@@ -82,7 +82,7 @@ const Home: React.FC = () => {
             <PlayerCard />
           </Carousel>
         </div>
-        <div style={{ marginTop: '24px' }}>
+        <div className='standing' style={{ marginTop: '24px' }}>
           <StandingsTable title="League Standings" teams={demoTeams} showForm />
         </div>
       </div>

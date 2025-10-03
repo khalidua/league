@@ -113,6 +113,7 @@ font-size: 56px;
 /* Responsive */
 @media (max-width: 1024px) {
   .Hero { height: 60vh; }
+  .Home .standings-title{font-size: 90%;}
   .logos img { width: 420px; }
   .players { max-width: 90%; }
   .match-details h1 { font-size: 44px; }
@@ -120,15 +121,24 @@ font-size: 56px;
 }
 
 @media (max-width: 768px) {
-  .Hero { flex-direction: column; height: 56vh; padding: 16px 0; }
-  .logos { opacity: 0.25; }
+  .Hero { flex-direction: column-reverse; height: 56vh; padding: 16px 0; }
+  .Hero .match-details{
+    text-align: center;
+    text-shadow:
+    0 0 2px #bafd00;
+    z-index: 1;
+  }
+  .Home .standings-title{font-size: 85%;}
+  .logos { opacity: 0.25; position: absolute; z-index: 0;}
   .logos img { width: 320px; }
   .match-details { margin: 0 20px; text-align: center; }
-  .match-details h1 { font-size: 36px; }
+  .match-details h1 { font-size: 36px; }    
   .match-details h2 { font-size: 24px; }
 }
 
 @media (max-width: 480px) {
+  .standing{width: 260px;}
+  .Home .standings-title{font-size: 75%;}
   .Hero { height: 50vh; }
   .logos img { width: 260px; }
   .match-details h1 { font-size: 28px; }
