@@ -31,6 +31,7 @@ html, body {
     margin: 0 auto;
     min-height: 100vh;
     width: 100%;
+    max-width: 100vw;
     padding: 2rem 0;
     position: relative;
     overflow-x: hidden;
@@ -41,7 +42,7 @@ html, body {
 .team {
     text-align: center;
     color: #F3F2EC;
-    margin: 3rem 0 2rem 0;
+    margin: 0 0 2rem 0;
 }
 .team h2{
     margin: 0;
@@ -80,11 +81,10 @@ html, body {
 }
 .players{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    max-width: 80%;
-    flex-wrap: wrap;
+    max-width: 1200px;
     margin: 2rem auto;
     width: 100%;
     padding: 3rem 0;
@@ -95,7 +95,7 @@ html, body {
     border: 1px solid rgba(220, 220, 220, 0.1);
 }
 .Home .standings-title {
-    margin: 0 0 2rem 0;
+    margin: 3rem 0 2rem 0;
     color: #F3F2EC;
     background: linear-gradient(135deg, #1E93AB 0%, #0F7A8E 100%);
     box-shadow: 0 8px 32px rgba(30, 147, 171, 0.3), 0 0 0 1px rgba(30, 147, 171, 0.1);
@@ -332,20 +332,29 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  .Home {
+    padding: 1rem 0;
+  }
   .Hero { 
     flex-direction: column-reverse; 
     height: 60vh; 
     padding: 20px 0; 
     border-radius: 16px;
+    margin: 0 1rem;
   }
   .Hero .match-details{
     text-align: center;
     z-index: 1;
   }
   .Home .standings-title{font-size: 1.2rem;}
+  .players { 
+    max-width: 100%; 
+    margin: 1rem;
+    padding: 2rem 1rem;
+  }
   .team h2{font-size: 1.2rem;}
   .logos { opacity: 0.25; position: absolute; z-index: 0;}
-  .logos img { width: 400px; }
+  .logos img { width: 300px; }
   .match-details { margin: 0 20px; text-align: center; }
   .match-details h1 { font-size: 2.2rem; }    
   .match-details h2 { font-size: 1.5rem; }
@@ -368,22 +377,29 @@ html, body {
 }
 
 @media (max-width: 480px) {
+  .Home {
+    padding: 0.5rem 0;
+  }
   .standing{
     width: 100%;
-    max-width: 1200px;
-    margin: 3rem auto 0;
-    padding: 0 1rem;
-}
-  .Home .standings-title{font-size: 1rem;}
-  .team h2{font-size: 1rem;}
-  .Hero { 
+    max-width: 100%;
+    margin: 2rem 0.5rem 0;
+    padding: 1rem;
+  }
+  .players {
+    margin: 1rem 0.5rem;
+    padding: 1.5rem 0.5rem;
+  }
+  .Hero {
+    margin: 0 0.5rem;
     height: 55vh; 
     border-radius: 12px;
   }
-  .logos img { width: 260px; }
+  .Home .standings-title{font-size: 1rem;}
+  .team h2{font-size: 1rem;}
+  .logos img { width: 200px; }
   .match-details h1 { font-size: 1.8rem; }
   .match-details h2 { font-size: 1.3rem; }
-  .Home .standings-title { max-width: 80%; font-size: 1rem; }
   .match-details button {
     padding: 12px 24px;
     font-size: 0.9rem;
@@ -391,9 +407,11 @@ html, body {
   .logos img.team1 {
     position: relative;
     z-index: 2;
-    margin-right: -200px;
+    width: 200px;
+    margin-right: 0;
     }
-.logos img.team2 {
-    margin-left: -50px;
+  .logos img.team2 {
+    width: 200px;
+    margin-left: 0;
     }
 }

@@ -70,7 +70,7 @@ const Home: React.FC = () => {
           </div>
         </div>
         <div className='team'><h2>MY TEAM</h2></div>
-        <div className='players' style={{ width: '100%' }}>
+        <div className='players'>
           <Carousel autoplayMs={4000}>
             <PlayerCard />
             <PlayerCard />
