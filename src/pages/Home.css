@@ -388,4 +388,12 @@ html, body {
     padding: 12px 24px;
     font-size: 0.9rem;
   }
+  .logos img.team1 {
+    position: relative;
+    z-index: 2;
+    margin-right: -200px;
+    }
+.logos img.team2 {
+    margin-left: -50px;
+    }
 }
