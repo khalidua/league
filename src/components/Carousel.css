@@ -54,11 +54,19 @@
   height: 40px;
   border-radius: 26px;
   border: none;
-  background: #bafd00;
-  color: #161c1c;
+  background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+  color: #F3F2EC;
   font-size: 22px;
   cursor: pointer;
   z-index: 1000;
+  box-shadow: 0 4px 12px rgba(230, 39, 39, 0.3);
+  transition: all 0.3s ease;
+}
+
+.carousel-btn:hover {
+  background: linear-gradient(135deg, #C41E3A 0%, #A0172E 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(230, 39, 39, 0.4);
 }
 .carousel-btn.prev{ left: 6px; }
 .carousel-btn.next{ right: 6px; }
@@ -68,12 +76,17 @@
   margin-top: 40px;
   border-radius: 26px;
   background-color: transparent;
-  color: white;
-  border-color: white;
+  color: #F3F2EC;
+  border: 2px solid #1E93AB;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 .myTeam:hover{
-  color: lightgray;
-  border-color: lightgray;
+  color: #F3F2EC;
+  border-color: #E62727;
+  background-color: rgba(230, 39, 39, 0.1);
+  transform: translateY(-2px);
 }
 
 /* Responsive */

@@ -12,7 +12,7 @@
 .standings-title {
 	margin: 0 auto;
 	width: fit-content; 
-	color: #e6e8eb;
+	color: #F3F2EC;
 	font-size: 1.25rem;
 	font-weight: 600;
 	letter-spacing: 0.2px;
@@ -21,37 +21,39 @@
 }
 
 .standings-card {
-	background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-	border: 1px solid rgba(255,255,255,0.08);
+	background: linear-gradient(180deg, rgba(243, 242, 236, 0.05), rgba(243, 242, 236, 0.02));
+	border: 1px solid rgba(220, 220, 220, 0.1);
 	backdrop-filter: blur(8px);
 	border-radius: 12px;
 	padding: 8px 12px;
-	width: 135%;
+	width: 100%;
 	box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+	overflow-x: auto;
 }
 
 .standings-table {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 0.95rem;
-	color: #cfd3d7;
+	color: #DCDCDC;
+	min-width: 600px;
 }
 
 .standings-table thead th {
 	text-align: left;
 	font-weight: 600;
-	color: #aab2bb;
+	color: #F3F2EC;
 	padding: 10px 8px;
-	border-bottom: 1px solid rgba(255,255,255,0.07);
+	border-bottom: 1px solid rgba(220, 220, 220, 0.2);
 }
 
 .standings-table tbody td {
 	padding: 10px 8px;
-	border-bottom: 1px dashed rgba(255,255,255,0.06);
+	border-bottom: 1px dashed rgba(220, 220, 220, 0.1);
 }
 
 .standings-row:hover {
-	background: rgba(255,255,255,0.03);
+	background: rgba(230, 39, 39, 0.05);
 }
 
 .col-pos,
@@ -63,7 +65,7 @@
 .col-pos,
 .col-pts {
 	font-weight: 700;
-	color: #e9edf1;
+	color: #F3F2EC;
 }
 
 .team-cell {
@@ -77,13 +79,30 @@
 	height: 24px;
 	border-radius: 4px;
 	object-fit: cover;
-	background: #1f232a;
-	border: 1px solid rgba(255,255,255,0.08);
+	background: #2A5A6B;
+	border: 1px solid rgba(220, 220, 220, 0.1);
 }
 
 .team-name {
-	color: #e6e8eb;
+	color: #F3F2EC;
 	font-weight: 600;
+}
+
+@media (max-width: 768px) {
+	.standings-card {
+		padding: 4px 8px;
+		margin: 0 8px;
+	}
+	
+	.standings-table {
+		font-size: 0.85rem;
+		min-width: 500px;
+	}
+	
+	.standings-table thead th,
+	.standings-table tbody td {
+		padding: 8px 6px;
+	}
 }
 
 @media (max-width: 640px) {
@@ -98,6 +117,10 @@
 
 	.col-form {
 		display: none;
+	}
+	
+	.standings-table {
+		min-width: 400px;
 	}
 }
 

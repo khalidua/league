@@ -1,41 +1,108 @@
 html, body, #root {
   height: 100%;
   width: 100%;
-  background-color: #161c1c;
+  background: linear-gradient(135deg, #1E93AB 0%, #2A5A6B 50%, #1A4A5A 100%);
+  background-attachment: fixed;
 }
 .nav-item{
-    color: white;
+    color: #F3F2EC;
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    width: 15%;
-    height: 65%;
-    border-radius: 50px;
+    width: auto;
+    min-width: 80px;
+    height: 50px;
+    border-radius: 12px;
+    padding: 0 16px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.nav-item:hover::before {
+    left: 100%;
+}
+
 .nav-item:hover{
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    color: #323c3b;
-    background-color: #bafd00;
+    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+    color: #F3F2EC;
     cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px rgba(230, 39, 39, 0.3),
+      0 4px 12px rgba(230, 39, 39, 0.2);
 }
 .nav-wrapper {
   display: flex;
   flex-direction:row;
   justify-content: center;
+  position: relative;
+  z-index: 10;
 }
 
 .Navbar {
-  border-radius: 50px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background-color: #323c3b;
-  color: white;
-  margin: 10px;
-  width: 50%;
-  height: 60px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  background: rgba(30, 147, 171, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #F3F2EC;
+  margin: 20px auto;
+  width: 60%;
+  max-width: 800px;
+  height: 70px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(243, 242, 236, 0.1);
+  border: 1px solid rgba(243, 242, 236, 0.2);
+  position: relative;
+  overflow: visible;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInDown 0.6s ease-out;
+  z-index: 100;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.Navbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(30, 147, 171, 0.1) 0%, 
+    rgba(42, 90, 107, 0.05) 50%, 
+    rgba(30, 147, 171, 0.1) 100%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .Navbar .hamburger{
@@ -50,22 +117,92 @@ html, body, #root {
 }
 .Navbar .hamburger .bar{
   position: absolute;
-  left: 8px;
-  right: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
   height: 2px;
-  background: white;
+  background: #F3F2EC;
   border-radius: 2px;
   transition: transform 200ms ease, opacity 200ms ease, top 200ms ease;
+  transform-origin: center;
 }
 .Navbar .hamburger .bar:nth-child(1){ top: 12px; }
 .Navbar .hamburger .bar:nth-child(2){ top: 19px; }
 .Navbar .hamburger .bar:nth-child(3){ top: 26px; }
-.Navbar .hamburger.is-open .bar:nth-child(1){ top: 19px; transform: rotate(45deg); }
+.Navbar .hamburger.is-open .bar:nth-child(1){ top: 20px; transform: translateX(-50%) rotate(45deg); }
 .Navbar .hamburger.is-open .bar:nth-child(2){ opacity: 0; }
-.Navbar .hamburger.is-open .bar:nth-child(3){ top: 19px; transform: rotate(-45deg); }
+.Navbar .hamburger.is-open .bar:nth-child(3){ top: 20px; transform: translateX(-50%) rotate(-45deg); }
 
+/* Desktop Navigation */
+.nav-links-desktop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Mobile Navigation */
 .Navbar .nav-links{
-  display: contents;
+  display: none;
+}
+
+/* Hide hamburger on desktop */
+@media (min-width: 769px) {
+  .Navbar .hamburger {
+    display: none;
+  }
+}
+
+/* Logo Styles */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  margin-right: auto;
+  margin-left: 20px;
+}
+
+.logo-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(230, 39, 39, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.logo-link:hover::before {
+  left: 100%;
+}
+
+.logo-link:hover {
+  transform: scale(1.05);
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #E62727;
+  text-shadow: 0 2px 4px rgba(230, 39, 39, 0.3);
+  letter-spacing: -0.5px;
+}
+
+.logo-league {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #F3F2EC;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .Navbar h2 {
@@ -76,12 +213,24 @@ html, body, #root {
 /* Dropdown styles */
 .dropdown {
   position: relative;
+  z-index: 1001;
+}
+
+.dropdown::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: transparent;
+  z-index: 999;
 }
 
 .dropbtn {
   background: none;
   border: none;
-  color: white;
+  color: #F3F2EC;
   cursor: pointer;
   font-size: 1rem;
 }
@@ -89,31 +238,82 @@ html, body, #root {
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #323c3b;
-  min-width: 150px;
-  box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-  z-index: 1;
+  background: rgba(30, 147, 171, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  min-width: 180px;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(243, 242, 236, 0.1);
+  z-index: 1000;
   flex-direction: column;
-  border-radius: 5px;
+  border-radius: 16px;
+  border: 1px solid rgba(243, 242, 236, 0.3);
+  padding: 8px;
+  top: 100%;
+  margin-top: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .dropdown-content a {
-  color: white;
-  padding: 10px;
+  color: #F3F2EC;
+  padding: 12px 16px;
   text-decoration: none;
   display: block;
-  border-radius: 50px;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-content a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.dropdown-content a:hover::before {
+  left: 100%;
+}
+
+.dropdown-content:hover {
+  opacity: 1;
+  visibility: visible;
 }
 
 .dropdown-content a:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    color: #323c3b;
-    background-color: #bafd00;
+    color: #F3F2EC;
+    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(230, 39, 39, 0.3);
 }
 
 .dropdown:hover .dropdown-content {
   display: flex;
   flex-direction: column;
+  opacity: 1;
+  visibility: visible;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive: collapse into hamburger */
@@ -124,27 +324,64 @@ html, body, #root {
   }
   .Navbar{
     width: auto;
-    height: 44px;
+    height: 60px;
     justify-content: center;
-    padding: 4px 6px;
-    border-radius: 12px;
+    padding: 8px 12px;
+    border-radius: 16px;
+    margin: 15px;
   }
-  .Navbar .hamburger{ display: block; margin-left: 0; display: flex; align-items: center; justify-content: center; }
-  .Navbar .hamburger .bar{ left: 50%; right: auto; width: 24px; transform: translateX(-50%); }
+  
+  /* Hide desktop navigation on mobile */
+  .nav-links-desktop {
+    display: none;
+  }
+  
+  /* Show hamburger on mobile */
+  .Navbar .hamburger{ 
+    display: block; 
+    margin-left: 0; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+  }
+  .Navbar .hamburger .bar{ 
+    left: 50%; 
+    right: auto; 
+    width: 24px; 
+    transform: translateX(-50%); 
+  }
+  
+  /* Mobile logo adjustments */
+  .navbar-logo {
+    margin-left: 10px;
+  }
+  
+  .logo-text {
+    font-size: 1.5rem;
+  }
+  
+  .logo-league {
+    font-size: 1rem;
+  }
   .Navbar .nav-links{
     display: none;
     position: absolute;
-    top: 56px;
-    left: 10px;
-    right: 10px;
-    background: #323c3b;
-    border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    top: 76px;
+    left: 15px;
+    right: 15px;
+    background: rgba(30, 147, 171, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.2),
+      0 8px 32px rgba(0, 0, 0, 0.1);
     flex-direction: column;
-    gap: 0;
+    gap: 4px;
     width: auto;
-    padding: 8px 0;
+    padding: 12px;
     z-index: 1001;
+    border: 1px solid rgba(243, 242, 236, 0.2);
   }
   .Navbar.open .nav-links{ display: flex; }
   .nav-overlay{
@@ -153,8 +390,26 @@ html, body, #root {
     background: rgba(0,0,0,0.35);
     z-index: 1000;
   }
-  .nav-link{ display: block; color: white; padding: 14px 16px; text-decoration: none; font-size: 17px; }
-  .nav-link:hover{ background-color: #ddd; color: black; }
-  .nav-item{ width: auto; height: auto; padding: 6px 10px; }
+  .nav-link{ 
+    display: block; 
+    color: #F3F2EC; 
+    padding: 14px 16px; 
+    text-decoration: none; 
+    font-size: 17px; 
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  .nav-link:hover{ 
+    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+    color: #F3F2EC; 
+    transform: translateX(4px);
+  }
+  .nav-item{ 
+    width: auto; 
+    height: auto; 
+    padding: 8px 12px; 
+    margin: 2px 0;
+  }
   .dropdown:hover .dropdown-content{ position: static; display: flex; box-shadow: none; }
 }

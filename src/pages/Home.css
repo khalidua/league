@@ -1,83 +1,185 @@
 html, body {
     min-height: 100%;
     min-height: 100vh; /* viewport height */
-
-    background: #161c1c; /* your color */
+    background: linear-gradient(135deg, #1E93AB 0%, #2A5A6B 50%, #1A4A5A 100%);
+    background-attachment: fixed;
     margin: 0;
     padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+  }
+
+  /* Add subtle background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(230, 39, 39, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(230, 39, 39, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
   }
 .Home {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 3rem auto;
+    margin: 0 auto;
     min-height: 100vh;
     width: 100%;
+    padding: 2rem 0;
+    position: relative;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 
 .team {
     text-align: center;
-    color: white;
+    color: #F3F2EC;
+    margin: 3rem 0 2rem 0;
 }
 .team h2{
-    margin-top: 50px;
-    color: #161c1c;
-    background-color: #bafd00;
-    box-shadow: 0 0 250px 3px #bafd00;
-    padding: 10px 25px;
-    border-radius: 36px;
+    margin: 0;
+    color: #F3F2EC;
+    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+    box-shadow: 0 8px 32px rgba(230, 39, 39, 0.3), 0 0 0 1px rgba(230, 39, 39, 0.1);
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.team h2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.team h2:hover::before {
+    left: 100%;
+}
+
+.team h2:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(230, 39, 39, 0.4), 0 0 0 1px rgba(230, 39, 39, 0.2);
 }
 .players{
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    max-width: 60%;
+    max-width: 80%;
     flex-wrap: wrap;
-    margin: 0 auto;
+    margin: 2rem auto;
     width: 100%;
+    padding: 3rem 0;
+    position: relative;
+    background: rgba(243, 242, 236, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(220, 220, 220, 0.1);
 }
 .Home .standings-title {
-    margin: 0;
-    color: #161c1c;
-    background-color: #bafd00;
-    box-shadow: 0 0 250px 3px #bafd00;
-    font-weight:bolder;
-    font-size:x-large;
-    padding: 10px 25px;
-    border-radius: 36px;
+    margin: 0 0 2rem 0;
+    color: #F3F2EC;
+    background: linear-gradient(135deg, #1E93AB 0%, #0F7A8E 100%);
+    box-shadow: 0 8px 32px rgba(30, 147, 171, 0.3), 0 0 0 1px rgba(30, 147, 171, 0.1);
+    font-weight: 700;
+    font-size: 1.5rem;
+    padding: 16px 32px;
+    border-radius: 50px;
     text-align: center;
-    max-width: 50% ;
+    max-width: 60%;
     align-items: center;
     justify-content: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.Home .standings-title::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.Home .standings-title:hover::before {
+    left: 100%;
+}
+
+.Home .standings-title:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(30, 147, 171, 0.4), 0 0 0 1px rgba(30, 147, 171, 0.2);
 }
 .Hero {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 70vh;
-    background-color: #323c3b;
-    margin-bottom: 20px;
+    height: 80vh;
+    background: linear-gradient(135deg, #2A5A6B 0%, #1E93AB 50%, #1A4A5A 100%);
+    margin-bottom: 3rem;
     overflow: hidden;
     position: relative;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(243, 242, 236, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(243, 242, 236, 0.1);
+}
 
+.Hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(230, 39, 39, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(30, 147, 171, 0.05) 0%, transparent 50%);
+    pointer-events: none;
 }
 .logos {
-  opacity: 0.3;
+  opacity: 0.4;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   position: relative;
+  z-index: 2;
 }
 
 .logos img {
   width: 520px;
   height: auto;
-  transition: transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+.logos img:hover {
+  transform: scale(1.05);
+  opacity: 0.6;
 }
 
 /* Team 1 pushed slightly left */
@@ -95,53 +197,195 @@ html, body {
 }
 
 .match-details{   
-    margin: 0px 50px;    
+    margin: 0px 50px;
+    z-index: 3;
+    position: relative;
 }
 .match-details h1{
-font-size: 56px;
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #F3F2EC 0%, #E62727 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.02em;
 }
 .match-details h2 {
-    font-size: 32px;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #F3F2EC;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.match-details p {
+    color: #DCDCDC;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 .match-details button {
-    background-color: #bafd00;
-    box-shadow: 0 0 250px 3px #bafd00;
-        border-radius: 36px;
+    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+    color: #F3F2EC;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(230, 39, 39, 0.3), 0 0 0 1px rgba(230, 39, 39, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
 
+.match-details button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.match-details button:hover::before {
+    left: 100%;
+}
+
+.match-details button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(230, 39, 39, 0.4), 0 0 0 1px rgba(230, 39, 39, 0.2);
+}
+
+/* Add smooth animations for page load */
+.Home {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Add subtle floating animation to hero elements */
+.Hero {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Add pulse animation to team logos */
+.logos img {
+    animation: pulse 4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 0.6;
+    }
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .Hero { height: 60vh; }
-  .Home .standings-title{font-size: 90%;}
+  .Hero { 
+    height: 70vh; 
+    border-radius: 20px;
+  }
+  .Hero .match-details{
+    margin-left: 10%;
+  }
+  .Home .standings-title{font-size: 1.3rem;}
   .logos img { width: 420px; }
   .players { max-width: 90%; }
-  .match-details h1 { font-size: 44px; }
-  .match-details h2 { font-size: 28px; }
+  .team h2{font-size: 1.3rem;}
+  .match-details h1 { font-size: 2.8rem; }
+  .match-details h2 { font-size: 1.8rem; }
+  .logos img.team1 {
+    position: relative;
+    z-index: 2;
+    margin-right: -200px;
+    }
+.logos img.team2 {
+    margin-left: -50px;
+    }
 }
 
 @media (max-width: 768px) {
-  .Hero { flex-direction: column-reverse; height: 56vh; padding: 16px 0; }
+  .Hero { 
+    flex-direction: column-reverse; 
+    height: 60vh; 
+    padding: 20px 0; 
+    border-radius: 16px;
+  }
   .Hero .match-details{
     text-align: center;
-    text-shadow:
-    0 0 2px #bafd00;
     z-index: 1;
   }
-  .Home .standings-title{font-size: 85%;}
+  .Home .standings-title{font-size: 1.2rem;}
+  .team h2{font-size: 1.2rem;}
   .logos { opacity: 0.25; position: absolute; z-index: 0;}
-  .logos img { width: 320px; }
+  .logos img { width: 400px; }
   .match-details { margin: 0 20px; text-align: center; }
-  .match-details h1 { font-size: 36px; }    
-  .match-details h2 { font-size: 24px; }
+  .match-details h1 { font-size: 2.2rem; }    
+  .match-details h2 { font-size: 1.5rem; }
+  .match-details button {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+}
+
+.standing{
+    width: 100%;
+    max-width: 1200px;
+    margin: 3rem auto 0;
+    padding: 2rem;
+    background: rgba(243, 242, 236, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(220, 220, 220, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 480px) {
-  .standing{width: 260px;}
-  .Home .standings-title{font-size: 75%;}
-  .Hero { height: 50vh; }
+  .standing{
+    width: 100%;
+    max-width: 1200px;
+    margin: 3rem auto 0;
+    padding: 0 1rem;
+}
+  .Home .standings-title{font-size: 1rem;}
+  .team h2{font-size: 1rem;}
+  .Hero { 
+    height: 55vh; 
+    border-radius: 12px;
+  }
   .logos img { width: 260px; }
-  .match-details h1 { font-size: 28px; }
-  .match-details h2 { font-size: 20px; }
-  .Home .standings-title { max-width: 80%; font-size: large; }
+  .match-details h1 { font-size: 1.8rem; }
+  .match-details h2 { font-size: 1.3rem; }
+  .Home .standings-title { max-width: 80%; font-size: 1rem; }
+  .match-details button {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
 }
