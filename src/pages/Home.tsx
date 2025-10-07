@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
 import Carousel from '../components/Carousel';
 import "./Home.css"
@@ -53,6 +54,18 @@ const Home: React.FC = () => {
       form: 'D-W-L-W-D'
     }
   ];
+  const groupA: StandingsTeam[] = demoTeams;
+  const groupB: StandingsTeam[] = [
+    { id: 'b1', name: 'Man Devs', logoUrl: manLogo, played: 10, wins: 6, draws: 2, losses: 2, goalsFor: 17, goalsAgainst: 9, goalDifference: 8, points: 20, form: 'W-W-D-L-W' },
+    { id: 'b2', name: 'Real Coders', logoUrl: realLogo, played: 10, wins: 6, draws: 1, losses: 3, goalsFor: 16, goalsAgainst: 12, goalDifference: 4, points: 19, form: 'W-L-W-W-L' },
+    { id: 'b3', name: 'Vite City', logoUrl: reactLogo, played: 10, wins: 5, draws: 3, losses: 2, goalsFor: 14, goalsAgainst: 11, goalDifference: 3, points: 18, form: 'D-W-W-L-D' }
+  ];
+
+  const groups: { title: string; teams: StandingsTeam[] }[] = [
+    { title: 'Group A', teams: groupA },
+    { title: 'Group B', teams: groupB }
+  ];
+
   return (
     <>
       <div className='Home'>
@@ -82,9 +95,25 @@ const Home: React.FC = () => {
             <PlayerCard />
           </Carousel>
         </div>
-        <div className='standing' style={{ marginTop: '24px' }}>
-          <StandingsTable title="League Standings" teams={demoTeams} showForm />
+      <div className='standing' style={{ marginTop: '24px' }}>
+        <div className='standing-grid'>
+        {groups.map(g => {
+          const top3 = [...g.teams].sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+            return b.goalsFor - a.goalsFor;
+          }).slice(0, 3);
+          return (
+            <div key={g.title} style={{ marginBottom: '24px' }}>
+              <StandingsTable title={g.title} teams={top3} showForm />
+            </div>
+          );
+        })}
         </div>
+        <div className='standings-actions'>
+          <Link className='standings-cta' to="/standings">See full standings</Link>
+        </div>
+      </div>
       </div>
     </>
   );

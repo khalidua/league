@@ -1,0 +1,67 @@
+.StandingsPage{
+  padding: 16px 24px 40px;
+}
+
+.standings-strap{
+  width: 100%;
+  color: #F3F2EC;
+  margin: 0 0 1.5rem 0;
+  background: linear-gradient(135deg, #1E93AB 0%, #0F7A8E 100%);
+  box-shadow: 0 8px 32px rgba(30, 147, 171, 0.25), 0 0 0 1px rgba(30, 147, 171, 0.1);
+  font-weight: 700;
+  font-size: 1.2rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-align: center;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.standings-tabs{
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.tab-btn{
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(30, 147, 171, 0.12);
+  color: #F3F2EC;
+  border: 1px solid rgba(243, 242, 236, 0.2);
+  cursor: pointer;
+}
+.tab-btn.is-active{
+  background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+  border: none;
+}
+
+.standings-section{
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: rgba(243, 242, 236, 0.05);
+  border-radius: 20px;
+  border: 1px solid rgba(220, 220, 220, 0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.standings-footer{
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+.standings-home{
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 50px;
+  color: #F3F2EC;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid rgba(243, 242, 236, 0.4);
+}
+
+

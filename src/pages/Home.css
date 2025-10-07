@@ -50,7 +50,8 @@ html, body {
     background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
     box-shadow: 0 8px 32px rgba(230, 39, 39, 0.3), 0 0 0 1px rgba(230, 39, 39, 0.1);
     padding: 16px 32px;
-    border-radius: 50px;
+    border-radius: 10px; /* strap style, not pill */
+    width: 100%;
     font-weight: 700;
     font-size: 1.5rem;
     letter-spacing: 0.5px;
@@ -94,6 +95,7 @@ html, body {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(220, 220, 220, 0.1);
 }
+
 .Home .standings-title {
     margin: 3rem 0 2rem 0;
     color: #F3F2EC;
@@ -375,6 +377,47 @@ html, body {
     border: 1px solid rgba(220, 220, 220, 0.1);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
+
+.standing-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.standing-grid .standings-wrapper{ max-width: 100%; }
+.standing-grid .standings-table{ min-width: 0; }
+
+@media (max-width: 900px){
+  .standing-grid{ grid-template-columns: 1fr; }
+}
+
+.standings-actions{
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.standings-cta{
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 50px;
+  color: #F3F2EC;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid rgba(243, 242, 236, 0.4);
+  transition: all 0.3s ease;
+
+}
+
+.standings-cta:hover{
+    color: #F3F2EC;
+    border-color: #E62727;
+    background-color: rgba(230, 39, 39, 0.1);
+    transform: translateY(-2px);
+}
+.standings-cta.prev{ left: 6px; }
+.standings-cta.next{ right: 6px; }
+
 
 @media (max-width: 480px) {
   .Home {

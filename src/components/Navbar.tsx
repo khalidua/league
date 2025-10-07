@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Navbar.css';
+import { Link } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -9,10 +10,10 @@ const Navbar: React.FC = () => {
       <div className={`Navbar ${open ? 'open' : ''}`}>
         {/* Logo */}
         <div className="navbar-logo">
-          <a href="/" className="logo-link">
+          <Link to="/" className="logo-link">
             <span className="logo-text">ZC</span>
             <span className="logo-league">LEAGUE</span>
-          </a>
+          </Link>
         </div>
 
         <button
@@ -29,33 +30,32 @@ const Navbar: React.FC = () => {
         
         {/* Desktop Navigation */}
         <div className="nav-links-desktop">
-          <a className='nav-item' href="/">Home</a>
-          <a className='nav-item' href="/teams">Teams</a>
-          <a className='nav-item' href="/matches">Matches</a>
+          <Link className='nav-item' to="/">Home</Link>
+          <Link className='nav-item' to="/teams">Teams</Link>
+          <Link className='nav-item' to="/matches">Matches</Link>
           
           {/* Desktop Dropdown */}
           <div className="dropdown">
             <button className="dropbtn">More ▼</button>
             <div className="dropdown-content">
-              <a href="/standings">Standings</a>
-              <a href="/players">Players</a>
-              <a href="/schedule">Schedule</a>
-              <a href="/news">News</a>
-              <a href="/rules">Rules</a>
+              <Link to="/standings">Standings</Link>
+              <Link to="/players">Players</Link>
+              <Link to="/news">News</Link>
+              <Link to="/rules">Rules</Link>
             </div>
           </div>
         </div>
 
         {/* Mobile Navigation */}
         <div id="mobile-menu" className="nav-links" role="menu">
-          <a className='nav-item' role="menuitem" href="/">Home</a>
-          <a className='nav-item' role="menuitem" href="/teams">Teams</a>
-          <a className='nav-item' role="menuitem" href="/matches">Matches</a>
-          <a className='nav-item' role="menuitem" href="/standings">Standings</a>
-          <a className='nav-item' role="menuitem" href="/players">Players</a>
-          <a className='nav-item' role="menuitem" href="/schedule">Schedule</a>
-          <a className='nav-item' role="menuitem" href="/news">News</a>
-          <a className='nav-item' role="menuitem" href="/rules">Rules</a>
+          <Link className='nav-item' role="menuitem" to="/" onClick={toggle}>Home</Link>
+          <Link className='nav-item' role="menuitem" to="/teams" onClick={toggle}>Teams</Link>
+          <Link className='nav-item' role="menuitem" to="/matches" onClick={toggle}>Matches</Link>
+          <Link className='nav-item' role="menuitem" to="/standings" onClick={toggle}>Standings</Link>
+          <Link className='nav-item' role="menuitem" to="/players" onClick={toggle}>Players</Link>
+          <Link className='nav-item' role="menuitem" to="/schedule" onClick={toggle}>Schedule</Link>
+          <Link className='nav-item' role="menuitem" to="/news" onClick={toggle}>News</Link>
+          <Link className='nav-item' role="menuitem" to="/rules" onClick={toggle}>Rules</Link>
         </div>
         
         {open && <div className="nav-overlay" onClick={toggle} aria-hidden="true" />}

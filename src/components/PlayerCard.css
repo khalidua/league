@@ -28,7 +28,7 @@ body {
   perspective: 2500px;
   margin: 0 20px;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .cover-image {
@@ -37,7 +37,15 @@ body {
   object-fit: cover;
   opacity: 0.9;
   transition: opacity 0.5s ease;
-  background-color: #323c3b;
+  background: linear-gradient(
+    135deg,
+    rgba(30, 147, 171, 0.25) 0%,   /* light teal tint */
+    rgba(255, 255, 255, 0.10) 100% /* soft white blend */
+  );
+  backdrop-filter: blur(12px);       /* glass blur effect */
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 36px;  
   
 }
 
@@ -57,7 +65,7 @@ body {
 
 
 .card:hover .wrapper {
-  transform: perspective(900px) translateY(-5%) rotateX(25deg) translateZ(0);
+  transform: perspective(900px) translateY(-5%) rotateX(50deg) translateZ(0);
   box-shadow: 2px 35px 32px -8px rgba(0, 0, 0, 0.2);
 }
 
@@ -76,16 +84,15 @@ body {
   position: absolute;
   left: 0;
 }
-
 .wrapper::before {
   top: 0;
   height: 100%;
   background-image: linear-gradient(
     to top,
     transparent 0%,
-    rgba(50, 60, 59, 0.3) 40%,  
-    rgba(50, 60, 59, 0.6) 75%,
-    #323c3b 100%
+    rgba(255, 255, 255, 0.10) 40%,   /* subtle mist */
+    rgba(255, 255, 255, 0.18) 75%,   /* soft fade */
+    rgba(255, 255, 255, 0.25) 100%   /* delicate glow */
   );
 }
 
@@ -95,12 +102,14 @@ body {
   background-image: linear-gradient(
     to bottom,
     transparent 0%,         
-    rgba(50, 60, 59, 0.3) 40%,
-    rgba(50, 60, 59, 0.6) 75%,
-    #323c3b 100%
+    rgba(255, 255, 255, 0.10) 40%,   /* gentle tint */
+    rgba(255, 255, 255, 0.18) 75%,   /* light frost */
+    rgba(255, 255, 255, 0.25) 100%   /* smooth glass shine */
   );
   border-radius: 16px;
 }
+
+
 
 .card:hover .wrapper::before,
 .wrapper::after {
@@ -133,7 +142,7 @@ body {
 
 .card:hover .character-wrapper {
   opacity: 1;
-  transform: translate3d(0, -3%, 100px);
+  transform: translate3d(0, -20%, 100px);
 }
 
 
