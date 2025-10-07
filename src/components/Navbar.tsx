@@ -53,7 +53,6 @@ const Navbar: React.FC = () => {
           <Link className='nav-item' role="menuitem" to="/matches" onClick={toggle}>Matches</Link>
           <Link className='nav-item' role="menuitem" to="/standings" onClick={toggle}>Standings</Link>
           <Link className='nav-item' role="menuitem" to="/players" onClick={toggle}>Players</Link>
-          <Link className='nav-item' role="menuitem" to="/schedule" onClick={toggle}>Schedule</Link>
           <Link className='nav-item' role="menuitem" to="/news" onClick={toggle}>News</Link>
           <Link className='nav-item' role="menuitem" to="/rules" onClick={toggle}>Rules</Link>
         </div>
