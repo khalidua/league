@@ -73,3 +73,11 @@
     align-items: center;
     justify-content: center;
 }
+
+/* Responsive: stack card content vertically on narrow screens */
+@media (max-width: 700px){
+  .match-card{ flex-direction: column; gap: 12px; height: auto; padding: 14px; }
+  .match-card img{ max-width: 72px; }
+  .first-team, .second-team{ width: 100%; justify-content: center; }
+  .match-details-card{ width: 100%; max-width: 260px; }
+}

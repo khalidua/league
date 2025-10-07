@@ -382,9 +382,12 @@ html, body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    justify-items: center;
+    justify-content: center; /* center the two columns themselves */
 }
 
-.standing-grid .standings-wrapper{ max-width: 100%; }
+.standing-grid .standings-wrapper{ width: 100%; max-width: 640px; margin: 0 auto; }
+.standing-grid .standings-card{ width: 100%; max-width: 640px; margin: 0 auto; }
 .standing-grid .standings-table{ min-width: 0; }
 
 @media (max-width: 900px){
