@@ -1,6 +1,9 @@
 import { getCachedData, setCachedData } from '../utils/cache';
 
-export const API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "";
+const LOCAL_API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "";
+const PRODUCTION_API_BASE = "https://league-ts6a.onrender.com";
+
+export const API_BASE = LOCAL_API_BASE;
 
 async function request<T>(path: string, init?: RequestInit, useCache: boolean = true): Promise<T> {
 	// Only cache GET requests
@@ -13,23 +16,40 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 		}
 	}
 
-	const res = await fetch(`${API_BASE}/api${path}`, {
-		headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
-		...init,
-	});
-	if (!res.ok) {
-		const text = await res.text().catch(() => "");
-		throw new Error(text || `Request failed: ${res.status}`);
+	// Try local API first, then fallback to production
+	const urls = [
+		`${LOCAL_API_BASE}/api${path}`,
+		`${PRODUCTION_API_BASE}/api${path}`
+	];
+
+	let lastError: Error | null = null;
+
+	for (const url of urls) {
+		try {
+			const res = await fetch(url, {
+				headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+				...init,
+			});
+			
+			if (res.ok) {
+				const data = await res.json() as T;
+				
+				// Cache successful GET responses
+				if (useCache && cacheKey) {
+					setCachedData(cacheKey, data);
+				}
+				
+				return data;
+			} else {
+				const text = await res.text().catch(() => "");
+				lastError = new Error(text || `Request failed: ${res.status}`);
+			}
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error('Network error');
+		}
 	}
-	
-	const data = await res.json() as T;
-	
-	// Cache successful GET responses
-	if (useCache && cacheKey) {
-		setCachedData(cacheKey, data);
-	}
-	
-	return data;
+
+	throw lastError || new Error('All API endpoints failed');
 }
 
 export const api = {
