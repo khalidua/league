@@ -4,6 +4,6 @@ SQLAlchemy==2.0.35
 pydantic==2.9.2
 pydantic-settings==2.6.1
 python-dotenv==1.0.1
-psycopg2-binary==2.9.9
+psycopg2-binary
 cloudinary==1.36.0
 python-multipart==0.0.6
