@@ -1,0 +1,1137 @@
+openapi: 3.0.3
+info:
+  title: ZC League API
+  version: 1.0.0
+  description: REST API for users, teams, players, tournaments, matches, results, stadiums, events, and admin management.
+servers:
+  - url: /api
+    description: Default API base path
+paths:
+  /users:
+    get:
+      summary: List users
+      parameters:
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [Player, Admin, Organizer, Coach]
+          description: Filter by role
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, inactive]
+          description: Filter by status
+      responses:
+        '200':
+          description: Array of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /users/{userid}:
+    get:
+      summary: Get user by id
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not found
+    patch:
+      summary: Update user
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete user
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /admins:
+    get:
+      summary: List admins
+      responses:
+        '200':
+          description: Array of admins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Admin'
+    post:
+      summary: Create admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreate'
+      responses:
+        '201':
+          description: Created admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  /admins/{adminid}:
+    get:
+      summary: Get admin by id
+      parameters:
+        - $ref: '#/components/parameters/AdminId'
+      responses:
+        '200':
+          description: Admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+        '404':
+          description: Not found
+    patch:
+      summary: Update admin
+      parameters:
+        - $ref: '#/components/parameters/AdminId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdate'
+      responses:
+        '200':
+          description: Updated admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete admin
+      parameters:
+        - $ref: '#/components/parameters/AdminId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /teams:
+    get:
+      summary: List teams
+      responses:
+        '200':
+          description: Array of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+    post:
+      summary: Create team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamCreate'
+      responses:
+        '201':
+          description: Created team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+  /teams/{teamid}:
+    get:
+      summary: Get team by id
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      responses:
+        '200':
+          description: Team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Not found
+    patch:
+      summary: Update team
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamUpdate'
+      responses:
+        '200':
+          description: Updated team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete team
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /playerstats:
+    get:
+      summary: List player stats
+      responses:
+        '200':
+          description: Array of player stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerStats'
+    post:
+      summary: Create player stats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerStatsCreate'
+      responses:
+        '201':
+          description: Created stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+  /playerstats/{statsid}:
+    get:
+      summary: Get player stats by id
+      parameters:
+        - $ref: '#/components/parameters/StatsId'
+      responses:
+        '200':
+          description: Player stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+        '404':
+          description: Not found
+    patch:
+      summary: Update player stats
+      parameters:
+        - $ref: '#/components/parameters/StatsId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerStatsUpdate'
+      responses:
+        '200':
+          description: Updated stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerStats'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete player stats
+      parameters:
+        - $ref: '#/components/parameters/StatsId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /players:
+    get:
+      summary: List players
+      responses:
+        '200':
+          description: Array of players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+    post:
+      summary: Create player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerCreate'
+      responses:
+        '201':
+          description: Created player
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+  /players/{playerid}:
+    get:
+      summary: Get player by id
+      parameters:
+        - $ref: '#/components/parameters/PlayerId'
+      responses:
+        '200':
+          description: Player
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        '404':
+          description: Not found
+    patch:
+      summary: Update player
+      parameters:
+        - $ref: '#/components/parameters/PlayerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerUpdate'
+      responses:
+        '200':
+          description: Updated player
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete player
+      parameters:
+        - $ref: '#/components/parameters/PlayerId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /stadiums:
+    get:
+      summary: List stadiums
+      responses:
+        '200':
+          description: Array of stadiums
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stadium'
+    post:
+      summary: Create stadium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StadiumCreate'
+      responses:
+        '201':
+          description: Created stadium
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stadium'
+  /stadiums/{stadiumid}:
+    get:
+      summary: Get stadium by id
+      parameters:
+        - $ref: '#/components/parameters/StadiumId'
+      responses:
+        '200':
+          description: Stadium
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stadium'
+        '404':
+          description: Not found
+    patch:
+      summary: Update stadium
+      parameters:
+        - $ref: '#/components/parameters/StadiumId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StadiumUpdate'
+      responses:
+        '200':
+          description: Updated stadium
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stadium'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete stadium
+      parameters:
+        - $ref: '#/components/parameters/StadiumId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /tournaments:
+    get:
+      summary: List tournaments
+      responses:
+        '200':
+          description: Array of tournaments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tournament'
+    post:
+      summary: Create tournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentCreate'
+      responses:
+        '201':
+          description: Created tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+  /tournaments/{tournamentid}:
+    get:
+      summary: Get tournament by id
+      parameters:
+        - $ref: '#/components/parameters/TournamentId'
+      responses:
+        '200':
+          description: Tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          description: Not found
+    patch:
+      summary: Update tournament
+      parameters:
+        - $ref: '#/components/parameters/TournamentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentUpdate'
+      responses:
+        '200':
+          description: Updated tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete tournament
+      parameters:
+        - $ref: '#/components/parameters/TournamentId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /tournament-teams:
+    get:
+      summary: List tournament-team entries
+      responses:
+        '200':
+          description: Array of tournament-team entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TournamentTeam'
+    post:
+      summary: Add team to tournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentTeamCreate'
+      responses:
+        '201':
+          description: Created relation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentTeam'
+  /tournament-teams/{tournamentid}/{teamid}:
+    delete:
+      summary: Remove team from tournament
+      parameters:
+        - $ref: '#/components/parameters/TournamentId'
+        - $ref: '#/components/parameters/TeamId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /matches:
+    get:
+      summary: List matches
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [Upcoming, Live, Finished]
+        - in: query
+          name: round
+          schema:
+            type: string
+            enum: [Group, Quarter, Semi, Final]
+      responses:
+        '200':
+          description: Array of matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+    post:
+      summary: Create match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchCreate'
+      responses:
+        '201':
+          description: Created match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+  /matches/{matchid}:
+    get:
+      summary: Get match by id
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      responses:
+        '200':
+          description: Match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        '404':
+          description: Not found
+    patch:
+      summary: Update match
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchUpdate'
+      responses:
+        '200':
+          description: Updated match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete match
+      parameters:
+        - $ref: '#/components/parameters/MatchId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /match-results:
+    get:
+      summary: List match results
+      responses:
+        '200':
+          description: Array of match results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchResult'
+    post:
+      summary: Create match result
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchResultCreate'
+      responses:
+        '201':
+          description: Created match result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResult'
+  /match-results/{resultid}:
+    get:
+      summary: Get match result by id
+      parameters:
+        - $ref: '#/components/parameters/ResultId'
+      responses:
+        '200':
+          description: Match result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResult'
+        '404':
+          description: Not found
+    patch:
+      summary: Update match result
+      parameters:
+        - $ref: '#/components/parameters/ResultId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchResultUpdate'
+      responses:
+        '200':
+          description: Updated match result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResult'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete match result
+      parameters:
+        - $ref: '#/components/parameters/ResultId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+  /events:
+    get:
+      summary: List events
+      responses:
+        '200':
+          description: Array of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+    post:
+      summary: Create event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreate'
+      responses:
+        '201':
+          description: Created event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+  /events/{eventid}:
+    get:
+      summary: Get event by id
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+      responses:
+        '200':
+          description: Event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Not found
+    patch:
+      summary: Update event
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdate'
+      responses:
+        '200':
+          description: Updated event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Not found
+    delete:
+      summary: Delete event
+      parameters:
+        - $ref: '#/components/parameters/EventId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+
+components:
+  parameters:
+    UserId:
+      in: path
+      name: userid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    AdminId:
+      in: path
+      name: adminid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    TeamId:
+      in: path
+      name: teamid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    PlayerId:
+      in: path
+      name: playerid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    StatsId:
+      in: path
+      name: statsid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    StadiumId:
+      in: path
+      name: stadiumid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    TournamentId:
+      in: path
+      name: tournamentid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    MatchId:
+      in: path
+      name: matchid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    ResultId:
+      in: path
+      name: resultid
+      required: true
+      schema:
+        type: integer
+        format: int32
+    EventId:
+      in: path
+      name: eventid
+      required: true
+      schema:
+        type: integer
+        format: int32
+
+  schemas:
+    User:
+      type: object
+      properties:
+        userid:
+          type: integer
+          format: int32
+        email:
+          type: string
+          format: email
+        passwordhash:
+          type: string
+        role:
+          type: string
+          enum: [Player, Admin, Organizer, Coach]
+          default: Player
+        profileimage:
+          type: string
+        joindate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, inactive]
+          default: active
+        firstname:
+          type: string
+        lastname:
+          type: string
+      required: [userid, email, passwordhash]
+    UserCreate:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+        role:
+          type: string
+          enum: [Player, Admin, Organizer, Coach]
+        profileimage: { type: string }
+        firstname: { type: string }
+        lastname: { type: string }
+      required: [email, password]
+    UserUpdate:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        role: { type: string, enum: [Player, Admin, Organizer, Coach] }
+        profileimage: { type: string }
+        status: { type: string, enum: [active, inactive] }
+        firstname: { type: string }
+        lastname: { type: string }
+
+    Admin:
+      type: object
+      properties:
+        adminid: { type: integer, format: int32 }
+        userid: { type: integer, format: int32 }
+        permissionslevel: { type: integer, format: int32, default: 1 }
+      required: [adminid]
+    AdminCreate:
+      type: object
+      properties:
+        userid: { type: integer, format: int32 }
+        permissionslevel: { type: integer, format: int32 }
+      required: [userid]
+    AdminUpdate:
+      type: object
+      properties:
+        permissionslevel: { type: integer, format: int32 }
+
+    Team:
+      type: object
+      properties:
+        teamid: { type: integer, format: int32 }
+        teamname: { type: string }
+        logourl: { type: string }
+        teamcaptainid: { type: integer, format: int32, nullable: true }
+        createdat: { type: string, format: date-time }
+        description: { type: string }
+      required: [teamid, teamname]
+    TeamCreate:
+      type: object
+      properties:
+        teamname: { type: string }
+        logourl: { type: string }
+        teamcaptainid: { type: integer, format: int32, nullable: true }
+        description: { type: string }
+      required: [teamname]
+    TeamUpdate:
+      type: object
+      properties:
+        teamname: { type: string }
+        logourl: { type: string }
+        teamcaptainid: { type: integer, format: int32, nullable: true }
+        description: { type: string }
+
+    PlayerStats:
+      type: object
+      properties:
+        statsid: { type: integer, format: int32 }
+        matchesplayed: { type: integer, format: int32, default: 0 }
+        goals: { type: integer, format: int32, default: 0 }
+        assists: { type: integer, format: int32, default: 0 }
+        yellowcards: { type: integer, format: int32, default: 0 }
+        redcards: { type: integer, format: int32, default: 0 }
+        mvpcount: { type: integer, format: int32, default: 0 }
+        ratingaverage: { type: number, format: float, default: 0.0 }
+      required: [statsid]
+    PlayerStatsCreate:
+      type: object
+      properties:
+        matchesplayed: { type: integer, format: int32 }
+        goals: { type: integer, format: int32 }
+        assists: { type: integer, format: int32 }
+        yellowcards: { type: integer, format: int32 }
+        redcards: { type: integer, format: int32 }
+        mvpcount: { type: integer, format: int32 }
+        ratingaverage: { type: number, format: float }
+    PlayerStatsUpdate:
+      type: object
+      properties:
+        matchesplayed: { type: integer, format: int32 }
+        goals: { type: integer, format: int32 }
+        assists: { type: integer, format: int32 }
+        yellowcards: { type: integer, format: int32 }
+        redcards: { type: integer, format: int32 }
+        mvpcount: { type: integer, format: int32 }
+        ratingaverage: { type: number, format: float }
+
+    Player:
+      type: object
+      properties:
+        playerid: { type: integer, format: int32 }
+        userid: { type: integer, format: int32 }
+        teamid: { type: integer, format: int32, nullable: true }
+        position: { type: string }
+        jerseynumber: { type: integer, format: int32 }
+        statsid: { type: integer, format: int32 }
+        preferredfoot:
+          type: string
+          enum: [Left, Right, Both]
+          default: Right
+        height: { type: number, format: float }
+        weight: { type: number, format: float }
+      required: [playerid]
+    PlayerCreate:
+      type: object
+      properties:
+        userid: { type: integer, format: int32 }
+        teamid: { type: integer, format: int32, nullable: true }
+        position: { type: string }
+        jerseynumber: { type: integer, format: int32 }
+        statsid: { type: integer, format: int32 }
+        preferredfoot: { type: string, enum: [Left, Right, Both] }
+        height: { type: number, format: float }
+        weight: { type: number, format: float }
+      required: [userid, statsid]
+    PlayerUpdate:
+      type: object
+      properties:
+        teamid: { type: integer, format: int32, nullable: true }
+        position: { type: string }
+        jerseynumber: { type: integer, format: int32 }
+        preferredfoot: { type: string, enum: [Left, Right, Both] }
+        height: { type: number, format: float }
+        weight: { type: number, format: float }
+
+    Stadium:
+      type: object
+      properties:
+        stadiumid: { type: integer, format: int32 }
+        name: { type: string }
+        location: { type: string }
+        capacity: { type: integer, format: int32 }
+      required: [stadiumid, name]
+    StadiumCreate:
+      type: object
+      properties:
+        name: { type: string }
+        location: { type: string }
+        capacity: { type: integer, format: int32 }
+      required: [name]
+    StadiumUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        location: { type: string }
+        capacity: { type: integer, format: int32 }
+
+    Tournament:
+      type: object
+      properties:
+        tournamentid: { type: integer, format: int32 }
+        name: { type: string }
+        seasonyear: { type: integer, format: int32 }
+        startdate: { type: string, format: date }
+        enddate: { type: string, format: date }
+        organizerid: { type: integer, format: int32, nullable: true }
+        description: { type: string }
+      required: [tournamentid, name]
+    TournamentCreate:
+      type: object
+      properties:
+        name: { type: string }
+        seasonyear: { type: integer, format: int32 }
+        startdate: { type: string, format: date }
+        enddate: { type: string, format: date }
+        organizerid: { type: integer, format: int32, nullable: true }
+        description: { type: string }
+      required: [name]
+    TournamentUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        seasonyear: { type: integer, format: int32 }
+        startdate: { type: string, format: date }
+        enddate: { type: string, format: date }
+        organizerid: { type: integer, format: int32, nullable: true }
+        description: { type: string }
+
+    TournamentTeam:
+      type: object
+      properties:
+        tournamentid: { type: integer, format: int32 }
+        teamid: { type: integer, format: int32 }
+      required: [tournamentid, teamid]
+    TournamentTeamCreate:
+      type: object
+      properties:
+        tournamentid: { type: integer, format: int32 }
+        teamid: { type: integer, format: int32 }
+      required: [tournamentid, teamid]
+
+    Match:
+      type: object
+      properties:
+        matchid: { type: integer, format: int32 }
+        tournamentid: { type: integer, format: int32 }
+        hometeamid: { type: integer, format: int32 }
+        awayteamid: { type: integer, format: int32 }
+        stadiumid: { type: integer, format: int32 }
+        matchdate: { type: string, format: date-time }
+        round: { type: string, enum: [Group, Quarter, Semi, Final], default: Group }
+        status: { type: string, enum: [Upcoming, Live, Finished], default: Upcoming }
+      required: [matchid, matchdate]
+    MatchCreate:
+      type: object
+      properties:
+        tournamentid: { type: integer, format: int32 }
+        hometeamid: { type: integer, format: int32 }
+        awayteamid: { type: integer, format: int32 }
+        stadiumid: { type: integer, format: int32 }
+        matchdate: { type: string, format: date-time }
+        round: { type: string, enum: [Group, Quarter, Semi, Final] }
+        status: { type: string, enum: [Upcoming, Live, Finished] }
+      required: [matchdate]
+    MatchUpdate:
+      type: object
+      properties:
+        hometeamid: { type: integer, format: int32 }
+        awayteamid: { type: integer, format: int32 }
+        stadiumid: { type: integer, format: int32 }
+        matchdate: { type: string, format: date-time }
+        round: { type: string, enum: [Group, Quarter, Semi, Final] }
+        status: { type: string, enum: [Upcoming, Live, Finished] }
+
+    MatchResult:
+      type: object
+      properties:
+        resultid: { type: integer, format: int32 }
+        matchid: { type: integer, format: int32 }
+        homescore: { type: integer, format: int32, default: 0 }
+        awayscore: { type: integer, format: int32, default: 0 }
+        winnerteamid: { type: integer, format: int32 }
+        mvpplayerid: { type: integer, format: int32 }
+      required: [resultid]
+    MatchResultCreate:
+      type: object
+      properties:
+        matchid: { type: integer, format: int32 }
+        homescore: { type: integer, format: int32 }
+        awayscore: { type: integer, format: int32 }
+        winnerteamid: { type: integer, format: int32 }
+        mvpplayerid: { type: integer, format: int32 }
+      required: [matchid]
+    MatchResultUpdate:
+      type: object
+      properties:
+        homescore: { type: integer, format: int32 }
+        awayscore: { type: integer, format: int32 }
+        winnerteamid: { type: integer, format: int32 }
+        mvpplayerid: { type: integer, format: int32 }

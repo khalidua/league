@@ -1,0 +1,90 @@
+.RulesPage {
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: radial-gradient(circle at top right, rgba(30,147,171,0.15), rgba(15,122,142,0.05) 70%);
+  }
+  
+  .rules-strap {
+    width: 100%;
+    color: #F3F2EC;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, rgba(30,147,171,0.9) 0%, rgba(15,122,142,0.85) 100%);
+    box-shadow: 0 4px 24px rgba(30,147,171,0.35);
+    font-weight: 800;
+    font-size: 1.4rem;
+    padding: 14px 20px;
+    border-radius: 14px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    backdrop-filter: blur(12px);
+  }
+  
+  .rules-section {
+    width: 100%;
+    max-width: 900px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    color: #F3F2EC;
+    line-height: 1.8;
+  }
+  
+  .rules-intro, .rules-outro {
+    color: #ffffff;
+    font-weight: 600;
+    text-align: center;
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+  
+  .rules-list {
+    margin: 0;
+    padding-inline-start: 1.5rem;
+    list-style: decimal;
+  }
+  
+  .rules-list li {
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 3px solid rgba(30,147,171,0.5);
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  .rules-list li:hover {
+    background: rgba(30,147,171,0.12);
+    transform: translateX(4px);
+  }
+  
+  /* Optional: make the ending line glow softly */
+  .rules-outro {
+    margin-top: 24px;
+    font-style: italic;
+    background: linear-gradient(135deg, rgba(30,147,171,0.15), rgba(255,255,255,0.05));
+    padding: 10px 16px;
+    border-radius: 10px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 640px) {
+    .rules-section {
+      padding: 1.25rem;
+      border-radius: 16px;
+    }
+  
+    .rules-strap {
+      font-size: 1.1rem;
+      padding: 10px 16px;
+    }
+  }
+  
