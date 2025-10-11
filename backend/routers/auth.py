@@ -1,0 +1,196 @@
+from datetime import timedelta
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from backend.deps import get_db
+from backend import models
+from backend.schemas.auth import LoginRequest, RegisterRequest, AuthResponse
+from backend.schemas.user import User as UserSchema, UserUpdate, UserResponse
+from backend.auth import (
+    verify_password, 
+    get_password_hash, 
+    create_access_token, 
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    get_current_active_user
+)
+
+router = APIRouter()
+
+@router.post("/register", response_model=AuthResponse)
+def register(request: RegisterRequest, db: Session = Depends(get_db)):
+    """Register a new user"""
+    # Check if user already exists
+    existing_user = db.query(models.User).filter(models.User.email == request.email).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    
+    # Create new user
+    hashed_password = get_password_hash(request.password)
+    user = models.User(
+        email=request.email,
+        passwordhash=hashed_password,
+        firstname=request.firstname,
+        lastname=request.lastname,
+        role=request.role or "Player",
+        status="active",
+        profileimage=None  # No default image stored - handled in frontend
+    )
+    
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    # If user is a Player, create Player and PlayerStats records
+    if user.role == "Player":
+        # Create PlayerStats record first
+        player_stats = models.PlayerStats(
+            matchesplayed=0,
+            goals=0,
+            assists=0,
+            yellowcards=0,
+            redcards=0,
+            mvpcount=0,
+            ratingaverage=0
+        )
+        db.add(player_stats)
+        db.commit()
+        db.refresh(player_stats)
+        
+        # Create Player record linking user to stats
+        player = models.Player(
+            userid=user.userid,
+            statsid=player_stats.statsid,
+            position=None,
+            jerseynumber=None,
+            preferredfoot="Right",
+            height=None,
+            weight=None
+        )
+        db.add(player)
+        db.commit()
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(user.userid), "email": user.email},
+        expires_delta=access_token_expires
+    )
+    
+    return AuthResponse(
+        access_token=access_token,
+        user={
+            "userid": user.userid,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "role": user.role,
+            "status": user.status
+        }
+    )
+
+@router.post("/login", response_model=AuthResponse)
+def login(request: LoginRequest, db: Session = Depends(get_db)):
+    """Login user"""
+    # Find user by email
+    user = db.query(models.User).filter(models.User.email == request.email).first()
+    
+    if not user or not verify_password(request.password, user.passwordhash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if user.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(user.userid), "email": user.email},
+        expires_delta=access_token_expires
+    )
+    
+    return AuthResponse(
+        access_token=access_token,
+        user={
+            "userid": user.userid,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "role": user.role,
+            "status": user.status
+        }
+    )
+
+@router.get("/me", response_model=UserResponse)
+def get_current_user_info(current_user: models.User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """Get current user information"""
+    # Get user's team information if they are a player
+    if current_user.role == "Player":
+        player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+        if player and player.teamid:
+            team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
+            if team:
+                # Add team information to user data
+                user_data = {
+                    "userid": current_user.userid,
+                    "email": current_user.email,
+                    "firstname": current_user.firstname,
+                    "lastname": current_user.lastname,
+                    "role": current_user.role,
+                    "status": current_user.status,
+                    "profileimage": current_user.profileimage,
+                    "teamid": team.teamid,
+                    "teamname": team.teamname
+                }
+                return user_data
+    
+    return current_user
+
+@router.patch("/me", response_model=UserResponse)
+def update_current_user_profile(
+    user_update: UserUpdate,
+    current_user: models.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Update current user profile"""
+    # Update user fields
+    for field, value in user_update.model_dump(exclude_unset=True).items():
+        if hasattr(current_user, field):
+            setattr(current_user, field, value)
+    
+    db.commit()
+    db.refresh(current_user)
+    
+    # Get user's team information if they are a player
+    if current_user.role == "Player":
+        player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+        if player and player.teamid:
+            team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
+            if team:
+                # Add team information to user data
+                user_data = {
+                    "userid": current_user.userid,
+                    "email": current_user.email,
+                    "firstname": current_user.firstname,
+                    "lastname": current_user.lastname,
+                    "role": current_user.role,
+                    "status": current_user.status,
+                    "profileimage": current_user.profileimage,
+                    "teamid": team.teamid,
+                    "teamname": team.teamname
+                }
+                return user_data
+    
+    return current_user
+
+@router.post("/logout")
+def logout():
+    """Logout user (client-side token removal)"""
+    return {"message": "Successfully logged out"}

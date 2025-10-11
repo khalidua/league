@@ -1,15 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCard';
 import Carousel from '../components/Carousel';
 import "./Home.css"
 import StandingsTable, { type StandingsTeam } from '../components/StandingsTable';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../api/client';
+import Spinner from '../components/Spinner';
 import crisLogo from '../assets/cris.png';
 import realLogo from '../assets/realLogo.png';
 import manLogo from '../assets/manLogo.png';
 import reactLogo from '../assets/react.svg';
-
+import lockIcon from '../assets/icons8-lock-24.png';
+import defaultTeamLogo from '../assets/default_team.png';
 const Home: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  const [upcomingMatch, setUpcomingMatch] = useState<any>(null);
+  const [matchLoading, setMatchLoading] = useState(true);
+  const [matchError, setMatchError] = useState<string | null>(null);
+  
+  // Fetch upcoming match data
+  useEffect(() => {
+    const fetchUpcomingMatch = async () => {
+      try {
+        setMatchLoading(true);
+        setMatchError(null);
+        const matchData = await api.getNextUpcomingMatch();
+        setUpcomingMatch(matchData);
+      } catch (error) {
+        console.error('Failed to fetch upcoming match:', error);
+        setMatchError('Failed to load upcoming match');
+      } finally {
+        setMatchLoading(false);
+      }
+    };
+
+    fetchUpcomingMatch();
+  }, []);
+
+  // Helper function to format match date
+  const formatMatchDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+  
   const demoTeams: StandingsTeam[] = [
     {
       id: 1,
@@ -72,28 +113,91 @@ const Home: React.FC = () => {
         <div className='Hero'>
           <div className='match-details'>
             <h1>Upcoming Match</h1>
-            <h2><strong>Team A</strong> vs <strong>Team B</strong></h2>
-            <p>📅 October 10th — 7:00 PM</p>
-            <p>📍 Zewail City Stadium</p>
-            <button>View Full Schedule</button>
+            {matchLoading ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Spinner color="white" size="sm" />
+                <span>Loading match details...</span>
+              </div>
+            ) : matchError ? (
+              <div>
+                <h2>No upcoming matches</h2>
+                <p>Check back later for upcoming matches</p>
+              </div>
+            ) : upcomingMatch && !upcomingMatch.message ? (
+              <>
+                <h2>
+                  <strong>{upcomingMatch.hometeam?.teamname || 'TBD'}</strong> vs <strong>{upcomingMatch.awayteam?.teamname || 'TBD'}</strong>
+                </h2>
+                <p>📅 {formatMatchDate(upcomingMatch.matchdate)}</p>
+                <p>📍 {upcomingMatch.stadium?.name || 'TBD'} {upcomingMatch.stadium?.location ? `— ${upcomingMatch.stadium.location}` : ''}</p>
+                <p>🏆 {upcomingMatch.round} Round</p>
+                <button>View Full Schedule</button>
+              </>
+            ) : (
+              <div>
+                <h2>No upcoming matches</h2>
+                <p>Check back later for upcoming matches</p>
+              </div>
+            )}
           </div>
           <div className='logos'>
-            <img className='team1' src={realLogo} />
-            <img className='team2' src={manLogo} />
+            {matchLoading ? (
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <div style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Spinner color="white" size="sm" />
+                </div>
+                <div style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Spinner color="white" size="sm" />
+                </div>
+              </div>
+            ) : upcomingMatch && !upcomingMatch.message ? (
+              <>
+                <img 
+                  className='team1' 
+                  src={upcomingMatch.hometeam?.logourl || defaultTeamLogo} 
+                  alt={upcomingMatch.hometeam?.teamname || 'Home Team'}
+                />
+                <img 
+                  className='team2' 
+                  src={upcomingMatch.awayteam?.logourl || defaultTeamLogo} 
+                  alt={upcomingMatch.awayteam?.teamname || 'Away Team'}
+                />
+              </>
+            ) : (
+              <>
+                <img className='team1' src={defaultTeamLogo} alt="Team 1" />
+                <img className='team2' src={defaultTeamLogo} alt="Team 2" />
+              </>
+            )}
           </div>
         </div>
         <div className='team'><h2>MY TEAM</h2></div>
-        <div className='players'>
-          <Carousel autoplayMs={4000}>
-            <PlayerCard />
-            <PlayerCard />
-            <PlayerCard />
-            <PlayerCard />
-            <PlayerCard />
-            <PlayerCard />
-            <PlayerCard />
-            <PlayerCard />
-          </Carousel>
+        <div className="team-section-container">
+          <div className={`players ${!isAuthenticated ? 'blurred-section' : ''}`}>
+            <Carousel autoplayMs={4000}>
+              <PlayerCard />
+              <PlayerCard />
+              <PlayerCard />
+              <PlayerCard />
+              <PlayerCard />
+              <PlayerCard />
+              <PlayerCard />
+              <PlayerCard />
+            </Carousel>
+          </div>
+          {!isAuthenticated && (
+            <div className="login-overlay">
+              <div className="login-prompt">
+                <div className="login-icon"><img src={lockIcon} alt="Lock" style={{filter: "brightness(0) invert(1)"}}/></div>
+                <h3>Login to View Your Team</h3>
+                <p>Sign in to see your team players and manage your squad</p>
+                <div className="login-actions">
+                  <Link to="/login" className="login-btn primary">Login</Link>
+                  <Link to="/register" className="login-btn secondary">Register</Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       <div className='standing' style={{ marginTop: '24px' }}>
         <div className='standing-grid'>

@@ -28,8 +28,9 @@
 .matches-controls .search-input,
 .matches-controls .select,
 .matches-controls .date-input{ padding:10px 12px; border:1px solid rgba(243,242,236,0.2); border-radius:12px; background: rgba(30,147,171,0.12); color:#F3F2EC; }
-.matches-controls .only-mine{ padding:10px 14px; border-radius:12px; background: transparent; border:1px solid rgba(243,242,236,0.35); color:#F3F2EC; cursor:pointer; }
+.matches-controls .only-mine{ padding:10px 14px; border-radius:12px; background: transparent; border:1px solid rgba(243,242,236,0.35); color:#F3F2EC; cursor:pointer; transition: all 0.3s ease; }
 .matches-controls .only-mine.is-on{ background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%); border:none; }
+.matches-controls .only-mine:disabled{ opacity: 0.5; cursor: not-allowed; background: rgba(128, 128, 128, 0.2); border-color: rgba(128, 128, 128, 0.3); }
 
 .match-card{
     margin-top: 20px;
@@ -61,11 +62,69 @@
     align-items: center;
     border-radius: 36px;
     width: 200px;
-    height: 70px;
+    height: auto;
+    min-height: 70px;
+    padding: 12px;
     background: rgba(243, 242, 236, 0.2);
     border: 1px solid rgba(220, 220, 220, 0.1);
+    gap: 4px;
+}
 
+.kickoff-time {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #F3F2EC;
+    margin: 0;
+}
 
+.match-date {
+    font-size: 0.8rem;
+    color: rgba(243, 242, 236, 0.8);
+    margin: 0;
+}
+
+.match-round {
+    font-size: 0.75rem;
+    color: rgba(243, 242, 236, 0.9);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.match-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 0;
+}
+
+.status-upcoming {
+    background: rgba(30, 147, 171, 0.3);
+    color: #1E93AB;
+    border: 1px solid rgba(30, 147, 171, 0.5);
+}
+
+.status-live {
+    background: rgba(230, 39, 39, 0.3);
+    color: #E62727;
+    border: 1px solid rgba(230, 39, 39, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.status-finished {
+    background: rgba(128, 128, 128, 0.3);
+    color: #808080;
+    border: 1px solid rgba(128, 128, 128, 0.5);
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
 }
 .second-team{
     display: flex;

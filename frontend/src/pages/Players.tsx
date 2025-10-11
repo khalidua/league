@@ -3,6 +3,7 @@ import './Players.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import Spinner from '../components/Spinner';
+import defaultPlayerPhoto from '../assets/defaultPlayer.png';
 
 type PlayerRow = {
 	id: number;
@@ -12,12 +13,10 @@ type PlayerRow = {
 	number: number;
 	age?: number;
 	avatarUrl?: string;
-};
-
-type PlayersApiResponse = {
-	data: PlayerRow[];
-	total: number;
-	teams?: string[];
+	firstname?: string;
+	lastname?: string;
+	email?: string;
+	profileimage?: string;
 };
 
 const Players: React.FC = () => {
@@ -39,21 +38,40 @@ const Players: React.FC = () => {
 
 	useEffect(() => {
 		const controller = new AbortController();
-		async function load() {
+		(async () => {
 			setLoading(true);
 			setError(null);
 			try {
-				// Fetch players and map to UI rows. Backend schema doesn't include age/number/avatar.
+				// Fetch players and map to UI rows. Backend now includes player names.
 				const raw = await api.listPlayers();
-				const mapped: PlayerRow[] = (raw || []).map((p: any) => ({
-					id: p.playerid,
-					name: p.userid ? `Player ${p.playerid}` : `Player ${p.playerid}`,
-					team: typeof p.teamid === 'number' ? `Team ${p.teamid}` : '—',
-					position: p.position || 'MID',
-					number: p.jerseynumber || p.playerid,
-					age: undefined,
-					avatarUrl: '/vite.svg',
-				}));
+				const mapped: PlayerRow[] = (raw || []).map((p: any) => {
+					// Create full name from firstname and lastname, fallback to Player ID
+					const fullName = (() => {
+						if (p.firstname && p.lastname) {
+							return `${p.firstname} ${p.lastname}`;
+						} else if (p.firstname) {
+							return p.firstname;
+						} else if (p.lastname) {
+							return p.lastname;
+						} else {
+							return `Player ${p.playerid}`;
+						}
+					})();
+					
+					return {
+						id: p.playerid,
+						name: fullName,
+						team: typeof p.teamid === 'number' ? `Team ${p.teamid}` : '—',
+						position: p.position || 'MID',
+						number: p.jerseynumber || p.playerid,
+						age: undefined,
+						avatarUrl: p.profileimage || defaultPlayerPhoto,
+						firstname: p.firstname,
+						lastname: p.lastname,
+						email: p.email,
+						profileimage: p.profileimage,
+					};
+				});
 				const q = (query || '').trim().toLowerCase();
 				let list = mapped.filter((p) => {
 					const matchesQuery = !q || p.name.toLowerCase().includes(q) || p.team.toLowerCase().includes(q) || String(p.number).includes(q) || String(p.position).toLowerCase().includes(q);
@@ -76,8 +94,7 @@ const Players: React.FC = () => {
 			} finally {
 				setLoading(false);
 			}
-		}
-		load();
+		})();
 		return () => controller.abort();
 	}, [page, pageSize, query, team, position]);
 
@@ -199,7 +216,6 @@ const Players: React.FC = () => {
 };
 
 export default Players;
-
 
 type FilterDropdownProps = {
 	label?: string;

@@ -9,8 +9,13 @@ interface SpinnerProps {
 const Spinner: React.FC<SpinnerProps> = ({ size = 'md', color = 'white' }) => {
   const sizeClass = `spinner-${size}`;
   
+  // For white color, use explicit white instead of currentColor
+  const spinnerStyle = color === 'white' 
+    ? { borderColor: 'white', borderRightColor: 'transparent' }
+    : { color };
+  
   return (
-    <div className={`spinner-border ${sizeClass}`} style={{ color }} role="status">
+    <div className={`spinner-border ${sizeClass}`} style={spinnerStyle} role="status">
       <span className="visually-hidden">Loading...</span>
     </div>
   );

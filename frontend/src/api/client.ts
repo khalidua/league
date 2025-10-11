@@ -16,6 +16,14 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 		}
 	}
 
+	// Get auth token - check both possible key names for compatibility
+	const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+	const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+	
+	if (token) {
+		headers['Authorization'] = `Bearer ${token}`;
+	}
+
 	// Try local API first, then fallback to production
 	const urls = [
 		`${LOCAL_API_BASE}/api${path}`,
@@ -27,7 +35,7 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 	for (const url of urls) {
 		try {
 			const res = await fetch(url, {
-				headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+				headers: { ...headers, ...(init?.headers || {}) },
 				...init,
 			});
 			
@@ -53,6 +61,26 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 }
 
 export const api = {
+	// Authentication
+	login: (email: string, password: string) => 
+		request<any>(`/auth/login`, {
+			method: 'POST',
+			body: JSON.stringify({ email, password }),
+		}, false),
+	register: (email: string, password: string, firstname?: string, lastname?: string, role?: string) =>
+		request<any>(`/auth/register`, {
+			method: 'POST',
+			body: JSON.stringify({ email, password, firstname, lastname, role }),
+		}, false),
+	getCurrentUser: () => request<any>(`/auth/me`),
+	updateProfile: (data: { firstname?: string; lastname?: string; email?: string; role?: string; profileimage?: string | null }) =>
+		request<any>(`/auth/me`, {
+			method: 'PATCH',
+			body: JSON.stringify(data),
+		}, false),
+	logout: () => request<any>(`/auth/logout`, { method: 'POST' }, false),
+	
+	// Other APIs
 	listUsers: () => request<any[]>(`/users`),
 	listTeams: () => request<any[]>(`/teams`),
 	listPlayers: (params?: { teamid?: number; skip?: number; limit?: number }) => {
@@ -63,7 +91,9 @@ export const api = {
 		const suffix = qs.toString() ? `?${qs.toString()}` : '';
 		return request<any[]>(`/players${suffix}`);
 	},
+	listAdmins: () => request<any[]>(`/admins`),
 	listPlayerStats: () => request<any[]>(`/playerstats`),
+	getPlayerStats: (statsid: number) => request<any>(`/playerstats/${statsid}`),
 	listMatches: (params?: { status?: string; round?: string }) => {
 		const qs = new URLSearchParams();
 		if (params?.status) qs.set('status', params.status);
@@ -71,5 +101,6 @@ export const api = {
 		const suffix = qs.toString() ? `?${qs.toString()}` : '';
 		return request<any[]>(`/matches${suffix}`);
 	},
+	getNextUpcomingMatch: () => request<any>(`/matches/next-upcoming`),
 	listEvents: () => request<any[]>(`/events`),
 };

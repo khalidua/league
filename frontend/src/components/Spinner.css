@@ -9,6 +9,19 @@
   animation: spinner-border 0.75s linear infinite;
 }
 
+/* Ensure white spinner in auth buttons and other contexts */
+.auth-button .spinner-border,
+button .spinner-border {
+  border-color: white !important;
+  border-right-color: transparent !important;
+}
+
+/* Ensure consistent spinner styling */
+.spinner-border[style*="border-color: white"] {
+  border-color: white !important;
+  border-right-color: transparent !important;
+}
+
 .spinner-sm {
   width: 1rem;
   height: 1rem;

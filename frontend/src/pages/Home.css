@@ -85,15 +85,16 @@ html, body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 2rem auto;
     width: 100%;
-    padding: 3rem 0;
+    padding: 3rem 2rem;
     position: relative;
     background: rgba(243, 242, 236, 0.05);
     border-radius: 20px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(220, 220, 220, 0.1);
+    min-height: 350px;
 }
 
 .Home .standings-title {
@@ -188,7 +189,7 @@ html, body {
 .logos img.team1 {
   position: relative;
   z-index: 2;
-  margin-right: -300px; /* negative margin to overlap */
+  margin-right: -50px; /* negative margin to overlap */
 }
 
 /* Team 2 pushed slightly right */
@@ -353,6 +354,7 @@ html, body {
     max-width: 100%; 
     margin: 1rem;
     padding: 2rem 1rem;
+    min-height: 300px;
   }
   .team h2{font-size: 1.2rem;}
   .logos { opacity: 0.25; position: absolute; z-index: 0;}
@@ -364,6 +366,9 @@ html, body {
     padding: 14px 28px;
     font-size: 1rem;
   }
+      .logos img.team1 {margin-right: -20px;}
+    .logos img.team2 {margin-left: -50px;}
+
 }
 
 .standing{
@@ -435,6 +440,7 @@ html, body {
   .players {
     margin: 1rem 0.5rem;
     padding: 1.5rem 0.5rem;
+    min-height: 280px;
   }
   .Hero {
     margin: 0 0.5rem;
@@ -460,4 +466,141 @@ html, body {
     width: 200px;
     margin-left: 0;
     }
+}
+
+/* Blur Effect and Login Overlay */
+.team-section-container {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.blurred-section {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  border-radius: 16px;
+  pointer-events: auto;
+}
+
+.login-prompt {
+  background: linear-gradient(135deg, rgba(30, 147, 171, 0.95) 0%, rgba(26, 74, 90, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  max-width: 400px;
+  margin: 0 1rem;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.login-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.login-prompt h3 {
+  color: #FFFFFF;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.login-prompt p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.login-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.login-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.login-btn.primary {
+  background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 15px rgba(230, 39, 39, 0.3);
+}
+
+.login-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(230, 39, 39, 0.4);
+  color: #FFFFFF;
+}
+
+.login-btn.secondary {
+  background: transparent;
+  color: #FFFFFF;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.login-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  color: #FFFFFF;
+}
+
+/* Mobile responsive for login overlay */
+@media (max-width: 768px) {
+  .login-prompt {
+    padding: 1.5rem;
+    margin: 0 0.5rem;
+  }
+  
+  .login-prompt h3 {
+    font-size: 1.3rem;
+  }
+  
+  .login-prompt p {
+    font-size: 0.9rem;
+  }
+  
+  .login-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .login-btn {
+    width: 100%;
+    max-width: 200px;
+  }
 }

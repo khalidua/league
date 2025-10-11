@@ -29,3 +29,10 @@ class UserUpdate(UserBase):
 class User(UserBase):
 	userid: int
 	passwordhash: str
+	teamid: Optional[int] = None
+	teamname: Optional[str] = None
+
+class UserResponse(UserBase):
+	userid: int
+	teamid: Optional[int] = None
+	teamname: Optional[str] = None

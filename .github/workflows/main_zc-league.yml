@@ -1,0 +1,84 @@
+name: Build and deploy Python app to Azure Web App - ZC-League
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      # 1️⃣ Checkout code
+      - uses: actions/checkout@v4
+
+      # 2️⃣ Set up Python
+      - name: Set up Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3️⃣ Install dependencies (build check)
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r backend/requirements.txt
+      # 4️⃣ Package app for deployment
+      - name: Package application
+        run: |
+          mkdir -p packaged_app
+          cp -r backend packaged_app/
+          cp -r frontend packaged_app/ || true
+          cp backend/requirements.txt packaged_app/
+      # 5️⃣ Upload artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: packaged_app
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+  
+    steps:
+      # 1️⃣ Download artifact
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+          path: ./python-app
+
+      # 2️⃣ Login to Azure
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_239F5EF23FAD47868A1B4226CC5C610F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F59B4291D84A41969BF090BD7CC3BAF4 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F14010A83EE146888EE0793E1F4F662E }}
+
+      # 3️⃣ Deploy to Azure Web App
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'ZC-League'
+          slot-name: 'Production'
+          package: './python-app'
+
+      # 4️⃣ Set startup command
+      - name: Set startup command
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az webapp config set \
+              --name ZC-League \
+              --resource-group ZC-League_group \
+              --startup-file "uvicorn backend.app:app --host 0.0.0.0 --port \$PORT"

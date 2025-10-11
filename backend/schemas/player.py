@@ -31,3 +31,22 @@ class PlayerUpdate(PlayerBase):
 
 class Player(PlayerBase):
 	playerid: int
+
+class PlayerWithUser(PlayerBase):
+	playerid: int
+	firstname: Optional[str] = None
+	lastname: Optional[str] = None
+	email: Optional[str] = None
+	profileimage: Optional[str] = None
+	
+	@property
+	def fullname(self) -> str:
+		"""Get the full name of the player"""
+		if self.firstname and self.lastname:
+			return f"{self.firstname} {self.lastname}"
+		elif self.firstname:
+			return self.firstname
+		elif self.lastname:
+			return self.lastname
+		else:
+			return f"Player {self.playerid}"

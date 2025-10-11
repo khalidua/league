@@ -1,64 +1,130 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import './Navbar.css';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import UserMenu from './UserMenu';
 
 const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
+  const [moreDropdownPosition, setMoreDropdownPosition] = useState({ top: 0, left: 0 });
+  const { isAuthenticated } = useAuth();
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
   const toggle = () => setOpen(v => !v);
-  return (
-    <div className="nav-wrapper">
-      <div className={`Navbar ${open ? 'open' : ''}`}>
-        {/* Logo */}
-        <div className="navbar-logo">
-          <Link to="/" className="logo-link">
-            <span className="logo-text">ZC</span>
-            <span className="logo-league">LEAGUE</span>
-          </Link>
-        </div>
+  
+  const handleMoreToggle = () => {
+    if (!moreDropdownOpen && moreButtonRef.current) {
+      const rect = moreButtonRef.current.getBoundingClientRect();
+      setMoreDropdownPosition({
+        top: rect.bottom + 4,
+        left: rect.left
+      });
+    }
+    setMoreDropdownOpen(!moreDropdownOpen);
+  };
 
-        <button
-          className={`hamburger${open ? ' is-open' : ''}`}
-          aria-label="Toggle navigation menu"
-          aria-controls="mobile-menu"
-          aria-expanded={open}
-          onClick={toggle}
-        >
-          <span className="bar" />
-          <span className="bar" />
-          <span className="bar" />
-        </button>
-        
-        {/* Desktop Navigation */}
-        <div className="nav-links-desktop">
-          <Link className='nav-item' to="/">Home</Link>
-          <Link className='nav-item' to="/teams">Teams</Link>
-          <Link className='nav-item' to="/matches">Matches</Link>
-          
-          {/* Desktop Dropdown */}
-          <div className="dropdown">
-            <button className="dropbtn">More ▼</button>
-            <div className="dropdown-content">
-              <Link to="/standings">Standings</Link>
-              <Link to="/players">Players</Link>
-              <Link to="/rules">Rules</Link>
+  // Close More dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreDropdownOpen && 
+          moreButtonRef.current && 
+          !moreButtonRef.current.contains(event.target as Node) &&
+          moreDropdownRef.current &&
+          !moreDropdownRef.current.contains(event.target as Node)) {
+        setMoreDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [moreDropdownOpen]);
+
+  return (
+    <>
+      {/* Fixed Navbar Wrapper */}
+      <div className="nav-wrapper">
+        <nav className={`Navbar ${open ? 'open' : ''}`}>
+          {/* Left - Logo */}
+          <div className="navbar-logo">
+            <Link to="/" className="logo-link">
+              <span className="logo-text">ZC</span>
+              <span className="logo-league">LEAGUE</span>
+            </Link>
+          </div>
+
+          {/* Center - Navigation Links */}
+          <div className="nav-center">
+            <div className="nav-links-desktop">
+              <Link className="nav-item" to="/">Home</Link>
+              <Link className="nav-item" to="/teams">Teams</Link>
+              <Link className="nav-item" to="/matches">Matches</Link>
+
+              {/* Dropdown */}
+              <div className="dropdown">
+                <button ref={moreButtonRef} className="dropbtn" onClick={handleMoreToggle}>More ▼</button>
+                {moreDropdownOpen && createPortal(
+                  <div 
+                    ref={moreDropdownRef}
+                    className="dropdown-content"
+                    style={{
+                      position: 'fixed',
+                      top: `${moreDropdownPosition.top}px`,
+                      left: `${moreDropdownPosition.left}px`,
+                      zIndex: 10000
+                    }}
+                  >
+                    <Link to="/standings" onClick={() => setMoreDropdownOpen(false)}>Standings</Link>
+                    <Link to="/players" onClick={() => setMoreDropdownOpen(false)}>Players</Link>
+                    <Link to="/rules" onClick={() => setMoreDropdownOpen(false)}>Rules</Link>
+                  </div>,
+                  document.body
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Mobile Navigation */}
-        <div id="mobile-menu" className="nav-links" role="menu">
-          <Link className='nav-item' role="menuitem" to="/" onClick={toggle}>Home</Link>
-          <Link className='nav-item' role="menuitem" to="/teams" onClick={toggle}>Teams</Link>
-          <Link className='nav-item' role="menuitem" to="/matches" onClick={toggle}>Matches</Link>
-          <Link className='nav-item' role="menuitem" to="/standings" onClick={toggle}>Standings</Link>
-          <Link className='nav-item' role="menuitem" to="/players" onClick={toggle}>Players</Link>
-          <Link className='nav-item' role="menuitem" to="/news" onClick={toggle}>News</Link>
-          <Link className='nav-item' role="menuitem" to="/rules" onClick={toggle}>Rules</Link>
-        </div>
-        
-        {open && <div className="nav-overlay" onClick={toggle} aria-hidden="true" />}
+          {/* Right - Auth or User Menu */}
+          <div className="navbar-right">
+            {isAuthenticated ? (
+              <UserMenu className="usermenu" />
+            ) : (
+              <div className="auth-buttons">
+                <Link to="/login" className="auth-btn login-btn">Login</Link>
+                <Link to="/register" className="auth-btn register-btn">Register</Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className={`hamburger${open ? ' is-open' : ''}`}
+            aria-label="Toggle navigation menu"
+            onClick={toggle}
+          >
+            <span className="bar" />
+            <span className="bar" />
+            <span className="bar" />
+          </button>
+
+          {/* Mobile Menu */}
+          <div id="mobile-menu" className="nav-links" role="menu">
+            <Link className="nav-item" to="/" onClick={toggle}>Home</Link>
+            <Link className="nav-item" to="/teams" onClick={toggle}>Teams</Link>
+            <Link className="nav-item" to="/matches" onClick={toggle}>Matches</Link>
+            <Link className="nav-item" to="/standings" onClick={toggle}>Standings</Link>
+            <Link className="nav-item" to="/players" onClick={toggle}>Players</Link>
+            <Link className="nav-item" to="/rules" onClick={toggle}>Rules</Link>
+          </div>
+
+          {/* Overlay when mobile menu open */}
+          {open && <div className="nav-overlay" onClick={toggle} />}
+        </nav>
       </div>
-    </div>
+    </>
   );
 };
 

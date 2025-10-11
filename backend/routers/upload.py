@@ -45,13 +45,25 @@ async def upload_image(file: UploadFile = File(...)):
 	
 	try:
 		# Upload to Cloudinary with background removal effect
+		# Using PNG format to ensure transparent background instead of white
+		# The 'relative' flag preserves positioning and PNG format supports transparency
 		result = cloudinary.uploader.upload(
 			file_content,
 			resource_type="auto",  # Auto-detect image type including SVG
 			folder="zc-league",  # Organize uploads in a folder
 			transformation=[
-				{"effect": "background_removal"}  # Remove background automatically
-			]
+				{
+					"effect": "background_removal",
+					"flags": "relative"  # Preserve relative positioning
+				},
+				{
+					"format": "png",  # Ensure PNG format for transparency support
+					"quality": "auto"  # Optimize quality while preserving transparency
+				}
+			],
+			# Additional parameters to ensure transparency
+			format="png",
+			quality="auto"
 		)
 		
 		return UploadResponse(

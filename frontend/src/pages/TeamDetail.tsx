@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import defaultTeamLogo from '../assets/default_team.png';
 import editIcon from '../assets/icons8-edit-24.png';
 import Spinner from '../components/Spinner';
+import PlayerCard from '../components/PlayerCard';
 import './TeamDetail.css';
 
 type Team = {
@@ -25,6 +26,10 @@ type Player = {
 	preferredfoot?: string;
 	height?: number;
 	weight?: number;
+	firstname?: string;
+	lastname?: string;
+	email?: string;
+	profileimage?: string;
 };
 
 const TeamDetail: React.FC = () => {
@@ -231,18 +236,13 @@ const TeamDetail: React.FC = () => {
 				<div className="team-players-section">
 					<h2 className="section-title">Squad ({players.length} players)</h2>
 					{players.length > 0 ? (
-						<div className="players-grid">
+						<div className="players-cards-grid">
 							{players.map(player => (
-								<div key={player.playerid} className="player-card">
-									<div className="player-number">{player.jerseynumber || '—'}</div>
-									<div className="player-info">
-										<div className="player-name">Player {player.playerid}</div>
-										<div className="player-position">{player.position || '—'}</div>
-										{player.preferredfoot && (
-											<div className="player-foot">{player.preferredfoot} foot</div>
-										)}
-									</div>
-								</div>
+								<PlayerCard 
+									key={player.playerid} 
+									player={player} 
+									isCaptain={player.playerid === team?.teamcaptainid}
+								/>
 							))}
 						</div>
 					) : (

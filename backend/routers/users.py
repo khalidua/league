@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.deps import get_db
 from backend import models
-from backend.schemas import User as UserSchema, UserCreate, UserUpdate
+from backend.schemas import User as UserSchema, UserCreate, UserUpdate, UserResponse
 
 router = APIRouter()
 
-@router.get("/", response_model=List[UserSchema])
+@router.get("/", response_model=List[UserResponse])
 def list_users(role: Optional[str] = None, status: Optional[str] = None, db: Session = Depends(get_db)):
 	query = db.query(models.User)
 	if role:
@@ -22,7 +22,7 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
 		email=payload.email,
 		passwordhash=payload.password,
 		role=payload.role or "Player",
-		profileimage=payload.profileimage,
+		profileimage=payload.profileimage,  # Only store if provided, otherwise NULL
 		firstname=payload.firstname,
 		lastname=payload.lastname,
 	)
@@ -31,14 +31,14 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
 	db.refresh(user)
 	return user
 
-@router.get("/{userid}", response_model=UserSchema)
+@router.get("/{userid}", response_model=UserResponse)
 def get_user(userid: int, db: Session = Depends(get_db)):
 	user = db.query(models.User).get(userid)
 	if not user:
 		raise HTTPException(404, "User not found")
 	return user
 
-@router.patch("/{userid}", response_model=UserSchema)
+@router.patch("/{userid}", response_model=UserResponse)
 def update_user(userid: int, payload: UserUpdate, db: Session = Depends(get_db)):
 	user = db.query(models.User).get(userid)
 	if not user:

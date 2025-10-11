@@ -1,8 +1,9 @@
-from backend.schemas.user import User, UserCreate, UserUpdate
-from backend.schemas.admin import Admin, AdminCreate, AdminUpdate
+from backend.schemas.user import User, UserCreate, UserUpdate, UserResponse
+from backend.schemas.admin import Admin, AdminCreate, AdminUpdate, AdminWithUser
+from backend.schemas.auth import LoginRequest, RegisterRequest, AuthResponse, TokenData
 from backend.schemas.team import Team, TeamCreate, TeamUpdate
 from backend.schemas.playerstats import PlayerStats, PlayerStatsCreate, PlayerStatsUpdate
-from backend.schemas.player import Player, PlayerCreate, PlayerUpdate
+from backend.schemas.player import Player, PlayerCreate, PlayerUpdate, PlayerWithUser
 from backend.schemas.stadium import Stadium, StadiumCreate, StadiumUpdate
 from backend.schemas.tournament import Tournament, TournamentCreate, TournamentUpdate
 from backend.schemas.tournament_team import TournamentTeam, TournamentTeamCreate
@@ -14,11 +15,12 @@ from backend.schemas.match_result import MatchResult, MatchResultCreate, MatchRe
 from backend.schemas.event import Event, EventCreate, EventUpdate
 
 __all__ = [
-	"User", "UserCreate", "UserUpdate",
-	"Admin", "AdminCreate", "AdminUpdate",
+	"User", "UserCreate", "UserUpdate", "UserResponse",
+	"Admin", "AdminCreate", "AdminUpdate", "AdminWithUser",
+	"LoginRequest", "RegisterRequest", "AuthResponse", "TokenData",
 	"Team", "TeamCreate", "TeamUpdate",
 	"PlayerStats", "PlayerStatsCreate", "PlayerStatsUpdate",
-	"Player", "PlayerCreate", "PlayerUpdate",
+	"Player", "PlayerCreate", "PlayerUpdate", "PlayerWithUser",
 	"Stadium", "StadiumCreate", "StadiumUpdate",
 	"Tournament", "TournamentCreate", "TournamentUpdate",
 	"TournamentTeam", "TournamentTeamCreate",
