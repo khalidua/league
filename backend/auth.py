@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from backend import models
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
 # JWT settings
 SECRET_KEY = "your-secret-key-change-this-in-production"
@@ -22,17 +22,44 @@ security = HTTPBearer()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    # Truncate password to 72 bytes to avoid bcrypt limitation
-    if len(plain_password.encode('utf-8')) > 72:
-        plain_password = plain_password[:72]
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        # Ensure password is properly encoded and within bcrypt limits
+        password_bytes = plain_password.encode('utf-8')
+        if len(password_bytes) > 72:
+            # Truncate to 72 bytes, but try to avoid cutting in the middle of a multi-byte character
+            truncated = password_bytes[:72]
+            # Find the last complete character boundary
+            while truncated and truncated[-1] & 0x80 and not (truncated[-1] & 0x40):
+                truncated = truncated[:-1]
+            plain_password = truncated.decode('utf-8', errors='ignore')
+        
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception as e:
+        # Log the error for debugging but don't expose it to the user
+        print(f"Password verification error: {e}")
+        return False
 
 def get_password_hash(password: str) -> str:
     """Hash a password"""
-    # Truncate password to 72 bytes to avoid bcrypt limitation
-    if len(password.encode('utf-8')) > 72:
-        password = password[:72]
-    return pwd_context.hash(password)
+    try:
+        # Ensure password is properly encoded and within bcrypt limits
+        password_bytes = password.encode('utf-8')
+        if len(password_bytes) > 72:
+            # Truncate to 72 bytes, but try to avoid cutting in the middle of a multi-byte character
+            truncated = password_bytes[:72]
+            # Find the last complete character boundary
+            while truncated and truncated[-1] & 0x80 and not (truncated[-1] & 0x40):
+                truncated = truncated[:-1]
+            password = truncated.decode('utf-8', errors='ignore')
+        
+        return pwd_context.hash(password)
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Password hashing error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Password hashing failed"
+        )
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a JWT access token"""

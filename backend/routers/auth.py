@@ -19,10 +19,11 @@ router = APIRouter()
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     """Register a new user"""
     # Validate password length to prevent bcrypt errors
-    if len(request.password.encode('utf-8')) > 72:
+    password_bytes = request.password.encode('utf-8')
+    if len(password_bytes) > 72:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password too long (maximum 72 characters)"
+            detail="Password too long (maximum 72 bytes)"
         )
     
     # Check if user already exists
@@ -101,10 +102,11 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     """Login user"""
     # Validate password length to prevent bcrypt errors
-    if len(request.password.encode('utf-8')) > 72:
+    password_bytes = request.password.encode('utf-8')
+    if len(password_bytes) > 72:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password too long (maximum 72 characters)"
+            detail="Password too long (maximum 72 bytes)"
         )
     
     # Find user by email
