@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { api } from '../api/client';
+import { api, getApiUrl } from '../api/client';
 import './Profile.css';
 import Spinner from '../components/Spinner';
 import editIcon from '../assets/icons8-edit-24.png';
@@ -208,7 +208,7 @@ const Profile: React.FC = () => {
 
       console.log('Uploading profile image:', file.name, file.type, file.size);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch(getApiUrl('/upload'), {
         method: 'POST',
         body: formData,
       });

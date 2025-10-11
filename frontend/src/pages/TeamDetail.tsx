@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../api/client';
+import { api, getApiUrl } from '../api/client';
 import defaultTeamLogo from '../assets/default_team.png';
 import editIcon from '../assets/icons8-edit-24.png';
 import Spinner from '../components/Spinner';
@@ -52,7 +52,7 @@ const TeamDetail: React.FC = () => {
 			try {
 				// Fetch team details and players in parallel using efficient API
 				const [teamData, playersData] = await Promise.all([
-					fetch(`/api/teams/${id}`).then(res => {
+					fetch(getApiUrl(`/teams/${id}`)).then(res => {
 						if (!res.ok) throw new Error('Team not found');
 						return res.json();
 					}),
@@ -84,7 +84,7 @@ const TeamDetail: React.FC = () => {
 
 			console.log('Uploading file:', file.name, file.type, file.size);
 
-			const response = await fetch('/api/upload', {
+			const response = await fetch(getApiUrl('/upload'), {
 				method: 'POST',
 				body: formData,
 			});
@@ -101,7 +101,7 @@ const TeamDetail: React.FC = () => {
 			console.log('Upload result:', result);
 			
 			// Update team with new logo URL
-			const updateResponse = await fetch(`/api/teams/${team.teamid}`, {
+			const updateResponse = await fetch(getApiUrl(`/teams/${team.teamid}`), {
 				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json',

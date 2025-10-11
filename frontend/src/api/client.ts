@@ -1,9 +1,15 @@
 import { getCachedData, setCachedData } from '../utils/cache';
 
 const LOCAL_API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "";
-const PRODUCTION_API_BASE = "https://league-ts6a.onrender.com";
+const PRODUCTION_API_BASE = "https://zc-league-axckdddkdkbpeuc3.israelcentral-01.azurewebsites.net";
 
-export const API_BASE = LOCAL_API_BASE;
+// In production (deployed), use production API directly
+// In development, use local API with fallback
+const isProduction = import.meta.env.PROD;
+export const API_BASE = isProduction ? PRODUCTION_API_BASE : LOCAL_API_BASE;
+
+// Helper function to get the full API URL for direct fetch calls
+export const getApiUrl = (path: string) => `${API_BASE}/api${path}`;
 
 async function request<T>(path: string, init?: RequestInit, useCache: boolean = true): Promise<T> {
 	// Only cache GET requests
