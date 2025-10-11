@@ -24,7 +24,12 @@ class UserCreate(BaseModel):
 	lastname: Optional[str] = None
 
 class UserUpdate(UserBase):
-	pass
+	# Player-specific fields
+	position: Optional[str] = None
+	jerseynumber: Optional[int] = None
+	preferredfoot: Optional[str] = None
+	height: Optional[int] = None
+	weight: Optional[int] = None
 
 class User(UserBase):
 	userid: int
@@ -36,3 +41,9 @@ class UserResponse(UserBase):
 	userid: int
 	teamid: Optional[int] = None
 	teamname: Optional[str] = None
+	# Player-specific fields
+	position: Optional[str] = None
+	jerseynumber: Optional[int] = None
+	preferredfoot: Optional[str] = None
+	height: Optional[int] = None
+	weight: Optional[int] = None

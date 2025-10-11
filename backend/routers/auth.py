@@ -18,6 +18,13 @@ router = APIRouter()
 @router.post("/register", response_model=AuthResponse)
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     """Register a new user"""
+    # Validate password length to prevent bcrypt errors
+    if len(request.password.encode('utf-8')) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password too long (maximum 72 characters)"
+        )
+    
     # Check if user already exists
     existing_user = db.query(models.User).filter(models.User.email == request.email).first()
     if existing_user:
@@ -93,6 +100,13 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
 @router.post("/login", response_model=AuthResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     """Login user"""
+    # Validate password length to prevent bcrypt errors
+    if len(request.password.encode('utf-8')) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password too long (maximum 72 characters)"
+        )
+    
     # Find user by email
     user = db.query(models.User).filter(models.User.email == request.email).first()
     
@@ -134,22 +148,30 @@ def get_current_user_info(current_user: models.User = Depends(get_current_active
     # Get user's team information if they are a player
     if current_user.role == "Player":
         player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
-        if player and player.teamid:
-            team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
-            if team:
-                # Add team information to user data
-                user_data = {
-                    "userid": current_user.userid,
-                    "email": current_user.email,
-                    "firstname": current_user.firstname,
-                    "lastname": current_user.lastname,
-                    "role": current_user.role,
-                    "status": current_user.status,
-                    "profileimage": current_user.profileimage,
-                    "teamid": team.teamid,
-                    "teamname": team.teamname
-                }
-                return user_data
+        if player:
+            team = None
+            if player.teamid:
+                team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
+            
+            # Add team and player information to user data
+            user_data = {
+                "userid": current_user.userid,
+                "email": current_user.email,
+                "firstname": current_user.firstname,
+                "lastname": current_user.lastname,
+                "role": current_user.role,
+                "status": current_user.status,
+                "profileimage": current_user.profileimage,
+                "teamid": team.teamid if team else None,
+                "teamname": team.teamname if team else None,
+                # Player-specific fields
+                "position": player.position,
+                "jerseynumber": player.jerseynumber,
+                "preferredfoot": player.preferredfoot,
+                "height": player.height,
+                "weight": player.weight
+            }
+            return user_data
     
     return current_user
 
@@ -165,28 +187,46 @@ def update_current_user_profile(
         if hasattr(current_user, field):
             setattr(current_user, field, value)
     
+    # Update player-specific fields if user is a player
+    if current_user.role == "Player":
+        player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+        if player:
+            # Update player fields
+            player_fields = ['position', 'jerseynumber', 'preferredfoot', 'height', 'weight']
+            for field in player_fields:
+                if field in user_update.model_dump(exclude_unset=True):
+                    setattr(player, field, user_update.model_dump(exclude_unset=True)[field])
+    
     db.commit()
     db.refresh(current_user)
     
     # Get user's team information if they are a player
     if current_user.role == "Player":
         player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
-        if player and player.teamid:
-            team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
-            if team:
-                # Add team information to user data
-                user_data = {
-                    "userid": current_user.userid,
-                    "email": current_user.email,
-                    "firstname": current_user.firstname,
-                    "lastname": current_user.lastname,
-                    "role": current_user.role,
-                    "status": current_user.status,
-                    "profileimage": current_user.profileimage,
-                    "teamid": team.teamid,
-                    "teamname": team.teamname
-                }
-                return user_data
+        if player:
+            team = None
+            if player.teamid:
+                team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
+            
+            # Add team and player information to user data
+            user_data = {
+                "userid": current_user.userid,
+                "email": current_user.email,
+                "firstname": current_user.firstname,
+                "lastname": current_user.lastname,
+                "role": current_user.role,
+                "status": current_user.status,
+                "profileimage": current_user.profileimage,
+                "teamid": team.teamid if team else None,
+                "teamname": team.teamname if team else None,
+                # Player-specific fields
+                "position": player.position,
+                "jerseynumber": player.jerseynumber,
+                "preferredfoot": player.preferredfoot,
+                "height": player.height,
+                "weight": player.weight
+            }
+            return user_data
     
     return current_user
 
