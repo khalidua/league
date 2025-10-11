@@ -373,10 +373,12 @@
   border: 1px solid rgba(220, 220, 220, 0.1);
   border-radius: 12px;
   color: #F3F2EC;
-  font-size: 1rem;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
+}
+
+.player-detail {
+  font-weight: 500;
+  color: #F3F2EC;
+  font-size: 0.95rem;
 }
 
 .no-team {
@@ -601,6 +603,8 @@
   .profile-avatar-actions {
     margin-top: 10px;
     gap: 6px;
+    justify-content: center;
+    align-items: center;  
   }
 
   .edit-avatar-btn,
@@ -634,6 +638,11 @@
 
   .edit-actions {
     flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-role {
+    justify-content: center;
   }
 
   .profile-actions {
@@ -679,6 +688,7 @@
   .profile-avatar-actions {
     margin-top: 8px;
     gap: 4px;
+    justify-content: center;
   }
 
   .edit-avatar-btn,
@@ -686,5 +696,14 @@
     width: 24px;
     height: 24px;
     font-size: 10px;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-role {
+    justify-content: center;
   }
 }

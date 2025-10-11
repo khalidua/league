@@ -56,6 +56,7 @@
     justify-content: center;
 }
 .match-details-card{
+  position: fixed;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -103,8 +104,8 @@
 }
 
 .status-upcoming {
-    background: rgba(30, 147, 171, 0.3);
-    color: #1E93AB;
+    background: rgba(33, 188, 219, 0.3);
+    color: white;
     border: 1px solid rgba(30, 147, 171, 0.5);
 }
 

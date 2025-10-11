@@ -57,7 +57,13 @@ const Profile: React.FC = () => {
     email: '',
     role: '',
     teamname: '',
-    profileimage: ''
+    profileimage: '',
+    // Player-specific fields
+    position: '',
+    jerseynumber: '',
+    preferredfoot: '',
+    height: '',
+    weight: ''
   });
 
   useEffect(() => {
@@ -68,7 +74,13 @@ const Profile: React.FC = () => {
         email: user.email || '',
         role: user.role || '',
         teamname: user.teamname || '',
-        profileimage: user.profileimage || ''
+        profileimage: user.profileimage || '',
+        // Player-specific fields
+        position: user.position || '',
+        jerseynumber: user.jerseynumber?.toString() || '',
+        preferredfoot: user.preferredfoot || '',
+        height: user.height?.toString() || '',
+        weight: user.weight?.toString() || ''
       });
     }
   }, [user]);
@@ -140,7 +152,13 @@ const Profile: React.FC = () => {
         lastname: formData.lastname,
         email: formData.email,
         role: formData.role,
-        profileimage: formData.profileimage
+        profileimage: formData.profileimage,
+        // Player-specific fields
+        position: formData.position || null,
+        jerseynumber: formData.jerseynumber ? parseInt(formData.jerseynumber) : null,
+        preferredfoot: formData.preferredfoot || null,
+        height: formData.height ? parseInt(formData.height) : null,
+        weight: formData.weight ? parseInt(formData.weight) : null
       });
       
       // Update the user data in context
@@ -163,7 +181,13 @@ const Profile: React.FC = () => {
         email: user.email || '',
         role: user.role || '',
         teamname: user.teamname || '',
-        profileimage: user.profileimage || ''
+        profileimage: user.profileimage || '',
+        // Player-specific fields
+        position: user.position || '',
+        jerseynumber: user.jerseynumber?.toString() || '',
+        preferredfoot: user.preferredfoot || '',
+        height: user.height?.toString() || '',
+        weight: user.weight?.toString() || ''
       });
     }
     setIsEditing(false);
@@ -472,6 +496,132 @@ const Profile: React.FC = () => {
             </div>
           )}
 
+          {/* Player Details (for players) */}
+          {user.role === 'Player' && (
+            <div className="details-section">
+              <h3>Player Details</h3>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="position">Position</label>
+                  {isEditing ? (
+                    <select
+                      id="position"
+                      name="position"
+                      value={formData.position}
+                      onChange={handleInputChange}
+                      className="form-select"
+                    >
+                      <option value="">Select Position</option>
+                      <option value="Goalkeeper">Goalkeeper</option>
+                      <option value="Defender">Defender</option>
+                      <option value="Midfielder">Midfielder</option>
+                      <option value="Forward">Forward</option>
+                    </select>
+                  ) : (
+                    <div className="form-display">
+                      <span className="player-detail">
+                        {user.position || 'Not specified'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="jerseynumber">Jersey Number</label>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      id="jerseynumber"
+                      name="jerseynumber"
+                      value={formData.jerseynumber}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="Enter jersey number"
+                      min="1"
+                      max="99"
+                    />
+                  ) : (
+                    <div className="form-display">
+                      <span className="player-detail">
+                        {user.jerseynumber ? `#${user.jerseynumber}` : 'Not assigned'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="preferredfoot">Preferred Foot</label>
+                  {isEditing ? (
+                    <select
+                      id="preferredfoot"
+                      name="preferredfoot"
+                      value={formData.preferredfoot}
+                      onChange={handleInputChange}
+                      className="form-select"
+                    >
+                      <option value="">Select Preferred Foot</option>
+                      <option value="Right">Right</option>
+                      <option value="Left">Left</option>
+                      <option value="Both">Both</option>
+                    </select>
+                  ) : (
+                    <div className="form-display">
+                      <span className="player-detail">
+                        {user.preferredfoot || 'Not specified'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="height">Height (cm)</label>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      id="height"
+                      name="height"
+                      value={formData.height}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="Enter height in cm"
+                      min="150"
+                      max="220"
+                    />
+                  ) : (
+                    <div className="form-display">
+                      <span className="player-detail">
+                        {user.height ? `${user.height} cm` : 'Not specified'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="weight">Weight (kg)</label>
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      id="weight"
+                      name="weight"
+                      value={formData.weight}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="Enter weight in kg"
+                      min="50"
+                      max="120"
+                    />
+                  ) : (
+                    <div className="form-display">
+                      <span className="player-detail">
+                        {user.weight ? `${user.weight} kg` : 'Not specified'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Player Statistics (for players) */}
           {user.role === 'Player' && (
             <div className="details-section">
@@ -490,16 +640,6 @@ const Profile: React.FC = () => {
                         <AnimatedCounter value={playerStats?.goals || 0} />
                       </div>
                       <div className="stat-label">Goals</div>
-                    </div>
-                  </div>
-
-                  <div className="stat-card stat-secondary">
-                    <div className="stat-icon">🎯</div>
-                    <div className="stat-content">
-                      <div className="stat-value">
-                        <AnimatedCounter value={playerStats?.assists || 0} />
-                      </div>
-                      <div className="stat-label">Assists</div>
                     </div>
                   </div>
 
@@ -524,26 +664,22 @@ const Profile: React.FC = () => {
                   </div>
 
                   <div className="stat-card stat-warning">
-                    <div className="stat-icon">⭐</div>
-                    <div className="stat-content">
-                      <div className="stat-value">
-                        {playerStats?.ratingaverage ? (
-                          <AnimatedCounter value={parseFloat(playerStats.ratingaverage)} duration={3000} />
-                        ) : (
-                          <span>0</span>
-                        )}
-                      </div>
-                      <div className="stat-label">Avg Rating</div>
-                    </div>
-                  </div>
-
-                  <div className="stat-card stat-danger">
                     <div className="stat-icon">🟨</div>
                     <div className="stat-content">
                       <div className="stat-value">
                         <AnimatedCounter value={playerStats?.yellowcards || 0} />
                       </div>
                       <div className="stat-label">Yellow Cards</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card stat-danger">
+                    <div className="stat-icon">🟥</div>
+                    <div className="stat-content">
+                      <div className="stat-value">
+                        <AnimatedCounter value={playerStats?.redcards || 0} />
+                      </div>
+                      <div className="stat-label">Red Cards</div>
                     </div>
                   </div>
                 </div>

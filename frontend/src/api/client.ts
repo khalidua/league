@@ -73,7 +73,19 @@ export const api = {
 			body: JSON.stringify({ email, password, firstname, lastname, role }),
 		}, false),
 	getCurrentUser: () => request<any>(`/auth/me`),
-	updateProfile: (data: { firstname?: string; lastname?: string; email?: string; role?: string; profileimage?: string | null }) =>
+	updateProfile: (data: { 
+		firstname?: string; 
+		lastname?: string; 
+		email?: string; 
+		role?: string; 
+		profileimage?: string | null;
+		// Player-specific fields
+		position?: string | null;
+		jerseynumber?: number | null;
+		preferredfoot?: string | null;
+		height?: number | null;
+		weight?: number | null;
+	}) =>
 		request<any>(`/auth/me`, {
 			method: 'PATCH',
 			body: JSON.stringify(data),

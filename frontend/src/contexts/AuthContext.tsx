@@ -11,6 +11,12 @@ interface User {
   status: string;
   teamid?: number;
   teamname?: string;
+  // Player-specific fields
+  position?: string;
+  jerseynumber?: number;
+  preferredfoot?: string;
+  height?: number;
+  weight?: number;
 }
 
 interface AuthContextType {
