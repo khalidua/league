@@ -7,7 +7,7 @@ from backend.schemas import User as UserSchema, UserCreate, UserUpdate, UserResp
 
 router = APIRouter()
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("", response_model=List[UserResponse])
 def list_users(role: Optional[str] = None, status: Optional[str] = None, db: Session = Depends(get_db)):
 	query = db.query(models.User)
 	if role:
@@ -16,7 +16,7 @@ def list_users(role: Optional[str] = None, status: Optional[str] = None, db: Ses
 		query = query.filter(models.User.status == status)
 	return query.all()
 
-@router.post("/", response_model=UserSchema, status_code=201)
+@router.post("", response_model=UserSchema, status_code=201)
 def create_user(payload: UserCreate, db: Session = Depends(get_db)):
 	user = models.User(
 		email=payload.email,
@@ -33,14 +33,14 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
 
 @router.get("/{userid}", response_model=UserResponse)
 def get_user(userid: int, db: Session = Depends(get_db)):
-	user = db.query(models.User).get(userid)
+	user = db.query(models.User).filter(models.User.userid == userid).first()
 	if not user:
 		raise HTTPException(404, "User not found")
 	return user
 
 @router.patch("/{userid}", response_model=UserResponse)
 def update_user(userid: int, payload: UserUpdate, db: Session = Depends(get_db)):
-	user = db.query(models.User).get(userid)
+	user = db.query(models.User).filter(models.User.userid == userid).first()
 	if not user:
 		raise HTTPException(404, "User not found")
 	for field, value in payload.model_dump(exclude_unset=True).items():
@@ -52,7 +52,7 @@ def update_user(userid: int, payload: UserUpdate, db: Session = Depends(get_db))
 
 @router.delete("/{userid}", status_code=204)
 def delete_user(userid: int, db: Session = Depends(get_db)):
-	user = db.query(models.User).get(userid)
+	user = db.query(models.User).filter(models.User.userid == userid).first()
 	if not user:
 		raise HTTPException(404, "User not found")
 	db.delete(user)

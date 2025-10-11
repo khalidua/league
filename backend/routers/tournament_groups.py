@@ -7,11 +7,11 @@ from backend.schemas import TournamentGroup as TournamentGroupSchema, Tournament
 
 router = APIRouter()
 
-@router.get("/", response_model=List[TournamentGroupSchema])
+@router.get("", response_model=List[TournamentGroupSchema])
 def list_tournament_groups(db: Session = Depends(get_db)):
 	return db.query(models.TournamentGroup).all()
 
-@router.post("/", response_model=TournamentGroupSchema, status_code=201)
+@router.post("", response_model=TournamentGroupSchema, status_code=201)
 def create_tournament_group(payload: TournamentGroupCreate, db: Session = Depends(get_db)):
 	group = models.TournamentGroup(**payload.model_dump())
 	db.add(group)
@@ -21,14 +21,14 @@ def create_tournament_group(payload: TournamentGroupCreate, db: Session = Depend
 
 @router.get("/{groupid}", response_model=TournamentGroupSchema)
 def get_tournament_group(groupid: int, db: Session = Depends(get_db)):
-	group = db.query(models.TournamentGroup).get(groupid)
+	group = db.query(models.TournamentGroup).filter(models.TournamentGroup.groupid == groupid).first()
 	if not group:
 		raise HTTPException(404, "Tournament group not found")
 	return group
 
 @router.patch("/{groupid}", response_model=TournamentGroupSchema)
 def update_tournament_group(groupid: int, payload: TournamentGroupUpdate, db: Session = Depends(get_db)):
-	group = db.query(models.TournamentGroup).get(groupid)
+	group = db.query(models.TournamentGroup).filter(models.TournamentGroup.groupid == groupid).first()
 	if not group:
 		raise HTTPException(404, "Tournament group not found")
 	for field, value in payload.model_dump(exclude_unset=True).items():
@@ -40,7 +40,7 @@ def update_tournament_group(groupid: int, payload: TournamentGroupUpdate, db: Se
 
 @router.delete("/{groupid}", status_code=204)
 def delete_tournament_group(groupid: int, db: Session = Depends(get_db)):
-	group = db.query(models.TournamentGroup).get(groupid)
+	group = db.query(models.TournamentGroup).filter(models.TournamentGroup.groupid == groupid).first()
 	if not group:
 		raise HTTPException(404, "Tournament group not found")
 	db.delete(group)

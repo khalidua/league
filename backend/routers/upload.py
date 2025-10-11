@@ -17,7 +17,7 @@ class UploadResponse(BaseModel):
 	image_url: str
 	public_id: str
 
-@router.post("/", response_model=UploadResponse)
+@router.post("", response_model=UploadResponse)
 async def upload_image(file: UploadFile = File(...)):
 	"""
 	Upload an image file (including SVG) to Cloudinary.

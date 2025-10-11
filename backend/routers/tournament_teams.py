@@ -7,11 +7,11 @@ from backend.schemas import TournamentTeam as TTschema, TournamentTeamCreate
 
 router = APIRouter()
 
-@router.get("/", response_model=List[TTschema])
+@router.get("", response_model=List[TTschema])
 def list_entries(db: Session = Depends(get_db)):
 	return db.query(models.TournamentTeam).all()
 
-@router.post("/", response_model=TTschema, status_code=201)
+@router.post("", response_model=TTschema, status_code=201)
 def create_entry(payload: TournamentTeamCreate, db: Session = Depends(get_db)):
 	entry = models.TournamentTeam(**payload.model_dump())
 	db.add(entry)
@@ -21,7 +21,10 @@ def create_entry(payload: TournamentTeamCreate, db: Session = Depends(get_db)):
 
 @router.delete("/{tournamentid}/{teamid}", status_code=204)
 def delete_entry(tournamentid: int, teamid: int, db: Session = Depends(get_db)):
-	entry = db.query(models.TournamentTeam).get((tournamentid, teamid))
+	entry = db.query(models.TournamentTeam).filter(
+		models.TournamentTeam.tournamentid == tournamentid,
+		models.TournamentTeam.teamid == teamid
+	).first()
 	if not entry:
 		raise HTTPException(404, "Entry not found")
 	db.delete(entry)

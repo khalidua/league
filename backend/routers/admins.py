@@ -7,7 +7,7 @@ from backend.schemas import Admin as AdminSchema, AdminCreate, AdminUpdate, Admi
 
 router = APIRouter()
 
-@router.get("/", response_model=List[AdminWithUser])
+@router.get("", response_model=List[AdminWithUser])
 def list_admins(db: Session = Depends(get_db)):
 	# Join Admin with User to get admin names
 	query = db.query(models.Admin, models.User).outerjoin(
@@ -33,7 +33,7 @@ def list_admins(db: Session = Depends(get_db)):
 	
 	return admins_with_users
 
-@router.post("/", response_model=AdminSchema, status_code=201)
+@router.post("", response_model=AdminSchema, status_code=201)
 def create_admin(payload: AdminCreate, db: Session = Depends(get_db)):
 	admin = models.Admin(**payload.model_dump())
 	db.add(admin)
@@ -67,7 +67,7 @@ def get_admin(adminid: int, db: Session = Depends(get_db)):
 
 @router.patch("/{adminid}", response_model=AdminSchema)
 def update_admin(adminid: int, payload: AdminUpdate, db: Session = Depends(get_db)):
-	admin = db.query(models.Admin).get(adminid)
+	admin = db.query(models.Admin).filter(models.Admin.adminid == adminid).first()
 	if not admin:
 		raise HTTPException(404, "Admin not found")
 	for field, value in payload.model_dump(exclude_unset=True).items():
@@ -79,7 +79,7 @@ def update_admin(adminid: int, payload: AdminUpdate, db: Session = Depends(get_d
 
 @router.delete("/{adminid}", status_code=204)
 def delete_admin(adminid: int, db: Session = Depends(get_db)):
-	admin = db.query(models.Admin).get(adminid)
+	admin = db.query(models.Admin).filter(models.Admin.adminid == adminid).first()
 	if not admin:
 		raise HTTPException(404, "Admin not found")
 	db.delete(admin)

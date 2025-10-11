@@ -7,7 +7,7 @@ from backend.schemas import Player as PlayerSchema, PlayerCreate, PlayerUpdate, 
 
 router = APIRouter()
 
-@router.get("/", response_model=List[PlayerWithUser])
+@router.get("", response_model=List[PlayerWithUser])
 def list_players(
 	teamid: Optional[int] = Query(None, description="Filter players by team ID"),
 	skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -46,7 +46,7 @@ def list_players(
 	
 	return players_with_users
 
-@router.post("/", response_model=PlayerSchema, status_code=201)
+@router.post("", response_model=PlayerSchema, status_code=201)
 def create_player(payload: PlayerCreate, db: Session = Depends(get_db)):
 	player = models.Player(**payload.model_dump())
 	db.add(player)
@@ -56,14 +56,14 @@ def create_player(payload: PlayerCreate, db: Session = Depends(get_db)):
 
 @router.get("/{playerid}", response_model=PlayerSchema)
 def get_player(playerid: int, db: Session = Depends(get_db)):
-	player = db.query(models.Player).get(playerid)
+	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
 	if not player:
 		raise HTTPException(404, "Player not found")
 	return player
 
 @router.patch("/{playerid}", response_model=PlayerSchema)
 def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(get_db)):
-	player = db.query(models.Player).get(playerid)
+	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
 	if not player:
 		raise HTTPException(404, "Player not found")
 	for field, value in payload.model_dump(exclude_unset=True).items():
@@ -75,7 +75,7 @@ def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(ge
 
 @router.delete("/{playerid}", status_code=204)
 def delete_player(playerid: int, db: Session = Depends(get_db)):
-	player = db.query(models.Player).get(playerid)
+	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
 	if not player:
 		raise HTTPException(404, "Player not found")
 	db.delete(player)
