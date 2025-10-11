@@ -30,40 +30,31 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 		headers['Authorization'] = `Bearer ${token}`;
 	}
 
-	// Try local API first, then fallback to production
-	const urls = [
-		`${LOCAL_API_BASE}/api${path}`,
-		`${PRODUCTION_API_BASE}/api${path}`
-	];
+	// Use the appropriate API base URL
+	const url = `${API_BASE}/api${path}`;
 
-	let lastError: Error | null = null;
-
-	for (const url of urls) {
-		try {
-			const res = await fetch(url, {
-				headers: { ...headers, ...(init?.headers || {}) },
-				...init,
-			});
+	try {
+		const res = await fetch(url, {
+			headers: { ...headers, ...(init?.headers || {}) },
+			...init,
+		});
+		
+		if (res.ok) {
+			const data = await res.json() as T;
 			
-			if (res.ok) {
-				const data = await res.json() as T;
-				
-				// Cache successful GET responses
-				if (useCache && cacheKey) {
-					setCachedData(cacheKey, data);
-				}
-				
-				return data;
-			} else {
-				const text = await res.text().catch(() => "");
-				lastError = new Error(text || `Request failed: ${res.status}`);
+			// Cache successful GET responses
+			if (useCache && cacheKey) {
+				setCachedData(cacheKey, data);
 			}
-		} catch (error) {
-			lastError = error instanceof Error ? error : new Error('Network error');
+			
+			return data;
+		} else {
+			const text = await res.text().catch(() => "");
+			throw new Error(text || `Request failed: ${res.status}`);
 		}
+	} catch (error) {
+		throw error instanceof Error ? error : new Error('Network error');
 	}
-
-	throw lastError || new Error('All API endpoints failed');
 }
 
 export const api = {
