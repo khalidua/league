@@ -57,6 +57,8 @@ html, body, #root {
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(243, 242, 236, 0.1);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1000;
 }
 
 .Navbar {
@@ -376,7 +378,7 @@ html, body, #root {
   }
   .Navbar .nav-links{
     display: none;
-    position: absolute;
+    position: fixed;
     top: 66px;
     right: 15px;
     background: linear-gradient(135deg, rgba(30, 147, 171, 0.95) 0%, rgba(26, 74, 90, 0.95) 100%);
@@ -392,7 +394,7 @@ html, body, #root {
     gap: 4px;
     width: 200px;
     padding: 12px;
-    z-index: 1001;
+    z-index: 9999;
     overflow: hidden;
   }
   .Navbar.open .nav-links{ display: flex; }
@@ -400,7 +402,7 @@ html, body, #root {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.35);
-    z-index: 1000;
+    z-index: 9998;
   }
   .nav-link{ 
     display: block; 

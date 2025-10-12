@@ -34,29 +34,42 @@
 
 .match-card{
     margin-top: 20px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
+    gap: 20px;
     border-radius: 36px;
     width: 100%;
     height: 200px;
+    padding: 20px;
     background: rgba(243, 242, 236, 0.05);
     border: 1px solid rgba(220, 220, 220, 0.1);
     background: linear-gradient(135deg, #1E93AB 0%, #0F7A8E 100%);
 }
 .match-card img{
     max-width: 100px;
+    height: auto;
+    object-fit: contain;
 }
 .first-team{
-
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    gap: 12px;
+    min-width: 0; /* Allow flex item to shrink */
+}
+.first-team h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #F3F2EC;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
 }
 .match-details-card{
-  position: fixed;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -69,6 +82,7 @@
     background: rgba(243, 242, 236, 0.2);
     border: 1px solid rgba(220, 220, 220, 0.1);
     gap: 4px;
+    flex-shrink: 0; /* Prevent the details card from shrinking */
 }
 
 .kickoff-time {
@@ -129,15 +143,65 @@
 }
 .second-team{
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 12px;
+    min-width: 0; /* Allow flex item to shrink */
+}
+.second-team h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #F3F2EC;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Medium screens: adjust grid for better spacing */
+@media (max-width: 900px) and (min-width: 701px) {
+  .match-card {
+    gap: 15px;
+    padding: 15px;
+  }
+  .match-card img {
+    max-width: 80px;
+  }
+  .first-team h2, .second-team h2 {
+    max-width: 150px;
+    font-size: 1.1rem;
+  }
+  .match-details-card {
+    width: 180px;
+  }
 }
 
 /* Responsive: stack card content vertically on narrow screens */
 @media (max-width: 700px){
-  .match-card{ flex-direction: column; gap: 12px; height: auto; padding: 14px; }
+  .match-card{ 
+    grid-template-columns: 1fr; 
+    grid-template-rows: auto auto auto;
+    gap: 12px; 
+    height: auto; 
+    padding: 14px; 
+  }
   .match-card img{ max-width: 72px; }
-  .first-team, .second-team{ width: 100%; justify-content: center; }
-  .match-details-card{ width: 100%; max-width: 260px; }
+  .first-team, .second-team{ 
+    justify-content: center; 
+    order: 1;
+  }
+  .second-team {
+    order: 3;
+  }
+  .match-details-card{ 
+    width: 100%; 
+    max-width: 260px; 
+    order: 2;
+    margin: 0 auto;
+  }
+  .first-team h2, .second-team h2 {
+    max-width: 150px;
+  }
 }
