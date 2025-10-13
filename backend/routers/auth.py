@@ -43,41 +43,15 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         lastname=request.lastname,
         role=request.role or "Player",
         status="active",
-        profileimage=None  # No default image stored - handled in frontend
+        profileimage="/assets/defaultPlayer.png"  # Set default profile image
     )
     
     db.add(user)
     db.commit()
     db.refresh(user)
     
-    # If user is a Player, create Player and PlayerStats records
-    if user.role == "Player":
-        # Create PlayerStats record first
-        player_stats = models.PlayerStats(
-            matchesplayed=0,
-            goals=0,
-            assists=0,
-            yellowcards=0,
-            redcards=0,
-            mvpcount=0,
-            ratingaverage=0
-        )
-        db.add(player_stats)
-        db.commit()
-        db.refresh(player_stats)
-        
-        # Create Player record linking user to stats
-        player = models.Player(
-            userid=user.userid,
-            statsid=player_stats.statsid,
-            position=None,
-            jerseynumber=None,
-            preferredfoot="Right",
-            height=None,
-            weight=None
-        )
-        db.add(player)
-        db.commit()
+    # Note: Player records are created during onboarding, not during registration
+    # This prevents duplicate player creation and allows for proper onboarding flow
     
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -94,7 +68,8 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             "firstname": user.firstname,
             "lastname": user.lastname,
             "role": user.role,
-            "status": user.status
+            "status": user.status,
+            "profileimage": user.profileimage
         }
     )
 
@@ -140,7 +115,8 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             "firstname": user.firstname,
             "lastname": user.lastname,
             "role": user.role,
-            "status": user.status
+            "status": user.status,
+            "profileimage": user.profileimage
         }
     )
 

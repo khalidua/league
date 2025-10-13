@@ -6,6 +6,7 @@ import Spinner from '../components/Spinner';
 import editIcon from '../assets/icons8-edit-24.png';
 import deleteIcon from '../assets/delete.png';
 import defaultPlayerPhoto from '../assets/defaultPlayer.png';
+import { formatFullName, capitalizeFirstLetter } from '../utils/nameUtils';
 
 // Animated Counter Component
 const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({ value, duration = 2000 }) => {
@@ -18,7 +19,7 @@ const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({ value
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setCount(Math.floor(easeOutQuart * value));
@@ -50,7 +51,7 @@ const Profile: React.FC = () => {
   const [statsLoading, setStatsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
@@ -94,7 +95,7 @@ const Profile: React.FC = () => {
           // First, get the player record to find the statsid
           const players = await api.listPlayers();
           const player = players.find((p: any) => p.userid === user.userid);
-          
+
           if (player && player.statsid) {
             // Get the specific stats record
             const stats = await api.getPlayerStats(player.statsid);
@@ -160,10 +161,10 @@ const Profile: React.FC = () => {
         height: formData.height ? parseInt(formData.height) : null,
         weight: formData.weight ? parseInt(formData.weight) : null
       });
-      
+
       // Update the user data in context
       updateUser(updatedUser);
-      
+
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
     } catch (err: any) {
@@ -201,7 +202,7 @@ const Profile: React.FC = () => {
 
     setUploading(true);
     setError(null);
-    
+
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -220,15 +221,15 @@ const Profile: React.FC = () => {
 
       const result = await response.json();
       console.log('Upload result:', result);
-      
+
       // Update user profile with new image URL
       const updatedUser = await api.updateProfile({
         profileimage: result.image_url
       });
-      
+
       // Update the user data in context
       updateUser(updatedUser);
-      
+
       setSuccess('Profile picture updated successfully!');
     } catch (error) {
       console.error('Upload error:', error);
@@ -243,19 +244,19 @@ const Profile: React.FC = () => {
 
     setUploading(true);
     setError(null);
-    
+
     try {
       // Update user profile to remove image URL
       console.log('Deleting profile picture...');
       const updatedUser = await api.updateProfile({
         profileimage: null
       });
-      
+
       console.log('Updated user after deletion:', updatedUser);
-      
+
       // Update the user data in context
       updateUser(updatedUser);
-      
+
       setSuccess('Profile picture removed successfully!');
     } catch (error) {
       console.error('Delete error:', error);
@@ -307,16 +308,16 @@ const Profile: React.FC = () => {
                     <Spinner color="white" size="md" />
                   </div>
                 ) : (
-                  <img 
-                    src={user.profileimage || defaultPlayerPhoto} 
-                    alt={`${user.firstname} ${user.lastname}`}
+                  <img
+                    src={user.profileimage || defaultPlayerPhoto}
+                    alt={formatFullName(user.firstname, user.lastname)}
                     className="avatar-image"
                   />
                 )}
               </div>
               <div className="profile-avatar-actions">
-                <button 
-                  className="edit-avatar-btn" 
+                <button
+                  className="edit-avatar-btn"
                   onClick={handleUploadClick}
                   disabled={uploading}
                   title="Edit profile picture"
@@ -324,8 +325,8 @@ const Profile: React.FC = () => {
                   <img src={editIcon} alt="Edit" width="16" height="16" style={{ filter: 'brightness(0) invert(1)' }} />
                 </button>
                 {user.profileimage && (
-                  <button 
-                    className="delete-avatar-btn" 
+                  <button
+                    className="delete-avatar-btn"
                     onClick={handleDeleteProfilePicture}
                     disabled={uploading}
                     title="Remove profile picture"
@@ -343,7 +344,7 @@ const Profile: React.FC = () => {
               />
             </div>
             <div className="profile-basic-info">
-              <h2>{user.firstname && user.lastname ? `${user.firstname} ${user.lastname}` : user.email}</h2>
+              <h2>{formatFullName(user.firstname, user.lastname) || user.email}</h2>
               <div className="profile-role">
                 <span className={`role-badge role-${user.role.toLowerCase()}`}>
                   {user.role}
@@ -358,24 +359,17 @@ const Profile: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="profile-actions">
-            {!isEditing ? (
-              <button 
-                className="edit-btn"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Profile
-              </button>
-            ) : (
+          {isEditing && (
+            <div className="profile-actions">
               <div className="edit-actions">
-                <button 
+                <button
                   className="save-btn"
                   onClick={handleSave}
                   disabled={saving}
                 >
                   {saving ? <Spinner color="white" size="sm" /> : 'Save Changes'}
                 </button>
-                <button 
+                <button
                   className="cancel-btn"
                   onClick={handleCancel}
                   disabled={saving}
@@ -383,14 +377,21 @@ const Profile: React.FC = () => {
                   Cancel
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Profile Details */}
         <div className="profile-details">
           <div className="details-section">
-            <h3>Personal Information</h3>
+            <h3>Personal Information {!isEditing && (
+              <span
+                className="edit-profile-link"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit
+              </span>
+            )}</h3>
             <div className="form-grid">
               <div className="form-group">
                 <label htmlFor="firstname">First Name</label>
@@ -406,7 +407,7 @@ const Profile: React.FC = () => {
                   />
                 ) : (
                   <div className="form-display">
-                    {user.firstname || 'Not provided'}
+                    {capitalizeFirstLetter(user.firstname) || 'Not provided'}
                   </div>
                 )}
               </div>
@@ -425,7 +426,7 @@ const Profile: React.FC = () => {
                   />
                 ) : (
                   <div className="form-display">
-                    {user.lastname || 'Not provided'}
+                    {capitalizeFirstLetter(user.lastname) || 'Not provided'}
                   </div>
                 )}
               </div>
@@ -721,6 +722,28 @@ const Profile: React.FC = () => {
             {success}
           </div>
         )}
+
+        {/* Delete Account Section */}
+        <div className="delete-account-section">
+          <div className="delete-account-content">
+            <div className="delete-account-info">
+              <h4>Delete Account</h4>
+              <p>Once you delete your account, there is no going back. Please be certain.</p>
+            </div>
+            <button
+              className="delete-account-btn"
+              onClick={() => {
+                if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                  // TODO: Implement account deletion
+                  alert('Account deletion feature coming soon!');
+                }
+              }}
+              disabled={loading}
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

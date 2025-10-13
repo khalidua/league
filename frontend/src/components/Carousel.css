@@ -82,11 +82,18 @@
   font-weight: 600;
   transition: all 0.3s ease;
 }
-.myTeam:hover{
+.myTeam:hover:not(:disabled){
   color: #F3F2EC;
   border-color: #E62727;
   background-color: rgba(230, 39, 39, 0.1);
   transform: translateY(-2px);
+}
+
+.myTeam:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #6b7280;
+  border-color: #6b7280;
 }
 
 /* Responsive */

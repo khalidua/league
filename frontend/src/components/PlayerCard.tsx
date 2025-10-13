@@ -1,6 +1,7 @@
 import React from 'react';
 import './PlayerCard.css';
 import defaultPlayerPhoto from '../assets/defaultPlayer.png';
+import { formatFullName } from '../utils/nameUtils';
 
 type PlayerCardProps = {
   player?: {
@@ -28,12 +29,9 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, isCaptain = false }) =>
   const playerData = player || defaultPlayer;
   // Create full name from firstname and lastname, fallback to Player ID
   const fullName = (() => {
-    if (playerData.firstname && playerData.lastname) {
-      return `${playerData.firstname} ${playerData.lastname}`;
-    } else if (playerData.firstname) {
-      return playerData.firstname;
-    } else if (playerData.lastname) {
-      return playerData.lastname;
+    const formattedName = formatFullName(playerData.firstname, playerData.lastname);
+    if (formattedName) {
+      return formattedName;
     } else {
       return `Player ${playerData.playerid}`;
     }

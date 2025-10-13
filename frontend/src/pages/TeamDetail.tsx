@@ -238,11 +238,16 @@ const TeamDetail: React.FC = () => {
 					{players.length > 0 ? (
 						<div className="players-cards-grid">
 							{players.map(player => (
-								<PlayerCard 
-									key={player.playerid} 
-									player={player} 
-									isCaptain={player.playerid === team?.teamcaptainid}
-								/>
+								<div 
+									key={player.playerid}
+									onClick={() => navigate(`/players/${player.playerid}`)}
+									className="player-card-wrapper"
+								>
+									<PlayerCard 
+										player={player} 
+										isCaptain={player.playerid === team?.teamcaptainid}
+									/>
+								</div>
 							))}
 						</div>
 					) : (

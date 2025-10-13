@@ -112,6 +112,50 @@ const Matches: React.FC = () => {
 		});
 	}, [matches, query, selectedDate, myOnly, user?.teamid]);
 
+	// Group matches by day
+	const groupedMatches = useMemo(() => {
+		const today = new Date();
+		const todayString = today.toISOString().split('T')[0];
+		
+		const groups: Record<string, MatchWithTeams[]> = {};
+		
+		filtered.forEach((match) => {
+			const matchDate = new Date(match.matchdate);
+			const dateString = matchDate.toISOString().split('T')[0];
+			
+			// Determine the display label for the date
+			let dateLabel: string;
+			if (dateString === todayString) {
+				dateLabel = 'Today';
+			} else {
+				// Format as "Day, Month Date" (e.g., "Mon, Dec 25")
+				dateLabel = matchDate.toLocaleDateString('en-US', { 
+					weekday: 'short', 
+					month: 'short', 
+					day: 'numeric' 
+				});
+			}
+			
+			if (!groups[dateLabel]) {
+				groups[dateLabel] = [];
+			}
+			groups[dateLabel].push(match);
+		});
+		
+		// Sort groups by date (Today first, then chronological order)
+		const sortedGroups = Object.entries(groups).sort(([a], [b]) => {
+			if (a === 'Today') return -1;
+			if (b === 'Today') return 1;
+			
+			// Parse the date strings for comparison
+			const dateA = new Date(a);
+			const dateB = new Date(b);
+			return dateA.getTime() - dateB.getTime();
+		});
+		
+		return sortedGroups;
+	}, [filtered]);
+
 	return (
 		<div className="MatchesPage">
 			<div className="matches-strap">MATCHES</div>
@@ -135,37 +179,46 @@ const Matches: React.FC = () => {
 						<span style={{ marginLeft: '10px' }}>Loading...</span>
 					</div>
 				)}
-				{!loading && filtered.map((m: MatchWithTeams) => (
-					<div className='match-card' key={m.matchid}>
-						<div className='first-team'>
-							<img 
-								src={m.hometeam?.logoUrl || defaultTeamLogo} 
-								alt={`${m.hometeam?.name || 'Home Team'} logo`}
-							/>
-							<h2>{m.hometeam?.name || 'TBD'}</h2>
+				
+				{!loading && groupedMatches.map(([dateLabel, dayMatches]) => (
+					<div key={dateLabel} className="match-day-group">
+						<div className="match-day-header">
+							<h3 className="match-day-title">{dateLabel}</h3>
+							<span className="match-count">{dayMatches.length} match{dayMatches.length !== 1 ? 'es' : ''}</span>
 						</div>
-						<div className='match-details-card'>
-							<h3 className='kickoff-time'>
-								{new Date(m.matchdate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-							</h3>
-							<div className='match-date'>
-								{new Date(m.matchdate).toLocaleDateString()}
-							</div>
-							<div className='match-round'>{m.round}</div>
-							<div className={`match-status status-${m.status.toLowerCase()}`}>
-								{m.status}
-							</div>
-						</div>
-						<div className='second-team'>
-							<img 
-								src={m.awayteam?.logoUrl || defaultTeamLogo} 
-								alt={`${m.awayteam?.name || 'Away Team'} logo`}
-							/>
-							<h2>{m.awayteam?.name || 'TBD'}</h2>
+						<div className="match-day-matches">
+							{dayMatches.map((m: MatchWithTeams) => (
+								<div className='match-card' key={m.matchid}>
+									<div className='first-team'>
+										<img 
+											src={m.hometeam?.logoUrl || defaultTeamLogo} 
+											alt={`${m.hometeam?.name || 'Home Team'} logo`}
+										/>
+										<h2>{m.hometeam?.name || 'TBD'}</h2>
+									</div>
+									<div className='match-details-card'>
+										<h3 className='kickoff-time'>
+											{new Date(m.matchdate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+										</h3>
+										<div className='match-round'>{m.round}</div>
+										<div className={`match-status status-${m.status.toLowerCase()}`}>
+											{m.status}
+										</div>
+									</div>
+									<div className='second-team'>
+										<img 
+											src={m.awayteam?.logoUrl || defaultTeamLogo} 
+											alt={`${m.awayteam?.name || 'Away Team'} logo`}
+										/>
+										<h2>{m.awayteam?.name || 'TBD'}</h2>
+									</div>
+								</div>
+							))}
 						</div>
 					</div>
 				))}
-				{!loading && filtered.length === 0 && (
+				
+				{!loading && groupedMatches.length === 0 && (
 					<div className='empty' style={{color:'white'}}>{error || 'No matches found.'}</div>
 				)}
 			</div>

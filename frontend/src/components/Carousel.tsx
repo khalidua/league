@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Carousel.css';
 
 type Props = {
   children: React.ReactNode[];
   initialIndex?: number;
   autoplayMs?: number | null;
+  teamId?: number | null;
 };
 
-const Carousel: React.FC<Props> = ({ children, initialIndex = 0, autoplayMs = null }) => {
+const Carousel: React.FC<Props> = ({ children, initialIndex = 0, autoplayMs = null, teamId = null }) => {
+  const navigate = useNavigate();
   const slides = React.Children.toArray(children);
   const [index, setIndex] = useState<number>(Math.max(0, Math.min(initialIndex, Math.max(0, slides.length - 1))));
   const autoplayRef = useRef<number | null>(null);
@@ -115,7 +118,17 @@ const Carousel: React.FC<Props> = ({ children, initialIndex = 0, autoplayMs = nu
         </div>
       </div>
 
-      <button className='myTeam'>View full team</button>
+      <button 
+        className='myTeam'
+        onClick={() => {
+          if (teamId) {
+            navigate(`/teams/${teamId}`);
+          }
+        }}
+        disabled={!teamId}
+      >
+        View full team
+      </button>
     </div>
   );
 };

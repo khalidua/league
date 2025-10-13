@@ -1,0 +1,253 @@
+.card-container {
+  width: 100%;
+}
+
+.page-btn{
+    position: relative;
+    z-index: 10000;
+}
+.stats-card {
+  position: relative;
+  width: 100%;
+  height: 470px;
+  background-color: brown;
+  border-radius: 24px;
+  z-index: 1;
+}
+
+.info-card {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 130px;
+  background-color: white;
+  border-radius: 24px;
+  z-index: 50;
+  color: #000;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 70px;
+}
+.stat-item{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.data-wrapper{
+    display: flex;
+    max-width: 100%;
+    height: 100%;
+}
+.main-data{
+    display: flex;
+    flex-direction: column;
+}
+h1{
+    margin: 0;
+    margin-top: 30px;
+.stat-value{
+  font-size: 24px;
+  font-weight: bold;
+}
+
+
+.stat-label{
+  font-size: 14px;
+  font-weight: bold;
+}
+
+
+.rating{
+  background-color: #000;
+  color: #fff;
+}
+
+
+.rating .stat-value{
+  color: #fff;
+}
+
+
+
+}
+.main-data h3{
+    margin: 0;
+    letter-spacing: 15px;
+}
+
+.ovals{
+    display: flex;
+    justify-content: space-between;
+    height: 25px;
+    margin-top: 15px;
+    max-width: 300px;
+}
+
+.oval-one{
+    width: 48%;
+    background-color: yellow;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.oval-two{
+    width: 48%;
+    border-radius: 24px;
+    background-color: aqua;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.team{
+    display: flex; 
+    max-width: 500px;
+    height: 50px; 
+    margin-top: 30px;
+}
+.team-logo-detail{
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-logo-detail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.team-name-detail{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+.personal-info{
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 16px;
+    margin-top: 20px;
+    margin-left: 60px;
+    backdrop-filter: blur(10px);
+}
+
+.personal-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    color: #F3F2EC;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #F3F2EC;
+    font-weight: 500;
+}
+
+/* Responsive design for personal info */
+@media (max-width: 768px) {
+    .personal-info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .personal-info {
+        margin: 16px;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .personal-info-grid {
+        gap: 10px;
+    }
+    
+    .personal-info {
+        margin: 12px;
+        padding: 12px;
+    }
+    
+    .info-label {
+        font-size: 0.7rem;
+    }
+    
+    .info-value {
+        font-size: 0.9rem;
+    }
+}
+.avatar-line{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 40%;
+}
+
+.avatar-line img {
+    width: 450px;
+    margin-bottom: 150px;
+    position: relative;
+    z-index: 1;
+}
+
+.player-pic{
+    position: absolute;
+    width: 100%;
+    height: auto;
+    max-width: 400px;
+    margin-bottom: 20px;
+    object-fit: contain;
+}
+
+.bg-logo{
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.1;
+    overflow: hidden;
+}
+
+.bg-logo img {
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+    object-fit: contain;
+    filter: grayscale(100%) brightness(0.9);
+}

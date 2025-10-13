@@ -8,11 +8,14 @@ import Players from './pages/Players.tsx'
 import Standings from './pages/Standings.tsx'
 import Teams from './pages/Teams.tsx'
 import TeamDetail from './pages/TeamDetail.tsx'
+import PlayerDetail from './pages/PlayerDetail.tsx'
 import Matches from './pages/Matches.tsx'
 import Rules from './pages/Rules.tsx'
 import Profile from './pages/Profile.tsx'
 import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
+import PlayerOnboarding from './pages/PlayerOnboarding.tsx'
+import TeamManagement from './pages/TeamManagement.tsx'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -24,6 +27,7 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/players" element={<Players />} />
+          <Route path="/players/:id" element={<PlayerDetail />} />
           <Route path="/standings" element={<Standings />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:id" element={<TeamDetail />} />
@@ -54,6 +58,22 @@ createRoot(document.getElementById('root')!).render(
             element={
               <ProtectedRoute requireAuth={false}>
                 <Register />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/onboarding" 
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <PlayerOnboarding />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/team-management" 
+            element={
+              <ProtectedRoute requireAuth={true}>
+                <TeamManagement />
               </ProtectedRoute>
             } 
           />

@@ -9,10 +9,13 @@ const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [moreDropdownPosition, setMoreDropdownPosition] = useState({ top: 0, left: 0 });
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const moreDropdownRef = useRef<HTMLDivElement>(null);
   const toggle = () => setOpen(v => !v);
+  
+  // Check if user is a team captain (Admin or has teamid)
+  const isTeamCaptain = user?.role === 'Admin' || user?.teamid;
   
   const handleMoreToggle = () => {
     if (!moreDropdownOpen && moreButtonRef.current) {
@@ -80,6 +83,9 @@ const Navbar: React.FC = () => {
                     <Link to="/standings" onClick={() => setMoreDropdownOpen(false)}>Standings</Link>
                     <Link to="/players" onClick={() => setMoreDropdownOpen(false)}>Players</Link>
                     <Link to="/rules" onClick={() => setMoreDropdownOpen(false)}>Rules</Link>
+                    {isTeamCaptain && (
+                      <Link to="/team-management" onClick={() => setMoreDropdownOpen(false)}>Team Management</Link>
+                    )}
                   </div>,
                   document.body
                 )}
@@ -118,6 +124,9 @@ const Navbar: React.FC = () => {
             <Link className="nav-item" to="/standings" onClick={toggle}>Standings</Link>
             <Link className="nav-item" to="/players" onClick={toggle}>Players</Link>
             <Link className="nav-item" to="/rules" onClick={toggle}>Rules</Link>
+            {isTeamCaptain && (
+              <Link className="nav-item" to="/team-management" onClick={toggle}>Team Management</Link>
+            )}
           </div>
 
           {/* Overlay when mobile menu open */}

@@ -28,6 +28,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   updateUser: (userData: User) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -97,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await api.login(email, password);
       const { access_token, user: userData } = response;
       
-      localStorage.setItem('token', access_token);
+      localStorage.setItem('access_token', access_token);
       setToken(access_token);
       setUser(userData);
     } catch (error) {
@@ -110,7 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await api.register(email, password, firstname, lastname, role);
       const { access_token, user: userData } = response;
       
-      localStorage.setItem('token', access_token);
+      localStorage.setItem('access_token', access_token);
       setToken(access_token);
       setUser(userData);
     } catch (error) {
@@ -129,6 +130,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(userData);
   };
 
+  const refreshUser = async () => {
+    try {
+      const userData = await api.getCurrentUser();
+      setUser(userData);
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     token,
@@ -138,6 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
     isAuthenticated,
     updateUser,
+    refreshUser,
   };
 
   return (

@@ -24,7 +24,7 @@ class UserCreate(BaseModel):
 	lastname: Optional[str] = None
 
 class UserUpdate(UserBase):
-	# Player-specific fields
+	# Player-specific fields (these are actually in Player model, but kept for compatibility)
 	position: Optional[str] = None
 	jerseynumber: Optional[int] = None
 	preferredfoot: Optional[str] = None

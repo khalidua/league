@@ -14,9 +14,11 @@ def list_players(
 	limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
 	db: Session = Depends(get_db)
 ):
-	# Join Player with User to get player names
-	query = db.query(models.Player, models.User).outerjoin(
+	# Join Player with User and Team to get player names and team info
+	query = db.query(models.Player, models.User, models.Team).outerjoin(
 		models.User, models.Player.userid == models.User.userid
+	).outerjoin(
+		models.Team, models.Player.teamid == models.Team.teamid
 	)
 	
 	if teamid is not None:
@@ -26,7 +28,7 @@ def list_players(
 	
 	# Convert joined results to PlayerWithUser objects
 	players_with_users = []
-	for player, user in results:
+	for player, user, team in results:
 		player_data = {
 			"playerid": player.playerid,
 			"userid": player.userid,
@@ -41,6 +43,9 @@ def list_players(
 			"lastname": user.lastname if user else None,
 			"email": user.email if user else None,
 			"profileimage": user.profileimage if user else None,
+			"status": user.status if user else None,
+			"teamname": team.teamname if team else None,
+			"teamlogo": team.logourl if team else None,
 		}
 		players_with_users.append(PlayerWithUser(**player_data))
 	
@@ -54,12 +59,51 @@ def create_player(payload: PlayerCreate, db: Session = Depends(get_db)):
 	db.refresh(player)
 	return player
 
-@router.get("/{playerid}", response_model=PlayerSchema)
+@router.get("/{playerid}", response_model=PlayerWithUser)
 def get_player(playerid: int, db: Session = Depends(get_db)):
-	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
-	if not player:
+	# Join Player with User, Team, and PlayerStats to get complete player info
+	result = db.query(models.Player, models.User, models.Team, models.PlayerStats).outerjoin(
+		models.User, models.Player.userid == models.User.userid
+	).outerjoin(
+		models.Team, models.Player.teamid == models.Team.teamid
+	).outerjoin(
+		models.PlayerStats, models.Player.statsid == models.PlayerStats.statsid
+	).filter(models.Player.playerid == playerid).first()
+	
+	if not result:
 		raise HTTPException(404, "Player not found")
-	return player
+	
+	player, user, team, stats = result
+	
+	# Convert joined result to PlayerWithUser object
+	player_data = {
+		"playerid": player.playerid,
+		"userid": player.userid,
+		"teamid": player.teamid,
+		"position": player.position,
+		"jerseynumber": player.jerseynumber,
+		"statsid": player.statsid,
+		"preferredfoot": player.preferredfoot,
+		"height": float(player.height) if player.height else None,
+		"weight": float(player.weight) if player.weight else None,
+		"firstname": user.firstname if user else None,
+		"lastname": user.lastname if user else None,
+		"email": user.email if user else None,
+		"profileimage": user.profileimage if user else None,
+		"status": user.status if user else None,
+		"teamname": team.teamname if team else None,
+		"teamlogo": team.logourl if team else None,
+		# Player statistics
+		"matchesplayed": stats.matchesplayed if stats else 0,
+		"goals": stats.goals if stats else 0,
+		"assists": stats.assists if stats else 0,
+		"yellowcards": stats.yellowcards if stats else 0,
+		"redcards": stats.redcards if stats else 0,
+		"mvpcount": stats.mvpcount if stats else 0,
+		"ratingaverage": float(stats.ratingaverage) if stats and stats.ratingaverage else 0.0,
+	}
+	
+	return PlayerWithUser(**player_data)
 
 @router.patch("/{playerid}", response_model=PlayerSchema)
 def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(get_db)):

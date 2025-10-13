@@ -43,6 +43,7 @@ html, body {
     text-align: center;
     color: #F3F2EC;
     margin: 0 0 2rem 0;
+    padding: 0 1rem;
 }
 .team h2{
     margin: 0;
@@ -603,4 +604,127 @@ html, body {
     width: 100%;
     max-width: 200px;
   }
+}
+
+/* Team info styles */
+.team h2 {
+    margin: 0 0 15px 0;
+}
+
+.team-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: rgba(243, 242, 236, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(220, 220, 220, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.team-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid rgba(243, 242, 236, 0.3);
+}
+
+.team-name {
+    color: #F3F2EC;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* No team section styles */
+.no-team-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 40px 20px;
+}
+
+.no-team-content {
+    text-align: center;
+    color: #F3F2EC;
+    max-width: 400px;
+}
+
+.no-team-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.no-team-content h3 {
+    color: #F3F2EC;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.no-team-content p {
+    color: rgba(243, 242, 236, 0.8);
+    font-size: 1rem;
+    margin: 0 0 25px 0;
+    line-height: 1.5;
+}
+
+.join-team-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #1E93AB 0%, #0F7A8E 100%);
+    color: #F3F2EC;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(30, 147, 171, 0.3);
+}
+
+.join-team-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(30, 147, 171, 0.4);
+    color: #F3F2EC;
+    text-decoration: none;
+}
+
+/* Responsive design for team info */
+@media (max-width: 768px) {
+    .team-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .team-logo {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .team-name {
+        font-size: 1rem;
+    }
+    
+    .no-team-content h3 {
+        font-size: 1.3rem;
+    }
+    
+    .no-team-content p {
+        font-size: 0.9rem;
+    }
+    
+    .join-team-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
 }

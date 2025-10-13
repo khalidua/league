@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Spinner from '../components/Spinner';
+import PasswordInput from '../components/PasswordInput';
 import './Auth.css';
 
 const Register: React.FC = () => {
@@ -34,7 +35,12 @@ const Register: React.FC = () => {
 
     try {
       await register(email, password, firstname, lastname, role);
-      navigate('/');
+      // Redirect to onboarding for players, home for others
+      if (role === 'Player') {
+        navigate('/onboarding');
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -109,9 +115,8 @@ const Register: React.FC = () => {
 
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -121,9 +126,8 @@ const Register: React.FC = () => {
 
           <div className="form-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required

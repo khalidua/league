@@ -6,6 +6,7 @@ import settingsIco from '../assets/icons8-settings-24.png'
 import ProfileIco from '../assets/icons8-profile-24.png'
 import logoutIco from '../assets/icons8-logout-24.png'
 import defaultPlayerPhoto from '../assets/defaultPlayer.png'
+import { formatFullName } from '../utils/nameUtils';
 import './UserMenu.css';
 
 interface UserMenuProps {
@@ -55,9 +56,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ className = '' }) => {
   };
 
 
-  const fullName = user?.firstname && user?.lastname 
-    ? `${user.firstname} ${user.lastname}` 
-    : user?.firstname || user?.email || 'User';
+  const fullName = (() => {
+    const formattedName = formatFullName(user?.firstname, user?.lastname);
+    return formattedName || user?.email || 'User';
+  })();
 
   return (
     <div className={`user-menu ${className}`} ref={menuRef}>
@@ -112,6 +114,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ className = '' }) => {
               <span className="menu-icon"><img src={ProfileIco}/></span>
               <span>Profile</span>
             </Link>
+            {/* Show team management for team captains */}
+            {(user?.role === 'Admin' || user?.teamid) && (
+              <Link to="/team-management" className="menu-item" onClick={() => setIsOpen(false)}>
+                <span className="menu-icon">⚽</span>
+                <span>Manage Team</span>
+              </Link>
+            )}
             <button className="menu-item">
               <span className="menu-icon"><img src={settingsIco}/></span>
               <span>Settings</span>

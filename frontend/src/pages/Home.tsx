@@ -13,11 +13,20 @@ import manLogo from '../assets/manLogo.png';
 import reactLogo from '../assets/react.svg';
 import lockIcon from '../assets/icons8-lock-24.png';
 import defaultTeamLogo from '../assets/default_team.png';
+import { capitalizeFirstLetter } from '../utils/nameUtils';
+import { getPlayerImage, getTeamLogo } from '../utils/defaultImages';
 const Home: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Debug user data
+  console.log('Home page - user data:', user);
+  console.log('Home page - isAuthenticated:', isAuthenticated);
   const [upcomingMatch, setUpcomingMatch] = useState<any>(null);
   const [matchLoading, setMatchLoading] = useState(true);
   const [matchError, setMatchError] = useState<string | null>(null);
+  const [teamPlayers, setTeamPlayers] = useState<any[]>([]);
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [teamError, setTeamError] = useState<string | null>(null);
   
   // Fetch upcoming match data
   useEffect(() => {
@@ -37,6 +46,27 @@ const Home: React.FC = () => {
 
     fetchUpcomingMatch();
   }, []);
+
+  // Fetch team players when user has a team
+  useEffect(() => {
+    const fetchTeamPlayers = async () => {
+      if (!isAuthenticated || !user?.teamid) return;
+      
+      try {
+        setTeamLoading(true);
+        setTeamError(null);
+        const players = await api.listPlayers({ teamid: user.teamid });
+        setTeamPlayers(players || []);
+      } catch (error) {
+        console.error('Failed to fetch team players:', error);
+        setTeamError('Failed to load team players');
+      } finally {
+        setTeamLoading(false);
+      }
+    };
+
+    fetchTeamPlayers();
+  }, [isAuthenticated, user?.teamid]);
 
   // Helper function to format match date
   const formatMatchDate = (dateString: string) => {
@@ -154,47 +184,106 @@ const Home: React.FC = () => {
               <>
                 <img 
                   className='team1' 
-                  src={upcomingMatch.hometeam?.logourl || defaultTeamLogo} 
+                  src={getTeamLogo(upcomingMatch.hometeam?.logourl)} 
                   alt={upcomingMatch.hometeam?.teamname || 'Home Team'}
                 />
                 <img 
                   className='team2' 
-                  src={upcomingMatch.awayteam?.logourl || defaultTeamLogo} 
+                  src={getTeamLogo(upcomingMatch.awayteam?.logourl)} 
                   alt={upcomingMatch.awayteam?.teamname || 'Away Team'}
                 />
               </>
             ) : (
               <>
-                <img className='team1' src={defaultTeamLogo} alt="Team 1" />
-                <img className='team2' src={defaultTeamLogo} alt="Team 2" />
+                <img className='team1' src={getTeamLogo()} alt="Team 1" />
+                <img className='team2' src={getTeamLogo()} alt="Team 2" />
               </>
             )}
           </div>
         </div>
-        <div className='team'><h2>MY TEAM</h2></div>
+        <div className='team'>
+          <h2>MY TEAM</h2>
+          {isAuthenticated && user?.teamid && user?.teamname ? (
+            <div className="team-info">
+              <img src={getTeamLogo(user.teamlogo)} alt={user.teamname} className="team-logo" />
+              <span className="team-name">{user.teamname}</span>
+            </div>
+          ) : isAuthenticated && user?.teamid ? (
+            <div className="team-info">
+              <img src={getTeamLogo()} alt="Your Team" className="team-logo" />
+              <span className="team-name">Your Team</span>
+            </div>
+          ) : null}
+        </div>
         <div className="team-section-container">
-          <div className={`players ${!isAuthenticated ? 'blurred-section' : ''}`}>
-            <Carousel autoplayMs={4000}>
-              <PlayerCard />
-              <PlayerCard />
-              <PlayerCard />
-              <PlayerCard />
-              <PlayerCard />
-              <PlayerCard />
-              <PlayerCard />
-              <PlayerCard />
-            </Carousel>
-          </div>
-          {!isAuthenticated && (
-            <div className="login-overlay">
-              <div className="login-prompt">
-                <div className="login-icon"><img src={lockIcon} alt="Lock" style={{filter: "brightness(0) invert(1)"}}/></div>
-                <h3>Login to View Your Team</h3>
-                <p>Sign in to see your team players and manage your squad</p>
-                <div className="login-actions">
-                  <Link to="/login" className="login-btn primary">Login</Link>
-                  <Link to="/register" className="login-btn secondary">Register</Link>
+          {!isAuthenticated ? (
+            <>
+              <div className="players blurred-section">
+                <Carousel autoplayMs={4000}>
+                  <PlayerCard />
+                  <PlayerCard />
+                  <PlayerCard />
+                  <PlayerCard />
+                  <PlayerCard />
+                  <PlayerCard />
+                  <PlayerCard />
+                  <PlayerCard />
+                </Carousel>
+              </div>
+              <div className="login-overlay">
+                <div className="login-prompt">
+                  <div className="login-icon"><img src={lockIcon} alt="Lock" style={{filter: "brightness(0) invert(1)"}}/></div>
+                  <h3>Login to View Your Team</h3>
+                  <p>Sign in to see your team players and manage your squad</p>
+                  <div className="login-actions">
+                    <Link to="/login" className="login-btn primary">Login</Link>
+                    <Link to="/register" className="login-btn secondary">Register</Link>
+                  </div>
                 </div>
+              </div>
+            </>
+          ) : user?.teamid ? (
+            <div className="players">
+              {teamLoading ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', color: 'white' }}>
+                  <Spinner color="white" size="md" />
+                  <span style={{ marginLeft: '15px' }}>Loading team players...</span>
+                </div>
+              ) : teamError ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
+                  <p>{teamError}</p>
+                </div>
+              ) : teamPlayers.length > 0 ? (
+                <Carousel autoplayMs={4000} teamId={user?.teamid}>
+                  {teamPlayers.map((player: any) => (
+                    <PlayerCard 
+                      key={player.playerid}
+                      player={{
+                        playerid: player.playerid,
+                        firstname: capitalizeFirstLetter(player.firstname) || '',
+                        lastname: capitalizeFirstLetter(player.lastname) || '',
+                        position: player.position || 'Unknown',
+                        jerseynumber: player.jerseynumber,
+                        profileimage: getPlayerImage(player.profileimage)
+                      }}
+                    />
+                  ))}
+                </Carousel>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
+                  <p>No players found in your team</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="no-team-section">
+              <div className="no-team-content">
+                <div className="no-team-icon">⚽</div>
+                <h3>You're not in a team yet</h3>
+                <p>Join a team to start playing and see your teammates here</p>
+                <Link to="/teams" className="join-team-btn">
+                  Browse Teams
+                </Link>
               </div>
             </div>
           )}

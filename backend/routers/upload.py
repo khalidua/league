@@ -57,6 +57,12 @@ async def upload_image(file: UploadFile = File(...)):
 					"flags": "relative"  # Preserve relative positioning
 				},
 				{
+					"gravity": "auto",
+					"height": 584,
+					"width": 600,
+					"crop": "auto"
+				},
+				{
 					"format": "png",  # Ensure PNG format for transparency support
 					"quality": "auto"  # Optimize quality while preserving transparency
 				}

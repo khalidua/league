@@ -70,6 +70,13 @@ export const api = {
 			body: JSON.stringify({ email, password, firstname, lastname, role }),
 		}, false),
 	getCurrentUser: () => request<any>(`/auth/me`),
+	
+	// Users
+	listUsers: () => request<any[]>('/users'),
+	updateUser: (userid: number, data: any) => request<any>(`/users/${userid}`, {
+		method: 'PATCH',
+		body: JSON.stringify(data)
+	}, false),
 	updateProfile: (data: { 
 		firstname?: string; 
 		lastname?: string; 
@@ -90,8 +97,10 @@ export const api = {
 	logout: () => request<any>(`/auth/logout`, { method: 'POST' }, false),
 	
 	// Other APIs
-	listUsers: () => request<any[]>(`/users`),
 	listTeams: () => request<any[]>(`/teams`),
+	deleteTeam: (teamid: number) => request<any>(`/teams/${teamid}`, {
+		method: 'DELETE'
+	}, false),
 	listPlayers: (params?: { teamid?: number; skip?: number; limit?: number }) => {
 		const qs = new URLSearchParams();
 		if (params?.teamid) qs.set('teamid', params.teamid.toString());
@@ -100,9 +109,25 @@ export const api = {
 		const suffix = qs.toString() ? `?${qs.toString()}` : '';
 		return request<any[]>(`/players${suffix}`);
 	},
+	getPlayer: (playerid: number) => request<any>(`/players/${playerid}`, undefined, false),
+	createPlayer: (data: any) => request<any>('/players', {
+		method: 'POST',
+		body: JSON.stringify(data)
+	}, false),
+	updatePlayer: (playerid: number, data: any) => request<any>(`/players/${playerid}`, {
+		method: 'PATCH',
+		body: JSON.stringify(data)
+	}, false),
+	
+	// Standings
+	listStandings: (groupid?: number) => request<any[]>(`/standings${groupid ? `?groupid=${groupid}` : ''}`),
 	listAdmins: () => request<any[]>(`/admins`),
 	listPlayerStats: () => request<any[]>(`/playerstats`),
 	getPlayerStats: (statsid: number) => request<any>(`/playerstats/${statsid}`),
+	createPlayerStats: (data: any) => request<any>('/playerstats', {
+		method: 'POST',
+		body: JSON.stringify(data)
+	}, false),
 	listMatches: (params?: { status?: string; round?: string }) => {
 		const qs = new URLSearchParams();
 		if (params?.status) qs.set('status', params.status);

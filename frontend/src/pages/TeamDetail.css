@@ -258,10 +258,76 @@
 
 .players-cards-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 24px;
+	grid-template-columns: repeat(auto-fit, 160px);
+	gap: 20px;
 	margin-top: 24px;
-	justify-items: center;
+	justify-content: center;
+	align-items: start;
+}
+
+/* Ensure consistent PlayerCard dimensions */
+.players-cards-grid {
+	--card-height: 240px;
+	--card-width: 160px;
+}
+
+.player-card-wrapper {
+	width: 100%;
+	max-width: 160px;
+	height: 240px;
+	margin: 0;
+	cursor: pointer;
+	transition: transform 0.2s ease;
+}
+
+.player-card-wrapper:hover {
+	transform: scale(1.05);
+}
+
+.players-cards-grid .player-card-container {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+.players-cards-grid .player-card-container .card {
+	width: 100%;
+	height: 100%;
+}
+
+/* Responsive design for player cards */
+@media (max-width: 768px) {
+	.players-cards-grid {
+		grid-template-columns: repeat(auto-fit, 140px);
+		gap: 16px;
+	}
+	
+	.players-cards-grid {
+		--card-height: 210px;
+		--card-width: 140px;
+	}
+	
+	.player-card-wrapper {
+		max-width: 140px;
+		height: 210px;
+	}
+}
+
+@media (max-width: 480px) {
+	.players-cards-grid {
+		grid-template-columns: repeat(auto-fit, 120px);
+		gap: 12px;
+	}
+	
+	.players-cards-grid {
+		--card-height: 180px;
+		--card-width: 120px;
+	}
+	
+	.player-card-wrapper {
+		max-width: 120px;
+		height: 180px;
+	}
 }
 
 .player-card {

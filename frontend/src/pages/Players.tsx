@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import Spinner from '../components/Spinner';
 import defaultPlayerPhoto from '../assets/defaultPlayer.png';
+import { formatFullName } from '../utils/nameUtils';
 
 type PlayerRow = {
 	id: number;
@@ -17,6 +18,10 @@ type PlayerRow = {
 	lastname?: string;
 	email?: string;
 	profileimage?: string;
+	status?: string;
+	preferredfoot?: string;
+	height?: number;
+	weight?: number;
 };
 
 const Players: React.FC = () => {
@@ -47,12 +52,9 @@ const Players: React.FC = () => {
 				const mapped: PlayerRow[] = (raw || []).map((p: any) => {
 					// Create full name from firstname and lastname, fallback to Player ID
 					const fullName = (() => {
-						if (p.firstname && p.lastname) {
-							return `${p.firstname} ${p.lastname}`;
-						} else if (p.firstname) {
-							return p.firstname;
-						} else if (p.lastname) {
-							return p.lastname;
+						const formattedName = formatFullName(p.firstname, p.lastname);
+						if (formattedName) {
+							return formattedName;
 						} else {
 							return `Player ${p.playerid}`;
 						}
@@ -61,7 +63,7 @@ const Players: React.FC = () => {
 					return {
 						id: p.playerid,
 						name: fullName,
-						team: typeof p.teamid === 'number' ? `Team ${p.teamid}` : '—',
+						team: p.teamname || (typeof p.teamid === 'number' ? `Team ${p.teamid}` : '—'),
 						position: p.position || 'MID',
 						number: p.jerseynumber || p.playerid,
 						age: undefined,
@@ -70,6 +72,10 @@ const Players: React.FC = () => {
 						lastname: p.lastname,
 						email: p.email,
 						profileimage: p.profileimage,
+						status: p.status,
+						preferredfoot: p.preferredfoot,
+						height: p.height,
+						weight: p.weight,
 					};
 				});
 				const q = (query || '').trim().toLowerCase();
@@ -150,13 +156,14 @@ const Players: React.FC = () => {
 									<th>Player</th>
 									<th>Team</th>
 									<th>Position</th>
-									<th>Age</th>
+									<th>Foot</th>
+									<th>Status</th>
 								</tr>
 							</thead>
 							<tbody>
 								{loading && (
 									<tr>
-										<td colSpan={5} className="empty" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+										<td colSpan={6} className="empty" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
 											<Spinner color="white" size="sm" />
 											<span style={{ marginLeft: '10px' }}>Loading...</span>
 										</td>
@@ -192,12 +199,17 @@ const Players: React.FC = () => {
 										</td>
 										<td onClick={() => goToPlayer(p)} style={{ cursor: 'pointer' }}>{p.team}</td>
 										<td onClick={() => goToPlayer(p)} style={{ cursor: 'pointer' }}>{p.position}</td>
-										<td onClick={() => goToPlayer(p)} style={{ cursor: 'pointer' }}>{p.age ?? '—'}</td>
+										<td onClick={() => goToPlayer(p)} style={{ cursor: 'pointer' }}>{p.preferredfoot || '—'}</td>
+										<td onClick={() => goToPlayer(p)} style={{ cursor: 'pointer' }}>
+											<span className={`status-badge ${p.status?.toLowerCase() || 'inactive'}`}>
+												{p.status || 'Inactive'}
+											</span>
+										</td>
 									</tr>
 								))}
 								{!loading && players.length === 0 && (
 									<tr>
-										<td colSpan={5} className="empty">{error || 'No matching players'}</td>
+										<td colSpan={6} className="empty">{error || 'No matching players'}</td>
 									</tr>
 								)}
 							</tbody>
