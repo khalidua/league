@@ -14,8 +14,8 @@ const Navbar: React.FC = () => {
   const moreDropdownRef = useRef<HTMLDivElement>(null);
   const toggle = () => setOpen(v => !v);
   
-  // Check if user is a team captain (Admin or has teamid)
-  const isTeamCaptain = user?.role === 'Admin' || user?.teamid;
+  // Team management is for players with a team, not for admins
+  const isTeamCaptain = !!user?.teamid && user?.role !== 'Admin';
   
   const handleMoreToggle = () => {
     if (!moreDropdownOpen && moreButtonRef.current) {
@@ -62,7 +62,7 @@ const Navbar: React.FC = () => {
           {/* Center - Navigation Links */}
           <div className="nav-center">
             <div className="nav-links-desktop">
-              <Link className="nav-item" to="/">Home</Link>
+              <Link className="nav-item" to="/">{(user?.role || '').toLowerCase() === 'admin' ? 'Dashboard' : 'Home'}</Link>
               <Link className="nav-item" to="/teams">Teams</Link>
               <Link className="nav-item" to="/matches">Matches</Link>
 
@@ -86,8 +86,8 @@ const Navbar: React.FC = () => {
                     {isTeamCaptain && (
                       <Link to="/team-management" onClick={() => setMoreDropdownOpen(false)}>Team Management</Link>
                     )}
-                    {user?.role === 'Admin' && (
-                      <Link to="/admin" onClick={() => setMoreDropdownOpen(false)}>Admin Dashboard</Link>
+                    {(user?.role || '').toLowerCase() === 'admin' && (
+                      <Link to="/admin" onClick={() => setMoreDropdownOpen(false)}>Dashboard</Link>
                     )}
                   </div>,
                   document.body
@@ -121,7 +121,7 @@ const Navbar: React.FC = () => {
 
           {/* Mobile Menu */}
           <div id="mobile-menu" className="nav-links" role="menu">
-            <Link className="nav-item" to="/" onClick={toggle}>Home</Link>
+            <Link className="nav-item" to="/" onClick={toggle}>{(user?.role || '').toLowerCase() === 'admin' ? 'Dashboard' : 'Home'}</Link>
             <Link className="nav-item" to="/teams" onClick={toggle}>Teams</Link>
             <Link className="nav-item" to="/matches" onClick={toggle}>Matches</Link>
             <Link className="nav-item" to="/standings" onClick={toggle}>Standings</Link>

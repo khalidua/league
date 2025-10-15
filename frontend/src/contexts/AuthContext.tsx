@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { api } from '../api/client';
+import { clearCache, invalidateCache } from '../utils/cache';
 
 interface User {
   userid: number;
@@ -101,6 +102,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('access_token', access_token);
       setToken(access_token);
       setUser(userData);
+      // Clear cached GETs as authenticated views may differ
+      clearCache();
     } catch (error) {
       throw error;
     }
@@ -114,6 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('access_token', access_token);
       setToken(access_token);
       setUser(userData);
+      clearCache();
     } catch (error) {
       throw error;
     }
@@ -124,6 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('access_token');
     setToken(null);
     setUser(null);
+    clearCache();
   };
 
   const updateUser = (userData: User) => {
@@ -134,6 +139,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const userData = await api.getCurrentUser();
       setUser(userData);
+      // Invalidate caches that are user-specific
+      invalidateCache('GET:/auth/me');
     } catch (error) {
       console.error('Failed to refresh user data:', error);
       throw error;

@@ -38,12 +38,11 @@ const AdminDashboard: React.FC = () => {
       setError(null);
 
       // Load dashboard statistics
-      const [users, players, teams, matches, tournaments] = await Promise.all([
+      const [users, players, teams, matches] = await Promise.all([
         api.listUsers(),
         api.listPlayers(),
         api.listTeams(),
-        api.listMatches(),
-        api.listTournaments()
+        api.listMatches()
       ]);
 
       const upcomingMatches = matches.filter((match: any) => match.status === 'Upcoming').length;
@@ -177,7 +176,7 @@ const AdminDashboard: React.FC = () => {
           className={`tab ${activeTab === 'matches' ? 'active' : ''}`}
           onClick={() => setActiveTab('matches')}
         >
-          Match Management
+          Live Match Dashboard
         </button>
         <button 
           className={`tab ${activeTab === 'tournaments' ? 'active' : ''}`}
@@ -320,108 +319,310 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-// Match Management Component
-const MatchManagement: React.FC<{ onMatchResultEntered?: () => void }> = ({ onMatchResultEntered }) => {
+// Match Management Component (Replaced with simplified live operator dashboard)
+const MatchManagement: React.FC<{ onMatchResultEntered?: () => void }> = () => {
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showResultForm, setShowResultForm] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
+  const [homePlayers, setHomePlayers] = useState<any[]>([]);
+  const [awayPlayers, setAwayPlayers] = useState<any[]>([]);
+  const [homeScore, setHomeScore] = useState(0);
+  const [awayScore, setAwayScore] = useState(0);
+  const [clockRunning, setClockRunning] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [lastTick, setLastTick] = useState<number | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home');
+  const [playerId, setPlayerId] = useState<string>('');
+  // removed assist selection per request
+  const [notes, setNotes] = useState<string>('');
+  const [events, setEvents] = useState<any[]>([]);
+  const [lastActionAt, setLastActionAt] = useState<number>(0);
+  const [selectedEventType, setSelectedEventType] = useState<'goal' | 'yellow' | 'red' | null>(null);
+  // MVP selection for finishMatch
+  const [mvpPlayerId, setMvpPlayerId] = useState<string>('');
 
   useEffect(() => {
-    loadMatches();
+    (async () => {
+      try {
+        setLoading(true);
+        const m = await api.listMatches();
+        setMatches(m || []);
+      } catch (e: any) {
+        setError(e.message || 'Failed to load matches');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const loadMatches = async () => {
-    try {
-      setLoading(true);
-      const matchesData = await api.listMatches();
-      setMatches(matchesData || []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load matches');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    let raf: number | null = null;
+    if (clockRunning) {
+      const step = (ts: number) => {
+        if (lastTick == null) setLastTick(ts);
+        else {
+          const d = Math.floor((ts - lastTick) / 1000);
+          if (d >= 1) { setElapsedSeconds((s) => s + d); setLastTick(ts); }
+        }
+        raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
     }
+    return () => { if (raf) cancelAnimationFrame(raf); };
+  }, [clockRunning, lastTick]);
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const r = (s % 60).toString().padStart(2, '0');
+    return `${m}:${r}`;
   };
 
-  const handleEnterResult = (match: any) => {
-    setSelectedMatch(match);
-    setShowResultForm(true);
+  const loadPlayers = async (match: any) => {
+    try {
+      const [hp, ap] = await Promise.all([
+        api.listPlayers({ teamid: match.hometeamid }),
+        api.listPlayers({ teamid: match.awayteamid })
+      ]);
+      setHomePlayers(hp || []);
+      setAwayPlayers(ap || []);
+    } catch {}
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+  const onSelectMatch = async (id: string) => {
+    const match = matches.find((m) => String(m.matchid) === id);
+    setSelectedMatch(match || null);
+    setHomeScore(0);
+    setAwayScore(0);
+    setElapsedSeconds(0);
+    setClockRunning(false);
+    setPlayerId('');
+    // assist removed
+    setNotes('');
+    setEvents([]);
+    if (match) await loadPlayers(match);
   };
 
-  if (loading) {
-    return <Spinner color="white" size="lg" />;
-  }
+  const throttle = () => {
+    const now = Date.now();
+    if (now - lastActionAt < 600) return false;
+    setLastActionAt(now);
+    return true;
+  };
+
+  const minuteNow = () => Math.floor(elapsedSeconds / 60);
+
+  const pushEvent = (type: string, opts: { teamid: number; playerid?: number; note?: string; minute: number; goalid?: number; }) => {
+    setEvents((ev) => [
+      {
+        id: opts.goalid ?? `tmp_${Date.now()}`,
+        type,
+        teamid: opts.teamid,
+        playerid: opts.playerid,
+        note: opts.note,
+        minute: opts.minute,
+      },
+      ...ev,
+    ]);
+  };
+
+  const handleSaveEvent = async (type: 'goal' | 'yellow' | 'red') => {
+    if (!selectedMatch) return;
+    if (!throttle()) return;
+    const teamid = selectedTeam === 'home' ? selectedMatch.hometeamid : selectedMatch.awayteamid;
+    const minute = minuteNow();
+    const playerNum = playerId ? Number(playerId) : undefined;
+
+    if (type === 'goal') {
+      if (!playerNum) return;
+      try {
+        const goal = await api.createGoal({ matchid: selectedMatch.matchid, playerid: playerNum, teamid, minute, isowngoal: 0 });
+        if (selectedTeam === 'home') setHomeScore((s) => s + 1); else setAwayScore((s) => s + 1);
+        pushEvent('goal', { teamid, playerid: playerNum, note: notes, minute, goalid: goal.goalid });
+        // Sync match result homescore/awayscore in DB (create if not exists, else update)
+        try {
+          const results = await api.listMatchResults();
+          const existing = (results || []).find((r: any) => r.matchid === selectedMatch.matchid);
+          const hs = selectedTeam === 'home' ? homeScore + 1 : homeScore;
+          const as = selectedTeam === 'away' ? awayScore + 1 : awayScore;
+          if (existing) {
+            await api.updateMatchResult(existing.resultid, { homescore: hs, awayscore: as });
+          } else {
+            await api.createMatchResult({ matchid: selectedMatch.matchid, homescore: hs, awayscore: as });
+          }
+        } catch {}
+      } catch {}
+      return;
+    }
+    // Update player stats for yellow/red via playerstats when available
+    if (playerNum) {
+      try {
+        // Try to fetch player to get statsid
+        const player = await api.getPlayer(playerNum);
+        if (player?.statsid) {
+          const patch: any = {};
+          if (type === 'yellow') patch.yellowcards = (player.yellowcards || player.stats?.yellowcards || 0) + 1;
+          if (type === 'red') patch.redcards = (player.redcards || player.stats?.redcards || 0) + 1;
+          if (Object.keys(patch).length > 0) {
+            await api.updatePlayerStats(player.statsid, patch);
+          }
+        }
+      } catch {}
+    }
+    pushEvent(type, { teamid, playerid: playerNum, note: notes, minute });
+  };
+
+  const undoLast = async () => {
+    if (events.length === 0) return;
+    const [last, ...rest] = events;
+    if (last.type === 'goal' && last.id) {
+      try {
+        await api.deleteGoal(last.id);
+        if (last.teamid === selectedMatch.hometeamid) setHomeScore((s) => Math.max(0, s - 1));
+        else setAwayScore((s) => Math.max(0, s - 1));
+      } catch {}
+    }
+    setEvents(rest);
+  };
+
+  const finishMatch = async () => {
+    if (!selectedMatch) return;
+    try {
+      const payload: any = {
+        matchid: selectedMatch.matchid,
+        homescore: homeScore,
+        awayscore: awayScore,
+        winnerteamid: homeScore > awayScore ? selectedMatch.hometeamid : (awayScore > homeScore ? selectedMatch.awayteamid : null),
+        mvpplayerid: mvpPlayerId ? Number(mvpPlayerId) : undefined,
+        home_goal_scorers: [],
+        away_goal_scorers: [],
+      };
+      // Create or update existing result
+      const results = await api.listMatchResults();
+      const existing = (results || []).find((r: any) => r.matchid === selectedMatch.matchid);
+      if (existing) {
+        await api.updateMatchResult(existing.resultid, payload);
+      } else {
+        await api.createMatchResult(payload);
+      }
+      await api.updateMatch(selectedMatch.matchid, { status: 'Finished' });
+    } catch {}
+  };
 
   return (
     <div className="match-management">
       <div className="section-header">
-        <h2>Match Management</h2>
-        <button className="primary-btn" onClick={() => setShowResultForm(true)}>
-          Enter Match Result
-        </button>
+        <h2>Live Match Dashboard</h2>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <select className="tournament-select" value={selectedMatch?.matchid || ''} onChange={(e) => onSelectMatch(e.target.value)}>
+            <option value="">Choose match…</option>
+            {matches.filter((m:any) => m.status !== 'Finished').map((m) => (
+              <option key={m.matchid} value={m.matchid}>{`${m.hometeamname || 'Home'} vs ${m.awayteamname || 'Away'} (${new Date(m.matchdate).toLocaleDateString()})`}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error && (
-        <div className="error-message">
-          {error}
-        </div>
+        <div className="error-message">{error}</div>
       )}
 
-      <div className="matches-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Home Team</th>
-              <th>Away Team</th>
-              <th>Round</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {matches.map((match) => (
-              <tr key={match.matchid}>
-                <td>{formatDate(match.matchdate)}</td>
-                <td>{match.hometeamname || 'TBD'}</td>
-                <td>{match.awayteamname || 'TBD'}</td>
-                <td>{match.round}</td>
-                <td>
-                  <span className={`status-badge ${match.status.toLowerCase()}`}>
-                    {match.status}
-                  </span>
-                </td>
-                <td>
-                  {match.status === 'Upcoming' && (
-                    <button 
-                      className="action-btn"
-                      onClick={() => handleEnterResult(match)}
-                    >
-                      Enter Result
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {selectedMatch && (
+        <div className="live-dashboard">
+          {/* Header row */}
+          <div className="live-header">
+            <div className="live-score">
+              <span className="team-name">{selectedMatch.hometeamname || 'Team A'}</span>
+              <span className="score">{homeScore} - {awayScore}</span>
+              <span className="team-name">{selectedMatch.awayteamname || 'Team B'}</span>
+            </div>
+            <div className="live-clock">
+              <span className="clock-time">{formatTime(elapsedSeconds)} ⏱️</span>
+              <button className="primary-btn" onClick={async () => {
+                if (!clockRunning) {
+                  const ok = confirm('Start the match clock and set match status to Live?');
+                  if (!ok) return;
+                  try {
+                    if (selectedMatch?.status !== 'Live') {
+                      await api.updateMatch(selectedMatch.matchid, { status: 'Live' });
+                      // reflect locally
+                      setSelectedMatch({ ...selectedMatch, status: 'Live' });
+                    }
+                    setClockRunning(true);
+                    setLastTick(null);
+                  } catch {}
+                } else {
+                  // pause
+                  setClockRunning(false);
+                  setLastTick(null);
+                }
+              }}>{clockRunning ? 'Pause' : 'Start'}</button>
+              <button className="secondary-btn" onClick={async () => {
+                const ok = confirm('Finish the match, save result, and set status to Finished?');
+                if (!ok) return;
+                await finishMatch();
+              }}>Finish</button>
+            </div>
+          </div>
 
-      {showResultForm && (
-        <MatchResultForm 
-          match={selectedMatch}
-          onClose={() => setShowResultForm(false)}
-          onSuccess={() => {
-            setShowResultForm(false);
-            loadMatches();
-            onMatchResultEntered?.();
-          }}
-        />
+          {/* Quick buttons row */}
+          <div className="quick-actions">
+            <button className="action-btn" onClick={() => handleSaveEvent('goal')}>⚽ Goal (G)</button>
+            <button className="action-btn" onClick={() => handleSaveEvent('yellow')}>🟨 Yellow (Y)</button>
+            <button className="action-btn" onClick={() => handleSaveEvent('red')}>🟥 Red (R)</button>
+          </div>
+
+          {/* Inputs row */}
+          <div className="event-bar">
+            <div className="team-toggle">
+              <button className={`secondary-btn ${selectedTeam === 'home' ? 'active' : ''}`} onClick={() => setSelectedTeam('home')}>{selectedMatch.hometeamname || 'Home'}</button>
+              <button className={`secondary-btn ${selectedTeam === 'away' ? 'active' : ''}`} onClick={() => setSelectedTeam('away')}>{selectedMatch.awayteamname || 'Away'}</button>
+            </div>
+            <select className="select" value={playerId} onChange={(e)=>setPlayerId(e.target.value)}>
+              <option value="">Player…</option>
+              {(selectedTeam === 'home' ? homePlayers : awayPlayers).map((p) => (
+                <option key={p.playerid} value={p.playerid}>{`#${p.jerseynumber || ''} ${p.firstname} ${p.lastname}`}</option>
+              ))}
+            </select>
+            <input className="notes" placeholder="Notes (optional)" value={notes} onChange={(e)=>setNotes(e.target.value)} />
+          </div>
+
+          {/* Save / Undo + MVP */}
+          <div className="commit-bar" style={{ alignItems: 'center' }}>
+            <button className="primary-btn" onClick={() => handleSaveEvent('goal')}>⏺ Save Event</button>
+            <button className="secondary-btn" onClick={undoLast}>Undo Last Event</button>
+            <div style={{ flex: 1 }} />
+            <select
+              className="tournament-select"
+              value={mvpPlayerId}
+              onChange={(e) => setMvpPlayerId(e.target.value)}
+            >
+              <option value="">MVP (optional)</option>
+              {[...homePlayers, ...awayPlayers].map((p) => (
+                <option key={p.playerid} value={p.playerid}>{`#${p.jerseynumber || ''} ${p.firstname} ${p.lastname}`}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Live Feed */}
+          <div className="feed">
+            <div className="feed-title">Live Feed</div>
+            <div className="feed-list">
+              {events.length === 0 ? (
+                <div className="feed-empty">No events yet</div>
+              ) : (
+                events.map((ev) => {
+                  const teamName = ev.teamid === selectedMatch.hometeamid ? (selectedMatch.hometeamname || 'Home') : (selectedMatch.awayteamname || 'Away');
+                  const player = [...homePlayers, ...awayPlayers].find((p) => p.playerid === ev.playerid);
+                  const line = `${String(ev.minute).padStart(2,'0')}:${String(0).padStart(2,'0')} ${ev.type.toUpperCase()} - ${teamName}${player ? ` • #${player.jerseynumber || ''} ${player.firstname} ${player.lastname}` : ''}${ev.note ? ` — ${ev.note}` : ''}`;
+                  return (
+                    <div key={ev.id} className="feed-item">{line}</div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -435,6 +636,7 @@ const MatchResultForm: React.FC<{
 }> = ({ match, onClose, onSuccess }) => {
   const [homeScore, setHomeScore] = useState('');
   const [awayScore, setAwayScore] = useState('');
+  const [combinedScore, setCombinedScore] = useState('');
   const [homeGoalScorers, setHomeGoalScorers] = useState<any[]>([]);
   const [awayGoalScorers, setAwayGoalScorers] = useState<any[]>([]);
   const [homePlayers, setHomePlayers] = useState<any[]>([]);
@@ -563,10 +765,29 @@ const MatchResultForm: React.FC<{
           <div className="form-group">
             <label>Match: {match?.hometeamname || 'Home Team'} vs {match?.awayteamname || 'Away Team'}</label>
           </div>
+
+          <div className="form-group">
+            <label>Score (e.g., 2-1)</label>
+            <input
+              type="text"
+              placeholder="H-A"
+              value={combinedScore}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\s/g, '');
+                setCombinedScore(val);
+                const parts = val.split('-');
+                if (parts.length === 2) {
+                  const [h, a] = parts;
+                  if (/^\d+$/.test(h)) setHomeScore(h);
+                  if (/^\d+$/.test(a)) setAwayScore(a);
+                }
+              }}
+            />
+          </div>
           
           <div className="score-inputs">
             <div className="form-group">
-              <label>Home Team Score</label>
+              <label>{match?.hometeamname || 'Home Team'} Score</label>
               <input
                 type="number"
                 min="0"
@@ -577,7 +798,7 @@ const MatchResultForm: React.FC<{
             </div>
             
             <div className="form-group">
-              <label>Away Team Score</label>
+              <label>{match?.awayteamname || 'Away Team'} Score</label>
               <input
                 type="number"
                 min="0"
@@ -763,6 +984,7 @@ const TournamentManagement: React.FC = () => {
             <p>Season: {tournament.seasonyear}</p>
             <p>Start: {tournament.startdate ? new Date(tournament.startdate).toLocaleDateString() : 'TBD'}</p>
             <p>End: {tournament.enddate ? new Date(tournament.enddate).toLocaleDateString() : 'TBD'}</p>
+            <p>Max Players: {tournament.maxPlayers ?? 8}</p>
             {tournament.description && (
               <p className="description">{tournament.description}</p>
             )}
@@ -793,7 +1015,8 @@ const TournamentCreateForm: React.FC<{
     seasonyear: new Date().getFullYear(),
     startdate: '',
     enddate: '',
-    description: ''
+    description: '',
+    maxPlayers: 8
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -870,6 +1093,17 @@ const TournamentCreateForm: React.FC<{
             />
           </div>
 
+        <div className="form-group">
+          <label>Max Players per Team</label>
+          <input
+            type="number"
+            min="1"
+            value={formData.maxPlayers}
+            onChange={(e) => setFormData({...formData, maxPlayers: parseInt(e.target.value || '0', 10)})}
+            required
+          />
+        </div>
+
           {error && (
             <div className="error-message">
               {error}
@@ -920,7 +1154,7 @@ const TeamManagement: React.FC = () => {
   return (
     <div className="team-management">
       <div className="section-header">
-        <h2>Team Management</h2>
+        <h2>Live Match Dashboard</h2>
         <button className="primary-btn" onClick={() => setShowCreateForm(true)}>
           Create Team
         </button>
@@ -1061,7 +1295,7 @@ const TournamentTeamManagement: React.FC = () => {
   const [tournamentTeams, setTournamentTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showAssignTeamForm, setShowAssignTeamForm] = useState(false);
+  // removed unused showAssignTeamForm state
 
   useEffect(() => {
     loadTournaments();
@@ -1123,6 +1357,14 @@ const TournamentTeamManagement: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Enforce tournament maxPlayers per team
+      const maxPlayers = Number(selectedTournament.maxPlayers ?? 8);
+      const roster = await api.listPlayers({ teamid });
+      const rosterCount = (roster || []).length;
+      if (rosterCount > maxPlayers) {
+        throw new Error(`Team must have at most ${maxPlayers} players (current: ${rosterCount}).`);
+      }
 
       await api.createTournamentTeam({
         tournamentid: selectedTournament.tournamentid,
@@ -1443,10 +1685,7 @@ const GroupManagement: React.FC = () => {
     return teams.filter((team: any) => tournamentTeamIds.includes(team.teamid));
   };
 
-  const getUnregisteredTeams = () => {
-    const tournamentTeamIds = tournamentTeams.map((tt: any) => tt.teamid);
-    return teams.filter((team: any) => !tournamentTeamIds.includes(team.teamid));
-  };
+  // removed unused getUnregisteredTeams helper
 
   if (loading && !selectedTournament) {
     return <Spinner color="white" size="lg" />;
@@ -1786,6 +2025,13 @@ const AssignTeamForm: React.FC<{
     try {
       setLoading(true);
       setError(null);
+      // Prevent assigning teams that do not match tournament's maxPlayers
+      const maxPlayers = Number((group as any).tournament?.maxPlayers ?? 8);
+      const roster = await api.listPlayers({ teamid });
+      const rosterCount = (roster || []).length;
+      if (rosterCount > maxPlayers) {
+        throw new Error(`Team must have at most ${maxPlayers} players (current: ${rosterCount}).`);
+      }
 
       await api.createGroupTeam({
         groupid: group.groupid,
@@ -1963,3 +2209,452 @@ const UserManagement: React.FC = () => {
 };
 
 export default AdminDashboard;
+
+// Reusable Match Create/Edit Form
+const MatchForm: React.FC<{
+  match: any | null;
+  onClose: () => void;
+  onSuccess: () => void;
+}> = ({ match, onClose, onSuccess }) => {
+  const isEdit = !!match;
+  const [teams, setTeams] = useState<any[]>([]);
+  const [stadiums, setStadiums] = useState<any[]>([]);
+  const [tournaments, setTournaments] = useState<any[]>([]);
+  const [form, setForm] = useState({
+    matchdate: match ? new Date(match.matchdate).toISOString().slice(0,16) : '',
+    hometeamid: match?.hometeamid || '',
+    awayteamid: match?.awayteamid || '',
+    stadiumid: match?.stadiumid || '',
+    round: match?.round || 'Group',
+    status: match?.status || 'Upcoming',
+    tournamentid: match?.tournamentid || ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [teamsData, stadiumsData, tournamentsData] = await Promise.all([
+          api.listTeams(),
+          api.listStadiums(),
+          api.listTournaments(),
+        ]);
+        setTeams(teamsData || []);
+        setStadiums(stadiumsData || []);
+        setTournaments(tournamentsData || []);
+      } catch (err) {
+        // ignore
+      }
+    };
+    load();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!form.hometeamid || !form.awayteamid || !form.matchdate) {
+      setError('Home team, away team and date/time are required');
+      return;
+    }
+    if (String(form.hometeamid) === String(form.awayteamid)) {
+      setError('Home and Away team cannot be the same');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const payload: any = {
+        hometeamid: Number(form.hometeamid),
+        awayteamid: Number(form.awayteamid),
+        stadiumid: form.stadiumid ? Number(form.stadiumid) : undefined,
+        matchdate: new Date(form.matchdate).toISOString(),
+        round: form.round,
+        status: form.status,
+        tournamentid: form.tournamentid ? Number(form.tournamentid) : undefined,
+      };
+
+      if (isEdit) {
+        await api.updateMatch(match.matchid, payload);
+      } else {
+        await api.createMatch(payload);
+      }
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || 'Failed to save match');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>{isEdit ? 'Edit Match' : 'Create Match'}</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Date & Time</label>
+            <input
+              type="datetime-local"
+              value={form.matchdate}
+              onChange={(e) => setForm({ ...form, matchdate: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Home Team</label>
+            <select
+              value={form.hometeamid}
+              onChange={(e) => setForm({ ...form, hometeamid: e.target.value })}
+              required
+            >
+              <option value="">Select team</option>
+              {teams.map((t) => (
+                <option key={t.teamid} value={t.teamid}>{t.teamname}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Away Team</label>
+            <select
+              value={form.awayteamid}
+              onChange={(e) => setForm({ ...form, awayteamid: e.target.value })}
+              required
+            >
+              <option value="">Select team</option>
+              {teams.map((t) => (
+                <option key={t.teamid} value={t.teamid}>{t.teamname}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Stadium</label>
+            <select
+              value={form.stadiumid}
+              onChange={(e) => setForm({ ...form, stadiumid: e.target.value })}
+            >
+              <option value="">Select stadium (optional)</option>
+              {stadiums.map((s) => (
+                <option key={s.stadiumid} value={s.stadiumid}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Round</label>
+            <select
+              value={form.round}
+              onChange={(e) => setForm({ ...form, round: e.target.value })}
+            >
+              <option value="Group">Group</option>
+              <option value="Quarter">Quarter</option>
+              <option value="Semi">Semi</option>
+              <option value="Final">Final</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Status</label>
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+            >
+              <option value="Upcoming">Upcoming</option>
+              <option value="Live">Live</option>
+              <option value="Finished">Finished</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Tournament</label>
+            <select
+              value={form.tournamentid}
+              onChange={(e) => setForm({ ...form, tournamentid: e.target.value })}
+            >
+              <option value="">Select tournament</option>
+              {tournaments.map((t) => (
+                <option key={t.tournamentid} value={t.tournamentid}>
+                  {t.name} ({t.seasonyear})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {error && (
+            <div className="error-message">{error}</div>
+          )}
+
+          <div className="form-actions">
+            <button type="button" onClick={onClose} className="secondary-btn">Cancel</button>
+            <button type="submit" disabled={loading} className="primary-btn">
+              {loading ? (isEdit ? 'Saving...' : 'Creating...') : (isEdit ? 'Save Changes' : 'Create Match')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// Live Match Operator Modal (MVP)
+const LiveMatchOperator: React.FC<{
+  match: any;
+  onClose: () => void;
+  onUpdated: () => void;
+}> = ({ match, onClose, onUpdated }) => {
+  const [homePlayers, setHomePlayers] = useState<any[]>([]);
+  const [awayPlayers, setAwayPlayers] = useState<any[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home');
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
+  const [selectedEventType, setSelectedEventType] = useState<'goal' | 'yellow' | 'red' | 'substitution' | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [homeScore, setHomeScore] = useState(0);
+  const [awayScore, setAwayScore] = useState(0);
+  const [clockRunning, setClockRunning] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [lastTick, setLastTick] = useState<number | null>(null);
+  const [mvpPlayerId, setMvpPlayerId] = useState<string>('');
+  const [minuteOverride, setMinuteOverride] = useState<string>('');
+  const [lastActionAt, setLastActionAt] = useState<number>(0);
+  const playerInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [hp, ap] = await Promise.all([
+          api.listPlayers({ teamid: match.hometeamid }),
+          api.listPlayers({ teamid: match.awayteamid })
+        ]);
+        setHomePlayers(hp || []);
+        setAwayPlayers(ap || []);
+      } catch {}
+    };
+    load();
+  }, [match]);
+
+  useEffect(() => {
+    let raf: number | null = null;
+    if (clockRunning) {
+      const step = (ts: number) => {
+        if (lastTick == null) {
+          setLastTick(ts);
+        } else {
+          const delta = Math.floor((ts - lastTick) / 1000);
+          if (delta >= 1) {
+            setElapsedSeconds((s) => s + delta);
+            setLastTick(ts);
+          }
+        }
+        raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }
+    return () => { if (raf) cancelAnimationFrame(raf); };
+  }, [clockRunning, lastTick]);
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const r = (s % 60).toString().padStart(2, '0');
+    return `${m}:${r}`;
+  };
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === ' ') { e.preventDefault(); toggleStartPause(); }
+      if (e.shiftKey && e.key.toLowerCase() === 's') { e.preventDefault(); stopClock(); }
+      if (e.key.toLowerCase() === 'g') { e.preventDefault(); setSelectedEventType('goal'); handleSaveEvent('goal'); }
+      if (e.key.toLowerCase() === 'y') { e.preventDefault(); setSelectedEventType('yellow'); handleSaveEvent('yellow'); }
+      if (e.key.toLowerCase() === 'r') { e.preventDefault(); setSelectedEventType('red'); handleSaveEvent('red'); }
+      if (e.key.toLowerCase() === 's') { e.preventDefault(); setSelectedEventType('substitution'); handleSaveEvent('substitution'); }
+      if (e.key.toLowerCase() === 'h') { setSelectedTeam('home'); }
+      if (e.key.toLowerCase() === 'a') { setSelectedTeam('away'); }
+      if (e.key === '/') { e.preventDefault(); playerInputRef.current?.focus(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undoLast(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); endMatch(); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [clockRunning, selectedTeam, selectedPlayerId, events, homeScore, awayScore, elapsedSeconds]);
+
+  const toggleStartPause = () => {
+    setClockRunning((r) => !r);
+    setLastTick(null);
+    if (!clockRunning && match.status !== 'Live') {
+      api.updateMatch(match.matchid, { status: 'Live' }).catch(() => {});
+    }
+  };
+  const stopClock = () => { setClockRunning(false); setLastTick(null); };
+  const minuteNow = () => Math.floor(elapsedSeconds / 60);
+  const effectiveMinute = () => {
+    const m = minuteOverride.trim();
+    if (m && /^\d+$/.test(m)) return parseInt(m, 10);
+    return minuteNow();
+  };
+  const throttleClick = () => {
+    const now = Date.now();
+    if (now - lastActionAt < 800) return false;
+    setLastActionAt(now);
+    return true;
+  };
+
+  const handleSaveEvent = async (type?: 'goal' | 'yellow' | 'red' | 'substitution') => {
+    const eventType = type || selectedEventType;
+    if (!eventType) return;
+    if (!selectedPlayerId) return;
+    if (!throttleClick()) return;
+    if (eventType === 'red' && !confirm('Confirm red card?')) return;
+    const teamid = selectedTeam === 'home' ? match.hometeamid : match.awayteamid;
+    const playerid = Number(selectedPlayerId);
+    const minute = effectiveMinute();
+
+    if (eventType === 'goal') {
+      try {
+        const goal = await api.createGoal({ matchid: match.matchid, playerid, teamid, minute, isowngoal: 0 });
+        setEvents((ev) => [{ id: goal.goalid, type: 'goal', teamid, playerid, minute }, ...ev]);
+        if (selectedTeam === 'home') setHomeScore((s) => s + 1); else setAwayScore((s) => s + 1);
+      } catch {}
+      return;
+    }
+    // For yellow/red/substitution: store locally (backend unchanged)
+    setEvents((ev) => [{ id: `tmp_${Date.now()}`, type: eventType, teamid, playerid, minute }, ...ev]);
+  };
+
+  const undoLast = async () => {
+    if (events.length === 0) return;
+    const [last, ...rest] = events;
+    if (last.type === 'goal' && last.id) {
+      try {
+        await api.deleteGoal(last.id);
+        if (last.teamid === match.hometeamid) setHomeScore((s) => Math.max(0, s - 1));
+        else setAwayScore((s) => Math.max(0, s - 1));
+      } catch {}
+    }
+    setEvents(rest);
+  };
+
+  const endMatch = async () => {
+    try {
+      const winnerteamid =
+        homeScore > awayScore ? match.hometeamid :
+        awayScore > homeScore ? match.awayteamid : null;
+
+      const payload: any = {
+        matchid: match.matchid,
+        homescore: homeScore,
+        awayscore: awayScore,
+        winnerteamid,
+        mvpplayerid: mvpPlayerId ? Number(mvpPlayerId) : undefined,
+        home_goal_scorers: [],
+        away_goal_scorers: [],
+      };
+
+      const results = await api.listMatchResults();
+      const existing = (results || []).find((r: any) => r.matchid === match.matchid);
+      if (existing) {
+        await api.updateMatchResult(existing.resultid, payload);
+      } else {
+        await api.createMatchResult(payload);
+      }
+
+      await api.updateMatch(match.matchid, { status: 'Finished' });
+      onUpdated();
+      onClose();
+    } catch {
+      onUpdated();
+    }
+  };
+
+  const playersFor = selectedTeam === 'home' ? homePlayers : awayPlayers;
+  const allPlayers = [...homePlayers, ...awayPlayers];
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content large-modal">
+        <div className="modal-header">
+          <h3>Live Match Dashboard</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+
+        <div className="live-dashboard">
+          {/* Header: Scoreboard + MatchClock */}
+          <div className="dashboard-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div className="scoreboard" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ fontWeight: 600 }}>{match.hometeamname || 'Home'}</div>
+              <div style={{ fontSize: 24, fontWeight: 700 }}>{homeScore} – {awayScore}</div>
+              <div style={{ fontWeight: 600 }}>{match.awayteamname || 'Away'}</div>
+            </div>
+            <div className="match-clock" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ fontFamily: 'monospace', fontSize: 20 }}>{formatTime(elapsedSeconds)}</div>
+              <button className="primary-btn" onClick={toggleStartPause}>{clockRunning ? 'Pause' : 'Start'}</button>
+              <button className="secondary-btn" onClick={stopClock}>Stop</button>
+            </div>
+          </div>
+
+          {/* EventInputBar */}
+          <div className="event-input-bar" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto auto auto auto auto', gap: 10, marginTop: 15 }}>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className={`secondary-btn ${selectedTeam === 'home' ? 'active' : ''}`} onClick={() => setSelectedTeam('home')}>Home</button>
+              <button className={`secondary-btn ${selectedTeam === 'away' ? 'active' : ''}`} onClick={() => setSelectedTeam('away')}>Away</button>
+            </div>
+            <div>
+              <input ref={playerInputRef} list="player-options" placeholder="Search player or number (/)" value={selectedPlayerId} onChange={(e) => setSelectedPlayerId(e.target.value)} />
+              <datalist id="player-options">
+                {playersFor.map((p) => (
+                  <option key={p.playerid} value={p.playerid}>{`${p.jerseynumber ? p.jerseynumber + ' - ' : ''}${p.firstname} ${p.lastname}`}</option>
+                ))}
+              </datalist>
+            </div>
+            <button className="action-btn" onClick={() => { setSelectedEventType('goal'); handleSaveEvent('goal'); }}>Goal (G)</button>
+            <button className="action-btn" onClick={() => { setSelectedEventType('yellow'); handleSaveEvent('yellow'); }}>Yellow (Y)</button>
+            <button className="remove-btn" onClick={() => { setSelectedEventType('red'); handleSaveEvent('red'); }}>Red (R)</button>
+            <button className="secondary-btn" onClick={() => { setSelectedEventType('substitution'); handleSaveEvent('substitution'); }}>Sub (S)</button>
+            <input type="number" min="0" placeholder={`Min (${minuteNow()})`} value={minuteOverride} onChange={(e) => setMinuteOverride(e.target.value)} />
+          </div>
+
+          {/* EventFeed */}
+          <div className="event-feed" style={{ marginTop: 15, maxHeight: 240, overflowY: 'auto' }}>
+            {events.length === 0 ? (
+              <div className="no-events" style={{ opacity: 0.7 }}>No events yet</div>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {events.map((ev) => {
+                  const teamName = ev.teamid === match.hometeamid ? (match.hometeamname || 'Home') : (match.awayteamname || 'Away');
+                  const player = allPlayers.find((p) => p.playerid === ev.playerid);
+                  return (
+                    <li key={ev.id} style={{ display: 'grid', gridTemplateColumns: '40px 1fr 1fr 110px', gap: 8, padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                      <span style={{ opacity: 0.8 }}>{String(ev.minute).padStart(2, '0')}'</span>
+                      <span style={{ fontWeight: 600 }}>{teamName}</span>
+                      <span>{player ? `${player.firstname} ${player.lastname}` : `#${ev.playerid}`}</span>
+                      <span style={{ textTransform: 'capitalize', justifySelf: 'end' }}>{ev.type}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          {/* FooterControls */}
+          <div className="footer-controls" style={{ display: 'flex', gap: 10, marginTop: 15, alignItems: 'center' }}>
+            <button className="secondary-btn" onClick={undoLast}>Undo Last</button>
+            <div style={{ flex: 1 }} />
+            <input list="mvp-options" placeholder="Select MVP (optional)" value={mvpPlayerId} onChange={(e) => setMvpPlayerId(e.target.value)} />
+            <datalist id="mvp-options">
+              {allPlayers.map((p) => (
+                <option key={p.playerid} value={p.playerid}>{`${p.firstname} ${p.lastname}`}</option>
+              ))}
+            </datalist>
+            <button className="primary-btn" onClick={endMatch}>End Match (Ctrl+Enter)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

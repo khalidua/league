@@ -1,4 +1,4 @@
-import { getCachedData, setCachedData } from '../utils/cache';
+import { getCachedData, setCachedData, invalidateCache } from '../utils/cache';
 
 const LOCAL_API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "";
 const PRODUCTION_API_BASE = "https://zc-league-axckdddkdkbpeuc3.israelcentral-01.azurewebsites.net";
@@ -10,6 +10,19 @@ export const API_BASE = isProduction ? PRODUCTION_API_BASE : LOCAL_API_BASE;
 
 // Helper function to get the full API URL for direct fetch calls
 export const getApiUrl = (path: string) => `${API_BASE}/api${path}`;
+
+function invalidateRelatedCaches(path: string): void {
+    // Normalize and strip query string
+    const basePath = path.split('?')[0] || '';
+    // Invalidate by broad patterns to keep it simple and safe
+    // Example: for "/players/123" it will invalidate any cached GETs containing "/players"
+    const segments = basePath.split('/').filter(Boolean);
+    if (segments.length > 0) {
+        invalidateCache(`GET:/${segments[0]}`);
+    }
+    // Also invalidate the exact basePath if present
+    invalidateCache(`GET:${basePath}`);
+}
 
 async function request<T>(path: string, init?: RequestInit, useCache: boolean = true): Promise<T> {
 	// Only cache GET requests
@@ -39,13 +52,27 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 			...init,
 		});
 		
-		if (res.ok) {
-			const data = await res.json() as T;
+        if (res.ok) {
+            // Some endpoints (e.g., DELETE) return 204 with no body
+            let data: T;
+            if (res.status === 204) {
+                // @ts-expect-error allow undefined for no-content
+                data = undefined;
+            } else {
+                const text = await res.text();
+                // Allow empty string as {} for safety
+                const parsed = text ? JSON.parse(text) : {};
+                data = parsed as T;
+            }
 			
 			// Cache successful GET responses
 			if (useCache && cacheKey) {
 				setCachedData(cacheKey, data);
 			}
+            // On successful non-GET mutations, invalidate related cached GETs
+            if (!cacheKey) {
+                invalidateRelatedCaches(path);
+            }
 			
 			return data;
 		} else {
@@ -111,6 +138,7 @@ export const api = {
 	logout: () => request<any>(`/auth/logout`, { method: 'POST' }, false),
 	
 	// Other APIs
+	listStadiums: () => request<any[]>(`/stadiums`),
 	listTeams: () => request<any[]>(`/teams`),
 	getTeam: (teamid: number) => request<any>(`/teams/${teamid}`),
 	createTeam: (data: any) => request<any>('/teams', {
@@ -231,18 +259,14 @@ export const api = {
 	listAdmins: () => request<any[]>(`/admins`),
 	listPlayerStats: () => request<any[]>(`/playerstats`),
 	getPlayerStats: (statsid: number) => request<any>(`/playerstats/${statsid}`),
+	updatePlayerStats: (statsid: number, data: any) => request<any>(`/playerstats/${statsid}`, {
+		method: 'PATCH',
+		body: JSON.stringify(data)
+	}, false),
 	createPlayerStats: (data: any) => request<any>('/playerstats', {
 		method: 'POST',
 		body: JSON.stringify(data)
 	}, false),
-	listMatches: (params?: { status?: string; round?: string }) => {
-		const qs = new URLSearchParams();
-		if (params?.status) qs.set('status', params.status);
-		if (params?.round) qs.set('round', params.round);
-		const suffix = qs.toString() ? `?${qs.toString()}` : '';
-		return request<any[]>(`/matches${suffix}`);
-	},
-	getNextUpcomingMatch: () => request<any>(`/matches/next-upcoming`),
 	listEvents: () => request<any[]>(`/events`),
 	
 	// Image Upload
@@ -263,7 +287,7 @@ export const api = {
 
 	// Goals API
 	listMatchGoals: (matchId: number) => request<any[]>(`/goals/match/${matchId}`),
-	createGoal: (data: any) => request<any>('/goals', {
+	createGoal: (data: any) => request<any>('/goals/', {
 		method: 'POST',
 		body: JSON.stringify(data)
 	}, false),

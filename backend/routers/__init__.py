@@ -17,6 +17,6 @@ api_router.include_router(group_teams.router, prefix="/group-teams", tags=["grou
 api_router.include_router(standings.router, prefix="/standings", tags=["standings"])
 api_router.include_router(matches.router, prefix="/matches", tags=["matches"])
 api_router.include_router(match_results.router, prefix="/match-results", tags=["match-results"])
-api_router.include_router(goals.router, prefix="/goals", tags=["goals"])
+api_router.include_router(goals.router)
 api_router.include_router(events.router, prefix="/events", tags=["events"])
 api_router.include_router(upload.router, prefix="/upload", tags=["upload"])

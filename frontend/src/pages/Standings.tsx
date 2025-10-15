@@ -37,8 +37,30 @@ const StandingsPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await api.listStandings();
-        setStandingsData(data);
+        const [standings, results, matches, teams, groupTeams] = await Promise.all([
+          api.listStandings(),
+          api.listMatchResults(),
+          api.listMatches(),
+          api.listTeams(),
+          api.listGroupTeams(),
+        ]);
+        // Attach auxiliary data for form calculation
+        const matchById: Record<number, any> = {};
+        (matches || []).forEach((m: any) => { matchById[Number(m.matchid)] = m; });
+        const teamById: Record<number, any> = {};
+        (teams || []).forEach((t: any) => { teamById[Number(t.teamid)] = t; });
+        // Build group -> teamId set
+        const groupIdToTeamIds: Record<number, Set<number>> = {};
+        (groupTeams || []).forEach((gt: any) => {
+          const gid = Number(gt.groupid);
+          const tid = Number(gt.teamid);
+          if (!groupIdToTeamIds[gid]) groupIdToTeamIds[gid] = new Set<number>();
+          groupIdToTeamIds[gid].add(tid);
+        });
+
+        // Map into enriched records keeping original properties
+        const enriched = (standings || []).map((s: any) => ({ ...s, _results: results, _matchById: matchById, _teamById: teamById, _groupTeamIds: groupIdToTeamIds[Number(s.groupid)] }));
+        setStandingsData(enriched);
       } catch (e) {
         setError('Failed to load standings');
         console.error('Error fetching standings:', e);
@@ -59,6 +81,35 @@ const StandingsPage: React.FC = () => {
       }
       
       // Convert to StandingsTeam format
+      const matchesById = (standing as any)._matchById as Record<number, any>;
+      const allResults = (standing as any)._results as any[];
+      const groupTeamIds = (standing as any)._groupTeamIds as Set<number> | undefined;
+      const teamIdNum = Number(standing.teamid);
+      const teamResults = (allResults || [])
+        .filter((r: any) => {
+          const m = matchesById[Number(r.matchid)];
+          if (!m) return false;
+          // require finished matches only and within same group (both teams in group)
+          if (m.status !== 'Finished') return false;
+          if (groupTeamIds) {
+            const inSameGroup = groupTeamIds.has(Number(m.hometeamid)) && groupTeamIds.has(Number(m.awayteamid));
+            if (!inSameGroup) return false;
+          }
+          return Number(m.hometeamid) === teamIdNum || Number(m.awayteamid) === teamIdNum;
+        })
+        .sort((ra: any, rb: any) => {
+          const ma = matchesById[Number(ra.matchid)];
+          const mb = matchesById[Number(rb.matchid)];
+          const da = ma ? new Date(ma.matchdate).getTime() : 0;
+          const db = mb ? new Date(mb.matchdate).getTime() : 0;
+          return db - da; // newest first
+        })
+        .slice(0, Math.min(5, standing.matchesplayed || 5));
+      const formStr = teamResults.map((r: any) => {
+        if (r.winnerteamid == null) return 'D';
+        return Number(r.winnerteamid) === teamIdNum ? 'W' : 'L';
+      }).join('-');
+
       const teamData: StandingsTeam = {
         id: standing.standingid,
         name: standing.teamname || `Team ${standing.teamid}`,
@@ -71,7 +122,7 @@ const StandingsPage: React.FC = () => {
         goalsAgainst: standing.goalsagainst,
         goalDifference: standing.goaldifference || 0,
         points: standing.points,
-        form: 'N/A' // We'll implement form calculation later
+        form: formStr
       };
       
       acc[groupName].push(teamData);

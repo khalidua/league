@@ -298,6 +298,108 @@
   border: 1px solid rgba(243, 242, 236, 0.2);
 }
 
+/* Live Match Dashboard */
+.live-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(243, 242, 236, 0.06);
+  border: 1px solid rgba(243, 242, 236, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.live-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-name {
+  font-weight: 600;
+}
+
+.score {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.live-clock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clock-time {
+  font-family: monospace;
+  font-size: 18px;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-bar {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr 2fr;
+  gap: 10px;
+}
+
+.event-bar .select,
+.event-bar .notes {
+  background: rgba(243, 242, 236, 0.08);
+  border: 1px solid rgba(243, 242, 236, 0.18);
+  border-radius: 8px;
+  color: #F3F2EC;
+  padding: 10px;
+}
+
+.commit-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.feed {
+  background: rgba(243, 242, 236, 0.06);
+  border: 1px solid rgba(243, 242, 236, 0.12);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.feed-title {
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.feed-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.feed-item {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.feed-empty {
+  opacity: 0.7;
+}
+
+@media (max-width: 900px) {
+  .event-bar { grid-template-columns: 1fr; }
+  .live-header { flex-direction: column; align-items: stretch; }
+  .live-clock { justify-content: space-between; }
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -728,6 +830,28 @@ tr:hover {
 }
 
 .tournament-select option {
+  background: #1a1a2e;
+  color: white;
+}
+
+/* Make generic .select inputs consistent with other dropdowns */
+.select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(243, 242, 236, 0.3);
+  border-radius: 8px;
+  background: rgba(243, 242, 236, 0.1);
+  color: white;
+  font-size: 1rem;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #1E93AB;
+  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+}
+
+.select option {
   background: #1a1a2e;
   color: white;
 }

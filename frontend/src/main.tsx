@@ -73,7 +73,7 @@ createRoot(document.getElementById('root')!).render(
           <Route 
             path="/team-management" 
             element={
-              <ProtectedRoute requireAuth={true}>
+              <ProtectedRoute requireAuth={true} allowedRoles={['Player']}>
                 <TeamManagement />
               </ProtectedRoute>
             } 

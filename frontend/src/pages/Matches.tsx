@@ -34,6 +34,7 @@ const Matches: React.FC = () => {
 	const [myOnly, setMyOnly] = useState(false);
 	const [matches, setMatches] = useState<MatchWithTeams[]>([]);
 	const [teams, setTeams] = useState<Team[]>([]);
+	const [resultByMatchId, setResultByMatchId] = useState<Record<number, { homescore: number; awayscore: number }>>({});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -43,10 +44,11 @@ const Matches: React.FC = () => {
 			setLoading(true);
 			setError(null);
 			try {
-				// Fetch both matches and teams data
-				const [matchesData, teamsData] = await Promise.all([
+				// Fetch matches, teams, and results
+				const [matchesData, teamsData, resultsData] = await Promise.all([
 					api.listMatches(),
-					api.listTeams()
+					api.listTeams(),
+					api.listMatchResults()
 				]);
 				
 				if (!active) return;
@@ -70,6 +72,15 @@ const Matches: React.FC = () => {
 				
 				setMatches(matchesWithTeams);
 				setTeams(Object.values(teamsMap));
+
+				// Map results by matchid for quick access
+				const resMap: Record<number, { homescore: number; awayscore: number }> = {};
+				(resultsData || []).forEach((r: any) => {
+					if (typeof r.matchid === 'number') {
+						resMap[r.matchid] = { homescore: Number(r.homescore || 0), awayscore: Number(r.awayscore || 0) };
+					}
+				});
+				setResultByMatchId(resMap);
 			} catch (e: any) {
 				if (!active) return;
 				setError('Failed to load matches');
@@ -115,45 +126,32 @@ const Matches: React.FC = () => {
 	// Group matches by day
 	const groupedMatches = useMemo(() => {
 		const today = new Date();
-		const todayString = today.toISOString().split('T')[0];
+		const todayISO = today.toISOString().split('T')[0];
 		
-		const groups: Record<string, MatchWithTeams[]> = {};
+		const groupList: { label: string; dateISO: string; matches: MatchWithTeams[] }[] = [];
+		const byLabel: Record<string, { label: string; dateISO: string; matches: MatchWithTeams[] }> = {};
 		
-		filtered.forEach((match) => {
-			const matchDate = new Date(match.matchdate);
-			const dateString = matchDate.toISOString().split('T')[0];
-			
-			// Determine the display label for the date
-			let dateLabel: string;
-			if (dateString === todayString) {
-				dateLabel = 'Today';
-			} else {
-				// Format as "Day, Month Date" (e.g., "Mon, Dec 25")
-				dateLabel = matchDate.toLocaleDateString('en-US', { 
-					weekday: 'short', 
-					month: 'short', 
-					day: 'numeric' 
-				});
+		filtered.forEach((m) => {
+			const d = new Date(m.matchdate);
+			const iso = d.toISOString().split('T')[0];
+			const label = iso === todayISO
+				? 'Today'
+				: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+			if (!byLabel[label]) {
+				byLabel[label] = { label, dateISO: iso, matches: [] };
+				groupList.push(byLabel[label]);
 			}
-			
-			if (!groups[dateLabel]) {
-				groups[dateLabel] = [];
-			}
-			groups[dateLabel].push(match);
+			byLabel[label].matches.push(m);
 		});
 		
-		// Sort groups by date (Today first, then chronological order)
-		const sortedGroups = Object.entries(groups).sort(([a], [b]) => {
-			if (a === 'Today') return -1;
-			if (b === 'Today') return 1;
-			
-			// Parse the date strings for comparison
-			const dateA = new Date(a);
-			const dateB = new Date(b);
-			return dateA.getTime() - dateB.getTime();
+		// Sort groups: Today first, then newer dates first (descending), older at bottom
+		groupList.sort((ga, gb) => {
+			if (ga.label === 'Today' && gb.label !== 'Today') return -1;
+			if (gb.label === 'Today' && ga.label !== 'Today') return 1;
+			return new Date(gb.dateISO).getTime() - new Date(ga.dateISO).getTime();
 		});
 		
-		return sortedGroups;
+		return groupList.map(g => [g.label, g.matches] as [string, MatchWithTeams[]]);
 	}, [filtered]);
 
 	return (
@@ -197,9 +195,13 @@ const Matches: React.FC = () => {
 										<h2>{m.hometeam?.name || 'TBD'}</h2>
 									</div>
 									<div className='match-details-card'>
-										<h3 className='kickoff-time'>
-											{new Date(m.matchdate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-										</h3>
+							<h3 className='kickoff-time'>
+								{(m.status === 'Finished' || m.status === 'Live') && resultByMatchId[m.matchid] ? (
+									`${resultByMatchId[m.matchid].homescore} - ${resultByMatchId[m.matchid].awayscore}`
+								) : (
+									new Date(m.matchdate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+								)}
+							</h3>
 										<div className='match-round'>{m.round}</div>
 										<div className={`match-status status-${m.status.toLowerCase()}`}>
 											{m.status}

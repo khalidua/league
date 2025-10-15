@@ -392,6 +392,11 @@ html, body {
     justify-content: center; /* center the two columns themselves */
 }
 
+.standing-grid.single{
+  grid-template-columns: 1fr; /* single column */
+  justify-items: center;      /* center the lone card */
+}
+
 .standing-grid .standings-wrapper{ width: 100%; max-width: 640px; margin: 0 auto; }
 .standing-grid .standings-card{ width: 100%; max-width: 640px; margin: 0 auto; }
 .standing-grid .standings-table{ min-width: 0; }

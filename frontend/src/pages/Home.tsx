@@ -4,6 +4,7 @@ import PlayerCard from '../components/PlayerCard';
 import Carousel from '../components/Carousel';
 import "./Home.css"
 import StandingsTable, { type StandingsTeam } from '../components/StandingsTable';
+import AdminDashboard from './AdminDashboard';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
 import Spinner from '../components/Spinner';
@@ -17,6 +18,7 @@ import { capitalizeFirstLetter } from '../utils/nameUtils';
 import { getPlayerImage, getTeamLogo } from '../utils/defaultImages';
 const Home: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
+  const isAdmin = (user?.role || '').toLowerCase() === 'admin';
   
   // Debug user data
   console.log('Home page - user data:', user);
@@ -81,61 +83,91 @@ const Home: React.FC = () => {
     return date.toLocaleDateString('en-US', options);
   };
   
-  const demoTeams: StandingsTeam[] = [
-    {
-      id: 1,
-      name: 'CRIS FC',
-      logoUrl: crisLogo,
-      played: 10,
-      wins: 7,
-      draws: 2,
-      losses: 1,
-      goalsFor: 20,
-      goalsAgainst: 9,
-      goalDifference: 11,
-      points: 23,
-      form: 'W-W-D-W-W'
-    },
-    {
-      id: 2,
-      name: 'React United',
-      logoUrl: reactLogo,
-      played: 10,
-      wins: 6,
-      draws: 3,
-      losses: 1,
-      goalsFor: 18,
-      goalsAgainst: 8,
-      goalDifference: 10,
-      points: 21,
-      form: 'W-D-W-W-D'
-    },
-    {
-      id: 3,
-      name: 'Vite City',
-      logoUrl: reactLogo,
-      played: 10,
-      wins: 5,
-      draws: 3,
-      losses: 2,
-      goalsFor: 15,
-      goalsAgainst: 10,
-      goalDifference: 5,
-      points: 18,
-      form: 'D-W-L-W-D'
-    }
-  ];
-  const groupA: StandingsTeam[] = demoTeams;
-  const groupB: StandingsTeam[] = [
-    { id: 'b1', name: 'Man Devs', logoUrl: manLogo, played: 10, wins: 6, draws: 2, losses: 2, goalsFor: 17, goalsAgainst: 9, goalDifference: 8, points: 20, form: 'W-W-D-L-W' },
-    { id: 'b2', name: 'Real Coders', logoUrl: realLogo, played: 10, wins: 6, draws: 1, losses: 3, goalsFor: 16, goalsAgainst: 12, goalDifference: 4, points: 19, form: 'W-L-W-W-L' },
-    { id: 'b3', name: 'Vite City', logoUrl: reactLogo, played: 10, wins: 5, draws: 3, losses: 2, goalsFor: 14, goalsAgainst: 11, goalDifference: 3, points: 18, form: 'D-W-W-L-D' }
-  ];
+  const [groups, setGroups] = useState<{ title: string; teams: StandingsTeam[] }[]>([]);
 
-  const groups: { title: string; teams: StandingsTeam[] }[] = [
-    { title: 'Group A', teams: groupA },
-    { title: 'Group B', teams: groupB }
-  ];
+  useEffect(() => {
+    const loadStandings = async () => {
+      try {
+        const [groupsData, standingsData, teamsData, resultsData, matchesData] = await Promise.all([
+          api.listTournamentGroups(),
+          api.listStandings(),
+          api.listTeams(),
+          api.listMatchResults(),
+          api.listMatches(),
+        ]);
+
+        const teamById: Record<number, any> = {};
+        (teamsData || []).forEach((t: any) => { teamById[Number(t.teamid)] = t; });
+
+        // index matches by id for quick lookup (date and teams)
+        const matchById: Record<number, any> = {};
+        (matchesData || []).forEach((m: any) => { matchById[Number(m.matchid)] = m; });
+
+        const groupsTop: { title: string; teams: StandingsTeam[] }[] = (groupsData || []).map((g: any) => {
+          const groupStandings = (standingsData || []).filter((s: any) => s.groupid === g.groupid);
+          const sorted = groupStandings.sort((a: any, b: any) => {
+            if (b.points !== a.points) return b.points - a.points;
+            const gdA = (a.goalsfor || 0) - (a.goalsagainst || 0);
+            const gdB = (b.goalsfor || 0) - (b.goalsagainst || 0);
+            if (gdB !== gdA) return gdB - gdA;
+            return (b.goalsfor || 0) - (a.goalsfor || 0);
+          }).slice(0, 3);
+
+          const top3: StandingsTeam[] = sorted.map((s: any) => {
+            const team = teamById[Number(s.teamid)] || {};
+            const played = (s.wins || 0) + (s.draws || 0) + (s.losses || 0);
+            // compute recent form from latest 5 results involving this team
+            const teamResults = (resultsData || [])
+              .filter((r: any) => {
+                const m = matchById[Number(r.matchid)];
+                if (!m) return false;
+                return Number(m.hometeamid) === Number(s.teamid) || Number(m.awayteamid) === Number(s.teamid);
+              })
+              .sort((ra: any, rb: any) => {
+                const ma = matchById[Number(ra.matchid)];
+                const mb = matchById[Number(rb.matchid)];
+                const da = ma ? new Date(ma.matchdate).getTime() : 0;
+                const db = mb ? new Date(mb.matchdate).getTime() : 0;
+                return db - da; // newest first
+              })
+              .slice(0, 5);
+
+            const formStr = teamResults.map((r: any) => {
+              if (r.winnerteamid == null) return 'D';
+              return Number(r.winnerteamid) === Number(s.teamid) ? 'W' : 'L';
+            }).join('-');
+            return {
+              id: s.teamid,
+              name: team.teamname || `Team ${s.teamid}`,
+              logoUrl: team.logourl || defaultTeamLogo,
+              played,
+              wins: s.wins || 0,
+              draws: s.draws || 0,
+              losses: s.losses || 0,
+              goalsFor: s.goalsfor || 0,
+              goalsAgainst: s.goalsagainst || 0,
+              goalDifference: (s.goalsfor || 0) - (s.goalsagainst || 0),
+              points: s.points || 0,
+              form: formStr,
+            } as StandingsTeam;
+          });
+
+          return { title: g.groupname || `Group ${g.groupid}`, teams: top3 };
+        });
+
+        setGroups(groupsTop);
+      } catch (e) {
+        // keep demo empty if load fails
+        setGroups([]);
+      }
+    };
+
+    loadStandings();
+  }, []);
+
+  if (isAdmin) {
+    return <AdminDashboard />;
+  }
 
   return (
     <>
@@ -201,20 +233,22 @@ const Home: React.FC = () => {
             )}
           </div>
         </div>
-        <div className='team'>
-          <h2>MY TEAM</h2>
-          {isAuthenticated && user?.teamid && user?.teamname ? (
-            <div className="team-info">
-              <img src={getTeamLogo(user.teamlogo)} alt={user.teamname} className="team-logo" />
-              <span className="team-name">{user.teamname}</span>
-            </div>
-          ) : isAuthenticated && user?.teamid ? (
-            <div className="team-info">
-              <img src={getTeamLogo()} alt="Your Team" className="team-logo" />
-              <span className="team-name">Your Team</span>
-            </div>
-          ) : null}
-        </div>
+        {!isAdmin && (
+          <div className='team'>
+            <h2>MY TEAM</h2>
+            {isAuthenticated && user?.teamid && user?.teamname ? (
+              <div className="team-info">
+                <img src={getTeamLogo(user.teamlogo)} alt={user.teamname} className="team-logo" />
+                <span className="team-name">{user.teamname}</span>
+              </div>
+            ) : isAuthenticated && user?.teamid ? (
+              <div className="team-info">
+                <img src={getTeamLogo()} alt="Your Team" className="team-logo" />
+                <span className="team-name">Your Team</span>
+              </div>
+            ) : null}
+          </div>
+        )}
         <div className="team-section-container">
           {!isAuthenticated ? (
             <>
@@ -275,7 +309,7 @@ const Home: React.FC = () => {
                 </div>
               )}
             </div>
-          ) : (
+          ) : (!isAdmin ? (
             <div className="no-team-section">
               <div className="no-team-content">
                 <div className="no-team-icon">⚽</div>
@@ -286,23 +320,29 @@ const Home: React.FC = () => {
                 </Link>
               </div>
             </div>
-          )}
+          ) : null)}
         </div>
       <div className='standing' style={{ marginTop: '24px' }}>
-        <div className='standing-grid'>
-        {groups.map(g => {
+        {(() => {
+          const visibleGroups = groups.filter(g => (g.teams && g.teams.length > 0));
+          const gridClass = `standing-grid${visibleGroups.length === 1 ? ' single' : ''}`;
+          return (
+            <div className={gridClass}>
+        {visibleGroups.map(g => {
           const top3 = [...g.teams].sort((a, b) => {
             if (b.points !== a.points) return b.points - a.points;
             if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
             return b.goalsFor - a.goalsFor;
           }).slice(0, 3);
           return (
-            <div key={g.title} style={{ marginBottom: '24px' }}>
+            <div key={g.title} className='standings-wrapper' style={{ marginBottom: '24px' }}>
               <StandingsTable title={g.title} teams={top3} showForm />
             </div>
           );
         })}
-        </div>
+            </div>
+          );
+        })()}
         <div className='standings-actions'>
           <Link className='standings-cta' to="/standings">See full standings</Link>
         </div>
