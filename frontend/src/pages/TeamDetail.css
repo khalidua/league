@@ -154,15 +154,20 @@
 	display: none;
 }
 
-.edit-logo-btn {
+.logo-actions {
 	position: absolute;
-	opacity: 0.5;
 	top: 8px;
 	right: 8px;
+	display: flex;
+	gap: 4px;
+}
+
+.edit-logo-btn,
+.delete-logo-btn {
+	opacity: 0.5;
 	width: 20px;
 	height: 30px;
 	border-radius: 20%;
-	background: rgba(30, 147, 171, 0.9);
 	color: white;
 	font-size: 14px;
 	cursor: pointer;
@@ -174,6 +179,14 @@
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+.edit-logo-btn {
+	background: rgba(30, 147, 171, 0.9);
+}
+
+.delete-logo-btn {
+	background: rgba(230, 39, 39, 0.9);
+}
+
 .edit-logo-btn:hover {
 	background: rgba(30, 147, 171, 1);
 	opacity: 1;
@@ -181,7 +194,15 @@
 	box-shadow: 0 6px 16px rgba(30, 147, 171, 0.4);
 }
 
-.edit-logo-btn:active {
+.delete-logo-btn:hover {
+	background: rgba(230, 39, 39, 1);
+	opacity: 1;
+	transform: scale(1.1);
+	box-shadow: 0 6px 16px rgba(230, 39, 39, 0.4);
+}
+
+.edit-logo-btn:active,
+.delete-logo-btn:active {
 	transform: scale(0.95);
 }
 

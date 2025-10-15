@@ -86,6 +86,9 @@ const Navbar: React.FC = () => {
                     {isTeamCaptain && (
                       <Link to="/team-management" onClick={() => setMoreDropdownOpen(false)}>Team Management</Link>
                     )}
+                    {user?.role === 'Admin' && (
+                      <Link to="/admin" onClick={() => setMoreDropdownOpen(false)}>Admin Dashboard</Link>
+                    )}
                   </div>,
                   document.body
                 )}

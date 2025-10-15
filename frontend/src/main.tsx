@@ -16,6 +16,7 @@ import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
 import PlayerOnboarding from './pages/PlayerOnboarding.tsx'
 import TeamManagement from './pages/TeamManagement.tsx'
+import AdminDashboard from './pages/AdminDashboard.tsx'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -74,6 +75,16 @@ createRoot(document.getElementById('root')!).render(
             element={
               <ProtectedRoute requireAuth={true}>
                 <TeamManagement />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Admin-only routes */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requireAuth={true} allowedRoles={['Admin']}>
+                <AdminDashboard />
               </ProtectedRoute>
             } 
           />

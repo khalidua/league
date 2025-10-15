@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from backend.deps import get_db
 from backend import models
 from backend.schemas import Tournament as TournamentSchema, TournamentCreate, TournamentUpdate
+from backend.auth import require_organizer_or_admin, require_authenticated_user
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ def list_tournaments(db: Session = Depends(get_db)):
 	return db.query(models.Tournament).all()
 
 @router.post("", response_model=TournamentSchema, status_code=201)
-def create_tournament(payload: TournamentCreate, db: Session = Depends(get_db)):
+def create_tournament(payload: TournamentCreate, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	tournament = models.Tournament(**payload.model_dump())
 	db.add(tournament)
 	db.commit()
@@ -27,7 +28,7 @@ def get_tournament(tournamentid: int, db: Session = Depends(get_db)):
 	return tournament
 
 @router.patch("/{tournamentid}", response_model=TournamentSchema)
-def update_tournament(tournamentid: int, payload: TournamentUpdate, db: Session = Depends(get_db)):
+def update_tournament(tournamentid: int, payload: TournamentUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	tournament = db.query(models.Tournament).filter(models.Tournament.tournamentid == tournamentid).first()
 	if not tournament:
 		raise HTTPException(404, "Tournament not found")
@@ -39,7 +40,7 @@ def update_tournament(tournamentid: int, payload: TournamentUpdate, db: Session 
 	return tournament
 
 @router.delete("/{tournamentid}", status_code=204)
-def delete_tournament(tournamentid: int, db: Session = Depends(get_db)):
+def delete_tournament(tournamentid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	tournament = db.query(models.Tournament).filter(models.Tournament.tournamentid == tournamentid).first()
 	if not tournament:
 		raise HTTPException(404, "Tournament not found")

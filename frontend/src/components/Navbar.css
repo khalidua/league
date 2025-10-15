@@ -321,7 +321,9 @@ html, body, #root {
 @media (max-width: 768px) {
   .nav-wrapper{
     justify-content: space-between;
-    padding: 0 1rem;
+    padding: 0 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   .Navbar{
     width: 100%;
@@ -329,6 +331,7 @@ html, body, #root {
     justify-content: space-between;
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
   }
   
   .nav-center {
@@ -366,21 +369,23 @@ html, body, #root {
   
   /* Mobile logo adjustments */
   .navbar-logo {
-    margin-left: 8px;
+    margin-left: 4px;
+    flex-shrink: 0;
   }
   
   .logo-text {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
   
   .logo-league {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
   .Navbar .nav-links{
     display: none;
     position: fixed;
-    top: 66px;
-    right: 15px;
+    top: 60px;
+    right: 8px;
+    left: 8px;
     background: linear-gradient(135deg, rgba(30, 147, 171, 0.95) 0%, rgba(26, 74, 90, 0.95) 100%);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
@@ -392,7 +397,7 @@ html, body, #root {
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
     flex-direction: column;
     gap: 4px;
-    width: 200px;
+    width: auto;
     padding: 12px;
     z-index: 9999;
     overflow: hidden;
@@ -448,6 +453,169 @@ html, body, #root {
     border-radius: 0 2px 2px 0;
   }
   .dropdown:hover .dropdown-content{ position: static; display: flex; box-shadow: none; }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .nav-wrapper {
+    padding: 0 0.25rem;
+  }
+  
+  .navbar-logo {
+    margin-left: 2px;
+  }
+  
+  .logo-text {
+    font-size: 1.2rem;
+  }
+  
+  .logo-league {
+    font-size: 0.8rem;
+  }
+  
+  .Navbar .hamburger {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .Navbar .hamburger .bar {
+    width: 16px;
+  }
+  
+  .Navbar .nav-links {
+    right: 4px;
+    left: 4px;
+    top: 58px;
+  }
+  
+  .auth-buttons {
+    gap: 8px;
+  }
+  
+  .auth-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Ultra small screens - less than 405px */
+@media (max-width: 405px) {
+  .nav-wrapper {
+    padding: 0 0.1rem;
+  }
+  
+  .navbar-logo {
+    margin-left: 1px;
+  }
+  
+  .logo-text {
+    font-size: 1.1rem;
+  }
+  
+  .logo-league {
+    font-size: 0.7rem;
+  }
+  
+  .Navbar {
+    height: 45px;
+  }
+  
+  .Navbar .hamburger {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .Navbar .hamburger .bar {
+    width: 14px;
+  }
+  
+  .Navbar .hamburger .bar:nth-child(1){ top: 8px; }
+  .Navbar .hamburger .bar:nth-child(2){ top: 12px; }
+  .Navbar .hamburger .bar:nth-child(3){ top: 16px; }
+  .Navbar .hamburger.is-open .bar:nth-child(1){ top: 12px; transform: translateX(-50%) rotate(45deg); }
+  .Navbar .hamburger.is-open .bar:nth-child(2){ opacity: 0; }
+  .Navbar .hamburger.is-open .bar:nth-child(3){ top: 12px; transform: translateX(-50%) rotate(-45deg); }
+  
+  .Navbar .nav-links {
+    right: 2px;
+    left: 2px;
+    top: 53px;
+    padding: 8px;
+  }
+  
+  .nav-item {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+  
+  .auth-buttons {
+    gap: 6px;
+  }
+  
+  .auth-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Ultra small screens - less than 360px */
+@media (max-width: 360px) {
+  .nav-wrapper {
+    padding: 0 0.05rem;
+  }
+  
+  .navbar-logo {
+    margin-left: 0px;
+  }
+  
+  .logo-text {
+    font-size: 1rem;
+  }
+  
+  .logo-league {
+    font-size: 0.65rem;
+  }
+  
+  .Navbar {
+    height: 40px;
+  }
+  
+  .Navbar .hamburger {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .Navbar .hamburger .bar {
+    width: 12px;
+  }
+  
+  .Navbar .hamburger .bar:nth-child(1){ top: 6px; }
+  .Navbar .hamburger .bar:nth-child(2){ top: 10px; }
+  .Navbar .hamburger .bar:nth-child(3){ top: 14px; }
+  .Navbar .hamburger.is-open .bar:nth-child(1){ top: 10px; transform: translateX(-50%) rotate(45deg); }
+  .Navbar .hamburger.is-open .bar:nth-child(2){ opacity: 0; }
+  .Navbar .hamburger.is-open .bar:nth-child(3){ top: 10px; transform: translateX(-50%) rotate(-45deg); }
+  
+  .Navbar .nav-links {
+    right: 1px;
+    left: 1px;
+    top: 48px;
+    padding: 6px;
+  }
+  
+  .nav-item {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+  
+  .auth-buttons {
+    gap: 4px;
+  }
+  
+  .auth-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
 }
 
 

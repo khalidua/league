@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.routers import users, admins, teams, playerstats, players, stadiums, tournaments, tournament_teams, tournament_groups, group_teams, standings, matches, match_results, events, upload, auth
+from backend.routers import users, admins, teams, playerstats, players, stadiums, tournaments, tournament_teams, tournament_groups, group_teams, standings, matches, match_results, goals, events, upload, auth
 
 api_router = APIRouter()
 
@@ -17,5 +17,6 @@ api_router.include_router(group_teams.router, prefix="/group-teams", tags=["grou
 api_router.include_router(standings.router, prefix="/standings", tags=["standings"])
 api_router.include_router(matches.router, prefix="/matches", tags=["matches"])
 api_router.include_router(match_results.router, prefix="/match-results", tags=["match-results"])
+api_router.include_router(goals.router, prefix="/goals", tags=["goals"])
 api_router.include_router(events.router, prefix="/events", tags=["events"])
 api_router.include_router(upload.router, prefix="/upload", tags=["upload"])

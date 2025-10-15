@@ -6,17 +6,47 @@ from datetime import datetime
 from backend.deps import get_db
 from backend import models
 from backend.schemas import Match as MatchSchema, MatchCreate, MatchUpdate
+from backend.auth import require_organizer_or_admin, require_authenticated_user
 
 router = APIRouter()
 
-@router.get("", response_model=List[MatchSchema])
+@router.get("")
 def list_matches(status: Optional[str] = None, round: Optional[str] = None, db: Session = Depends(get_db)):
+	"""List matches with team names"""
 	query = db.query(models.Match)
 	if status:
 		query = query.filter(models.Match.status == status)
 	if round:
 		query = query.filter(models.Match.round == round)
-	return query.all()
+	
+	matches = query.all()
+	
+	# Enhance matches with team names
+	enhanced_matches = []
+	for match in matches:
+		hometeam = None
+		awayteam = None
+		
+		if match.hometeamid:
+			hometeam = db.query(models.Team).filter(models.Team.teamid == match.hometeamid).first()
+		if match.awayteamid:
+			awayteam = db.query(models.Team).filter(models.Team.teamid == match.awayteamid).first()
+		
+		match_data = {
+			"matchid": match.matchid,
+			"tournamentid": match.tournamentid,
+			"hometeamid": match.hometeamid,
+			"awayteamid": match.awayteamid,
+			"stadiumid": match.stadiumid,
+			"matchdate": match.matchdate,
+			"round": match.round,
+			"status": match.status,
+			"hometeamname": hometeam.teamname if hometeam else "TBD",
+			"awayteamname": awayteam.teamname if awayteam else "TBD"
+		}
+		enhanced_matches.append(match_data)
+	
+	return enhanced_matches
 
 @router.get("/next-upcoming")
 def get_next_upcoming_match(db: Session = Depends(get_db)):
@@ -75,7 +105,7 @@ def get_next_upcoming_match(db: Session = Depends(get_db)):
 	}
 
 @router.post("", response_model=MatchSchema, status_code=201)
-def create_match(payload: MatchCreate, db: Session = Depends(get_db)):
+def create_match(payload: MatchCreate, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	match = models.Match(**payload.model_dump())
 	db.add(match)
 	db.commit()
@@ -90,7 +120,7 @@ def get_match(matchid: int, db: Session = Depends(get_db)):
 	return match
 
 @router.patch("/{matchid}", response_model=MatchSchema)
-def update_match(matchid: int, payload: MatchUpdate, db: Session = Depends(get_db)):
+def update_match(matchid: int, payload: MatchUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	match = db.query(models.Match).filter(models.Match.matchid == matchid).first()
 	if not match:
 		raise HTTPException(404, "Match not found")
@@ -102,7 +132,7 @@ def update_match(matchid: int, payload: MatchUpdate, db: Session = Depends(get_d
 	return match
 
 @router.delete("/{matchid}", status_code=204)
-def delete_match(matchid: int, db: Session = Depends(get_db)):
+def delete_match(matchid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	match = db.query(models.Match).filter(models.Match.matchid == matchid).first()
 	if not match:
 		raise HTTPException(404, "Match not found")

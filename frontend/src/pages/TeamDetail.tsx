@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api, getApiUrl } from '../api/client';
 import defaultTeamLogo from '../assets/default_team.png';
-import editIcon from '../assets/icons8-edit-24.png';
 import Spinner from '../components/Spinner';
 import PlayerCard from '../components/PlayerCard';
 import './TeamDetail.css';
@@ -35,12 +34,11 @@ type Player = {
 const TeamDetail: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
-	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [team, setTeam] = useState<Team | null>(null);
 	const [players, setPlayers] = useState<Player[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [uploading, setUploading] = useState(false);
+
 
 	useEffect(() => {
 		const loadTeamData = async () => {
@@ -71,64 +69,6 @@ const TeamDetail: React.FC = () => {
 		loadTeamData();
 	}, [id]);
 
-	const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (!file || !team) return;
-
-		setUploading(true);
-		setError(null);
-		
-		try {
-			const formData = new FormData();
-			formData.append('file', file);
-
-			console.log('Uploading file:', file.name, file.type, file.size);
-
-			const response = await fetch(getApiUrl('/upload'), {
-				method: 'POST',
-				body: formData,
-			});
-
-			console.log('Upload response status:', response.status);
-
-			if (!response.ok) {
-				const errorText = await response.text();
-				console.error('Upload failed:', errorText);
-				throw new Error(`Upload failed: ${response.status} - ${errorText}`);
-			}
-
-			const result = await response.json();
-			console.log('Upload result:', result);
-			
-			// Update team with new logo URL
-			const updateResponse = await fetch(getApiUrl(`/teams/${team.teamid}`), {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					...team,
-					logourl: result.image_url,
-				}),
-			});
-
-			if (updateResponse.ok) {
-				setTeam(prev => prev ? { ...prev, logourl: result.image_url } : null);
-				console.log('Team updated successfully');
-			} else {
-				console.error('Failed to update team');
-			}
-		} catch (error) {
-			console.error('Upload error:', error);
-			setError(`Failed to upload logo: ${error instanceof Error ? error.message : 'Unknown error'}`);
-		} finally {
-			setUploading(false);
-		}
-	};
-
-	const handleUploadClick = () => {
-		fileInputRef.current?.click();
-	};
 
 	if (loading) {
 		return (
@@ -170,35 +110,12 @@ const TeamDetail: React.FC = () => {
 				<div className="team-info-card">
 					<div className="team-logo-section">
 						<div className="team-logo-container">
-							{uploading ? (
-								<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-									<Spinner color="white" size="lg" />
-								</div>
-							) : (
-								<img 
-									className="team-logo-large" 
-									src={team.logourl || defaultTeamLogo} 
-									alt={`${team.teamname} logo`} 
-								/>
-							)}
-							<button 
-								className="edit-logo-btn" 
-								onClick={handleUploadClick}
-								disabled={uploading}
-								title={team.logourl ? "Edit logo" : "Upload logo"}
-							>
-								{team.logourl ? (
-									<img src={editIcon} alt="Edit" width="16" height="16" style={{ filter: 'brightness(0) invert(1)' }} />
-								) : "+"}
-							</button>
+							<img 
+								className="team-logo-large" 
+								src={team.logourl || defaultTeamLogo} 
+								alt={`${team.teamname} logo`} 
+							/>
 						</div>
-						<input
-							ref={fileInputRef}
-							type="file"
-							accept="image/*"
-							onChange={handleFileUpload}
-							className="hidden-file-input"
-						/>
 					</div>
 					<div className="team-info-section">
 						<h1 className="team-name-large">{team.teamname}</h1>

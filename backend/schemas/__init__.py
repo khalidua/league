@@ -12,6 +12,7 @@ from backend.schemas.group_teams import GroupTeams, GroupTeamsCreate
 from backend.schemas.standings import Standings, StandingsCreate, StandingsUpdate
 from backend.schemas.match import Match, MatchCreate, MatchUpdate
 from backend.schemas.match_result import MatchResult, MatchResultCreate, MatchResultUpdate
+from backend.schemas.goal import Goal, GoalCreate, GoalUpdate, GoalWithPlayer
 from backend.schemas.event import Event, EventCreate, EventUpdate
 
 __all__ = [
@@ -29,5 +30,6 @@ __all__ = [
 	"Standings", "StandingsCreate", "StandingsUpdate",
 	"Match", "MatchCreate", "MatchUpdate",
 	"MatchResult", "MatchResultCreate", "MatchResultUpdate",
+	"Goal", "GoalCreate", "GoalUpdate", "GoalWithPlayer",
 	"Event", "EventCreate", "EventUpdate",
 ]

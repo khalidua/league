@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { api } from '../api/client';
+import { api, getApiUrl } from '../api/client';
 import Spinner from '../components/Spinner';
 import { getPlayerImage } from '../utils/defaultImages';
 import { formatFullName, capitalizeFirstLetter } from '../utils/nameUtils';
+import defaultTeamLogo from '../assets/default_team.png';
+import editIcon from '../assets/icons8-edit-24.png';
 import './TeamManagement.css';
 
 type User = {
@@ -32,7 +34,7 @@ type Player = {
 };
 
 const TeamManagement: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [teamPlayers, setTeamPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,8 +43,12 @@ const TeamManagement: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [teamLogo, setTeamLogo] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   console.log('TeamManagement component loaded, user:', user);
+  console.log('Auth loading:', authLoading);
 
   // Check if current user is a team captain
   // For now, we'll allow Admins and users with teams to manage teams
@@ -50,12 +56,36 @@ const TeamManagement: React.FC = () => {
   const isCaptain = user?.role === 'Admin' || user?.teamid;
   
   console.log('isCaptain:', isCaptain, 'user.role:', user?.role, 'user.teamid:', user?.teamid);
+  console.log('Full user object:', JSON.stringify(user, null, 2));
+
+  // Show loading while auth is loading
+  if (authLoading) {
+    return (
+      <div className="team-management-container">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <Spinner color="white" size="lg" />
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (isCaptain && user?.teamid) {
       loadTeamPlayers();
+      loadTeamLogo();
     }
   }, [isCaptain, user?.teamid]);
+
+  const loadTeamLogo = async () => {
+    if (!user?.teamid) return;
+    
+    try {
+      const teamData = await api.getTeam(user.teamid);
+      setTeamLogo(teamData.logourl);
+    } catch (err: any) {
+      console.error('Failed to load team logo:', err);
+    }
+  };
 
   const loadTeamPlayers = async () => {
     setLoading(true);
@@ -186,13 +216,87 @@ const TeamManagement: React.FC = () => {
     }
   };
 
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user?.teamid) return;
+
+    setUploadingLogo(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      console.log('Uploading team logo:', file.name, file.type, file.size);
+
+      const response = await fetch(getApiUrl('/upload'), {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Upload result:', result);
+
+      // Update team with new logo URL
+      await api.updateTeam(user.teamid, {
+        logourl: result.image_url
+      });
+
+      // Update local state
+      setTeamLogo(result.image_url);
+      setSuccess('Team logo updated successfully!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      setError(`Failed to upload team logo: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    if (!user?.teamid) return;
+
+    if (!confirm('Are you sure you want to delete the team logo?')) {
+      return;
+    }
+
+    setUploadingLogo(true);
+    setError(null);
+    
+    try {
+      // Update team to remove logo URL
+      await api.updateTeam(user.teamid, {
+        logourl: null
+      });
+      
+      // Update local state
+      setTeamLogo(null);
+      setSuccess('Team logo deleted successfully!');
+    } catch (e: any) {
+      setError(e.message || 'Failed to delete team logo');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleLogoUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
 
   if (!isCaptain) {
+    console.log('Access denied - user is not a captain');
     return (
       <div className="team-management-container">
         <div className="access-denied">
           <h2>Access Denied</h2>
           <p>Only team captains can manage team players.</p>
+          <p>Debug info: Role: {user?.role}, Team ID: {user?.teamid}</p>
         </div>
       </div>
     );
@@ -245,6 +349,55 @@ const TeamManagement: React.FC = () => {
       )}
 
       <div className="team-management-content">
+        {/* Team Logo Management */}
+        <div className="section">
+          <h3>Team Logo</h3>
+          <div className="team-logo-section">
+            <div className="team-logo-container">
+              {uploadingLogo ? (
+                <div className="logo-loading">
+                  <Spinner color="white" size="md" />
+                </div>
+              ) : (
+                <img 
+                  className="team-logo-large" 
+                  src={teamLogo || defaultTeamLogo} 
+                  alt={`${user?.teamname} logo`} 
+                />
+              )}
+              <div className="logo-actions">
+                <button 
+                  className="edit-logo-btn" 
+                  onClick={handleLogoUploadClick}
+                  disabled={uploadingLogo}
+                  title={teamLogo ? "Edit logo" : "Upload logo"}
+                >
+                  {teamLogo ? (
+                    <img src={editIcon} alt="Edit" width="16" height="16" style={{ filter: 'brightness(0) invert(1)' }} />
+                  ) : "+"}
+                </button>
+                {teamLogo && (
+                  <button 
+                    className="delete-logo-btn" 
+                    onClick={handleDeleteLogo}
+                    disabled={uploadingLogo}
+                    title="Delete logo"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleLogoUpload}
+              className="hidden-file-input"
+            />
+          </div>
+        </div>
+
         {/* Current Team Players */}
         <div className="section">
           <h3>Your Team Players ({teamPlayers.length})</h3>

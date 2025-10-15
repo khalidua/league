@@ -48,6 +48,8 @@
 h1{
     margin: 0;
     margin-top: 30px;
+}
+
 .stat-value{
   font-size: 24px;
   font-weight: bold;
@@ -72,7 +74,6 @@ h1{
 
 
 
-}
 .main-data h3{
     margin: 0;
     letter-spacing: 15px;
@@ -176,27 +177,162 @@ h1{
     font-weight: 500;
 }
 
-/* Responsive design for personal info */
+/* Comprehensive Mobile Responsive Design */
 @media (max-width: 768px) {
-    .personal-info-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
+    .stats-card {
+        height: 400px;
+    }
+    
+    .info-card {
+        padding: 0px 20px;
+        height: 100px;
+    }
+    
+    .avatar-line {
+        margin-left: 60px;
+       }
+    
+    .avatar-line img {
+        width: 300px;
+        margin-bottom: 100px;
+    }
+    
+    .player-pic {
+        max-width: 300px;
     }
     
     .personal-info {
-        margin: 16px;
-        padding: 16px;
+        margin-top: 0;
+        margin-left: 20px;
+        padding: 15px;
+    }
+     .bg-logo{
+         overflow: hidden;
+         max-width: 100%;
+         width: 60%;
+         border-radius: 24px;
+     }
+    
+    .personal-info-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .team {
+        max-width: 300px;
+        height: 40px;
+        margin-top: 20px;
+    }
+    
+    .team-logo-detail {
+        width: 60px;
+    }
+    
+    .team-name-detail {
+        font-size: 14px;
+    }
+    
+    .ovals {
+        max-width: 250px;
+        height: 22px;
+        margin-top: 10px;
+    }
+    
+    .oval-one, .oval-two {
+        font-size: 12px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+    }
+    
+    h1 {
+        margin-top: 20px;
+        font-size: 1.5rem;
+    }
+    
+    .main-data h3 {
+        letter-spacing: 10px;
+        font-size: 1.1rem;
     }
 }
 
 @media (max-width: 480px) {
+    .stats-card {
+        height: 600px;
+    }
+    
+    .info-card {
+        padding: 0px 10px;
+        height: 90px;
+    }
+    
+    .avatar-line {
+        width: 30%;
+    }
+    
+    .avatar-line img {
+        width: 200px;
+        margin-bottom: 80px;
+    }
+    
+    .player-pic {
+        max-width: 200px;
+    }
+    
+    .personal-info {
+        margin-left: 10px;
+        padding: 10px;
+    }
+    
     .personal-info-grid {
         gap: 10px;
     }
     
-    .personal-info {
-        margin: 12px;
-        padding: 12px;
+    .team {
+        max-width: 250px;
+        height: 35px;
+        margin-top: 15px;
+    }
+    
+    .team-logo-detail {
+        width: 50px;
+    }
+    
+    .team-name-detail {
+        font-size: 12px;
+    }
+    
+    .ovals {
+        max-width: 200px;
+        height: 20px;
+        margin-top: 8px;
+    }
+    
+    .oval-one, .oval-two {
+        font-size: 10px;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+    }
+    
+    .stat-label {
+        font-size: 10px;
+    }
+    
+    h1 {
+        margin-top: 15px;
+        font-size: 1.3rem;
+    }
+    
+    .main-data h3 {
+        letter-spacing: 8px;
+        font-size: 1rem;
     }
     
     .info-label {
@@ -205,6 +341,325 @@ h1{
     
     .info-value {
         font-size: 0.9rem;
+    }
+    
+    .bg-logo {
+        width: 70%;
+        max-width: 100%;
+    }
+}
+
+/* Extra small screens - less than 405px */
+@media (max-width: 405px) {
+    .stats-card {
+        height: 320px;
+    }
+    
+    .info-card {
+        padding: 0px 8px;
+        height: 80px;
+    }
+    
+    .avatar-line {
+        width: 25%;
+    }
+    
+    .avatar-line img {
+        width: 150px;
+        margin-bottom: 60px;
+    }
+    
+    .player-pic {
+        max-width: 150px;
+    }
+    
+    .personal-info {
+        margin-left: 5px;
+        padding: 8px;
+    }
+    
+    .personal-info-grid {
+        gap: 6px;
+    }
+    
+    .team {
+        max-width: 200px;
+        height: 30px;
+        margin-top: 10px;
+    }
+    
+    .team-logo-detail {
+        width: 40px;
+    }
+    
+    .team-name-detail {
+        font-size: 11px;
+    }
+    
+    .ovals {
+        max-width: 150px;
+        height: 18px;
+        margin-top: 6px;
+    }
+    
+    .oval-one, .oval-two {
+        font-size: 9px;
+    }
+    
+    .stat-value {
+        font-size: 16px;
+    }
+    
+    .stat-label {
+        font-size: 9px;
+    }
+    
+    h1 {
+        margin-top: 10px;
+        font-size: 1.1rem;
+    }
+    
+    .main-data h3 {
+        letter-spacing: 6px;
+        font-size: 0.9rem;
+    }
+    
+    .info-label {
+        font-size: 0.65rem;
+    }
+    
+    .info-value {
+        font-size: 0.8rem;
+    }
+    
+    .bg-logo {
+        width: 80%;
+        max-width: 100%;
+    }
+}
+
+/* Ultra small screens - less than 360px */
+@media (max-width: 360px) {
+    .stats-card {
+        height: 300px;
+    }
+    
+    .info-card {
+        padding: 0px 6px;
+        height: 70px;
+    }
+    
+    .avatar-line {
+        width: 10%;
+    }
+    
+    .avatar-line img {
+        max-width: 100px;
+        margin-bottom: 50px;
+    }
+    
+    .player-pic {
+        max-width: 100px;
+    }
+    
+    .personal-info {
+        margin-left: 2px;
+        padding: 6px;
+    }
+    
+    .personal-info-grid {
+        gap: 4px;
+    }
+    
+    .team {
+        max-width: 180px;
+        height: 25px;
+        margin-top: 8px;
+    }
+    
+    .team-logo-detail {
+        width: 35px;
+    }
+    
+    .team-name-detail {
+        font-size: 10px;
+    }
+    
+    .ovals {
+        max-width: 130px;
+        height: 16px;
+        margin-top: 5px;
+    }
+    
+    .oval-one, .oval-two {
+        font-size: 8px;
+    }
+    
+    .stat-value {
+        font-size: 14px;
+    }
+    
+    .stat-label {
+        font-size: 8px;
+    }
+    
+    h1 {
+        margin-top: 8px;
+        font-size: 1rem;
+    }
+    
+    .main-data h3 {
+        letter-spacing: 4px;
+        font-size: 0.8rem;
+    }
+    
+    .info-label {
+        font-size: 0.6rem;
+    }
+    
+    .info-value {
+        font-size: 0.75rem;
+    }
+    
+    .bg-logo {
+        width: 70%;
+        max-width: 60%;
+    }
+}
+
+/* Vertical layout for screens under 500px */
+@media (max-width: 500px) {
+    .stats-card {
+        height: auto;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .data-wrapper {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .avatar-line {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-height: 30vh;
+        margin-left: 0;
+        margin-bottom: 20px;
+        order: 1;
+        position: relative;
+    }
+    
+    .avatar-line img {
+        max-width: 280px;
+        margin-bottom: 0;
+    }
+    
+    .player-pic {
+        max-width: 200px;
+        position: relative;
+        margin-bottom: 10px;
+        margin-top: 100px;
+    }
+
+    .main-data {
+        width: 100%;
+        text-align: center;
+        order: 2;
+    }
+    
+    .main-data h1 {
+        margin-top: 0;
+        font-size: 1.5rem;
+    }
+    
+    .main-data h3 {
+        letter-spacing: 8px;
+        font-size: 1rem;
+    }
+    
+    .ovals {
+        max-width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+        padding: 0px 30px;
+    }
+    .oval-one, .oval-two{
+        margin: 0px 5px;
+    }
+    
+    .team {
+        max-width: 60%;
+        justify-content: center;
+        align-items: center;
+        margin: 20px auto 0 auto;
+        display: flex;
+    }
+    
+    .personal-info {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0;
+        order: 3;
+        text-align: center;
+    }
+    
+    .personal-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+   .bg-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-25%, 0%); /* centers the logo */
+    width: 120%;
+    min-width: 400px;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.1;
+    z-index: 1;
+  }
+
+  .bg-logo img {
+    margin-top: 120px;
+    width: 120%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .avatar-line {
+    position: relative;
+    z-index: 2;
+  }
+
+  .player-pic {
+    position: relative;
+    z-index: 3;
+  }
+    .info-card {
+        position: relative;
+        margin-top: 20px;
+        border-radius: 16px;
+        height: auto;
+        padding: 15px;
+    }
+    .team-logo-detail{
+        margin-left: 0;
+        flex-shrink: 0;
+    }
+    
+    .team-name-detail{
+        text-align: center;
+        flex: 1;
     }
 }
 .avatar-line{
@@ -235,13 +690,17 @@ h1{
 .bg-logo{
     position: absolute;
     z-index: 1;
-    width: 100%;
-    height: 100%;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 50%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     opacity: 0.1;
     overflow: hidden;
+    border-radius: 24px;
+    margin-left: -50px;
 }
 
 .bg-logo img {

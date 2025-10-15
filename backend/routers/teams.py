@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from backend.deps import get_db
 from backend import models
 from backend.schemas import Team as TeamSchema, TeamCreate, TeamUpdate
+from backend.auth import require_organizer_or_admin, require_authenticated_user
 
 router = APIRouter()
 
@@ -12,7 +13,7 @@ def list_teams(db: Session = Depends(get_db)):
 	return db.query(models.Team).all()
 
 @router.post("", response_model=TeamSchema, status_code=201)
-def create_team(payload: TeamCreate, db: Session = Depends(get_db)):
+def create_team(payload: TeamCreate, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	team = models.Team(**payload.model_dump())
 	db.add(team)
 	db.commit()
@@ -27,7 +28,7 @@ def get_team(teamid: int, db: Session = Depends(get_db)):
 	return team
 
 @router.patch("/{teamid}", response_model=TeamSchema)
-def update_team(teamid: int, payload: TeamUpdate, db: Session = Depends(get_db)):
+def update_team(teamid: int, payload: TeamUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	team = db.query(models.Team).filter(models.Team.teamid == teamid).first()
 	if not team:
 		raise HTTPException(404, "Team not found")
@@ -39,7 +40,7 @@ def update_team(teamid: int, payload: TeamUpdate, db: Session = Depends(get_db))
 	return team
 
 @router.delete("/{teamid}", status_code=204)
-def delete_team(teamid: int, db: Session = Depends(get_db)):
+def delete_team(teamid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_organizer_or_admin)):
 	team = db.query(models.Team).filter(models.Team.teamid == teamid).first()
 	if not team:
 		raise HTTPException(404, "Team not found")

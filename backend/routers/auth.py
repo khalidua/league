@@ -43,7 +43,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         lastname=request.lastname,
         role=request.role or "Player",
         status="active",
-        profileimage="/assets/defaultPlayer.png"  # Set default profile image
+        profileimage="https://res.cloudinary.com/dns6zhmc2/image/upload/v1760475598/defaultPlayer_vnbpfb.png"  # Set default profile image from Cloudinary
     )
     
     db.add(user)

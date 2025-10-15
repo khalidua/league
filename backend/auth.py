@@ -126,3 +126,36 @@ def get_current_active_user(current_user: models.User = Depends(get_current_user
             detail="Inactive user"
         )
     return current_user
+
+def require_role(allowed_roles: list[str]):
+    """Dependency to require specific roles"""
+    def role_checker(current_user: models.User = Depends(get_current_active_user)) -> models.User:
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required roles: {', '.join(allowed_roles)}"
+            )
+        return current_user
+    return role_checker
+
+def require_admin(current_user: models.User = Depends(get_current_active_user)) -> models.User:
+    """Require admin role"""
+    if current_user.role != "Admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
+
+def require_organizer_or_admin(current_user: models.User = Depends(get_current_active_user)) -> models.User:
+    """Require organizer or admin role"""
+    if current_user.role not in ["Admin", "Organizer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Organizer or Admin access required"
+        )
+    return current_user
+
+def require_authenticated_user(current_user: models.User = Depends(get_current_active_user)) -> models.User:
+    """Require any authenticated user"""
+    return current_user

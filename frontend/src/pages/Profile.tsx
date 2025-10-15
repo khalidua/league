@@ -246,18 +246,18 @@ const Profile: React.FC = () => {
     setError(null);
 
     try {
-      // Update user profile to remove image URL
-      console.log('Deleting profile picture...');
-      const updatedUser = await api.updateProfile({
-        profileimage: null
-      });
+      // Delete profile image and restore to default
+      console.log('Deleting profile picture and restoring default...');
+      await api.deleteProfileImage();
 
+      // Get updated user data
+      const updatedUser = await api.getCurrentUser();
       console.log('Updated user after deletion:', updatedUser);
 
       // Update the user data in context
       updateUser(updatedUser);
 
-      setSuccess('Profile picture removed successfully!');
+      setSuccess('Profile picture removed and restored to default!');
     } catch (error) {
       console.error('Delete error:', error);
       setError(`Failed to remove profile picture: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -324,7 +324,7 @@ const Profile: React.FC = () => {
                 >
                   <img src={editIcon} alt="Edit" width="16" height="16" style={{ filter: 'brightness(0) invert(1)' }} />
                 </button>
-                {user.profileimage && (
+                {user.profileimage && user.profileimage !== "https://res.cloudinary.com/dns6zhmc2/image/upload/v1760475598/defaultPlayer_vnbpfb.png" && (
                   <button
                     className="delete-avatar-btn"
                     onClick={handleDeleteProfilePicture}

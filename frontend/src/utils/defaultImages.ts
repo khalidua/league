@@ -2,6 +2,7 @@
 import defaultPlayerPhoto from '../assets/defaultPlayer.png';
 import defaultTeamLogo from '../assets/default_team.png';
 
+
 /**
  * Get the default player profile image
  * This ensures consistency across the application

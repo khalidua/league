@@ -11,6 +11,7 @@ from backend.models.group_teams import GroupTeams
 from backend.models.standings import Standings
 from backend.models.match import Match
 from backend.models.match_result import MatchResult
+from backend.models.goal import Goal
 from backend.models.event import Event
 
 __all__ = [
@@ -27,5 +28,6 @@ __all__ = [
 	"Standings",
 	"Match",
 	"MatchResult",
+	"Goal",
 	"Event",
 ]

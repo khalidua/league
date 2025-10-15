@@ -4,11 +4,12 @@ from sqlalchemy.orm import Session
 from backend.deps import get_db
 from backend import models
 from backend.schemas import Admin as AdminSchema, AdminCreate, AdminUpdate, AdminWithUser
+from backend.auth import require_admin
 
 router = APIRouter()
 
 @router.get("", response_model=List[AdminWithUser])
-def list_admins(db: Session = Depends(get_db)):
+def list_admins(db: Session = Depends(get_db), current_user: models.User = Depends(require_admin)):
 	# Join Admin with User to get admin names
 	query = db.query(models.Admin, models.User).outerjoin(
 		models.User, models.Admin.userid == models.User.userid
@@ -34,7 +35,7 @@ def list_admins(db: Session = Depends(get_db)):
 	return admins_with_users
 
 @router.post("", response_model=AdminSchema, status_code=201)
-def create_admin(payload: AdminCreate, db: Session = Depends(get_db)):
+def create_admin(payload: AdminCreate, db: Session = Depends(get_db), current_user: models.User = Depends(require_admin)):
 	admin = models.Admin(**payload.model_dump())
 	db.add(admin)
 	db.commit()
@@ -42,7 +43,7 @@ def create_admin(payload: AdminCreate, db: Session = Depends(get_db)):
 	return admin
 
 @router.get("/{adminid}", response_model=AdminWithUser)
-def get_admin(adminid: int, db: Session = Depends(get_db)):
+def get_admin(adminid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_admin)):
 	# Join Admin with User to get admin names
 	result = db.query(models.Admin, models.User).outerjoin(
 		models.User, models.Admin.userid == models.User.userid
@@ -66,7 +67,7 @@ def get_admin(adminid: int, db: Session = Depends(get_db)):
 	return AdminWithUser(**admin_data)
 
 @router.patch("/{adminid}", response_model=AdminSchema)
-def update_admin(adminid: int, payload: AdminUpdate, db: Session = Depends(get_db)):
+def update_admin(adminid: int, payload: AdminUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(require_admin)):
 	admin = db.query(models.Admin).filter(models.Admin.adminid == adminid).first()
 	if not admin:
 		raise HTTPException(404, "Admin not found")
@@ -78,7 +79,7 @@ def update_admin(adminid: int, payload: AdminUpdate, db: Session = Depends(get_d
 	return admin
 
 @router.delete("/{adminid}", status_code=204)
-def delete_admin(adminid: int, db: Session = Depends(get_db)):
+def delete_admin(adminid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_admin)):
 	admin = db.query(models.Admin).filter(models.Admin.adminid == adminid).first()
 	if not admin:
 		raise HTTPException(404, "Admin not found")

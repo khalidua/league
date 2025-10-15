@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from backend.deps import get_db
 from backend import models
 from backend.schemas import Player as PlayerSchema, PlayerCreate, PlayerUpdate, PlayerWithUser
+from backend.auth import require_authenticated_user
 
 router = APIRouter()
 
@@ -52,7 +53,7 @@ def list_players(
 	return players_with_users
 
 @router.post("", response_model=PlayerSchema, status_code=201)
-def create_player(payload: PlayerCreate, db: Session = Depends(get_db)):
+def create_player(payload: PlayerCreate, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
 	player = models.Player(**payload.model_dump())
 	db.add(player)
 	db.commit()
@@ -106,7 +107,7 @@ def get_player(playerid: int, db: Session = Depends(get_db)):
 	return PlayerWithUser(**player_data)
 
 @router.patch("/{playerid}", response_model=PlayerSchema)
-def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(get_db)):
+def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
 	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
 	if not player:
 		raise HTTPException(404, "Player not found")
@@ -118,7 +119,7 @@ def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(ge
 	return player
 
 @router.delete("/{playerid}", status_code=204)
-def delete_player(playerid: int, db: Session = Depends(get_db)):
+def delete_player(playerid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
 	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
 	if not player:
 		raise HTTPException(404, "Player not found")
