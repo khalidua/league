@@ -22,6 +22,33 @@ function invalidateRelatedCaches(path: string): void {
     }
     // Also invalidate the exact basePath if present
     invalidateCache(`GET:${basePath}`);
+
+    // Additional targeted invalidations to keep derived views fresh
+    // Standings depend on matches, match-results, teams, group-teams, tournament-teams
+    const affectsStandings = [
+        '/matches', '/match-results', '/teams', '/group-teams', '/tournament-groups', '/tournament-teams'
+    ].some(prefix => basePath.startsWith(prefix));
+    if (!cacheKeyFromPath(basePath) && affectsStandings) {
+        invalidateCache('GET:/standings');
+        invalidateCache('GET:/matches');
+        invalidateCache('GET:/match-results');
+        invalidateCache('GET:/tournament-groups');
+        invalidateCache('GET:/teams');
+    }
+
+    // Join requests affect user/team membership and rosters on approval
+    if (basePath.startsWith('/join-requests')) {
+        invalidateCache('GET:/join-requests');
+        invalidateCache('GET:/auth/me');
+        invalidateCache('GET:/players');
+    }
+}
+
+// Helper to determine if a path would be cached (GET)
+function cacheKeyFromPath(_p: string): string | null {
+    // This helper mirrors request() logic loosely to detect GET vs mutation context
+    // Here, we only call it from mutation contexts, so always return null
+    return null;
 }
 
 async function request<T>(path: string, init?: RequestInit, useCache: boolean = true): Promise<T> {
@@ -52,7 +79,7 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 			...init,
 		});
 		
-        if (res.ok) {
+		if (res.ok) {
             // Some endpoints (e.g., DELETE) return 204 with no body
             let data: T;
             if (res.status === 204) {
@@ -77,21 +104,49 @@ async function request<T>(path: string, init?: RequestInit, useCache: boolean = 
 			return data;
 		} else {
 			const text = await res.text().catch(() => "");
-			
+			let detail: string | undefined;
+			try {
+				if (text) {
+					const parsed = JSON.parse(text);
+					if (parsed && typeof parsed === 'object' && 'detail' in parsed) {
+						if (typeof parsed.detail === 'string') {
+							detail = parsed.detail;
+						} else if (Array.isArray(parsed.detail)) {
+							// FastAPI may return a list of error objects
+							const first = parsed.detail[0];
+							if (first && typeof first === 'object') {
+								// Prefer msg or message fields if present
+								detail = first.msg || first.message || undefined;
+							}
+						}
+					}
+				}
+			} catch {}
+
+			const isLoginPath = path.startsWith('/auth/login');
+
 			// Handle 403 Forbidden (role-based access denied)
 			if (res.status === 403) {
-				throw new Error("Access denied. You don't have permission to perform this action.");
+				throw new Error(detail || "Access denied. You don't have permission to perform this action.");
 			}
-			
-			// Handle 401 Unauthorized (authentication required)
+
+			// Handle 401 Unauthorized
 			if (res.status === 401) {
-				// Clear invalid token
+				if (isLoginPath) {
+					// For login, surface server message and do not clear tokens
+					throw new Error(detail || 'Incorrect email or password');
+				}
+				// For other endpoints, treat as invalid/expired session
 				localStorage.removeItem('access_token');
 				localStorage.removeItem('token');
-				throw new Error("Authentication required. Please log in again.");
+				throw new Error(detail || "Authentication required. Please log in again.");
 			}
-			
-			throw new Error(text || `Request failed: ${res.status}`);
+
+			if (res.status === 400) {
+				throw new Error(detail || (text || 'Bad request'));
+			}
+
+			throw new Error(detail || text || `Request failed: ${res.status}`);
 		}
 	} catch (error) {
 		throw error instanceof Error ? error : new Error('Network error');
@@ -105,10 +160,16 @@ export const api = {
 			method: 'POST',
 			body: JSON.stringify({ email, password }),
 		}, false),
-	register: (email: string, password: string, firstname?: string, lastname?: string, role?: string) =>
+	register: (
+		email: string,
+		password: string,
+		firstname?: string,
+		lastname?: string,
+		options?: { position?: string; jerseynumber?: number; preferredfoot?: string; height?: number; weight?: number }
+	) =>
 		request<any>(`/auth/register`, {
 			method: 'POST',
-			body: JSON.stringify({ email, password, firstname, lastname, role }),
+			body: JSON.stringify({ email, password, firstname, lastname, ...(options || {}) }),
 		}, false),
 	getCurrentUser: () => request<any>(`/auth/me`),
 	
@@ -293,5 +354,29 @@ export const api = {
 	}, false),
 	deleteGoal: (goalId: number) => request<any>(`/goals/${goalId}`, {
 		method: 'DELETE'
+	}, false),
+
+	// Join Requests
+	listJoinRequests: () => request<any[]>(`/join-requests`),
+	createJoinRequest: (teamid: number, note?: string) => request<any>(`/join-requests`, {
+		method: 'POST',
+		body: JSON.stringify({ teamid, note })
+	}, false),
+	respondJoinRequest: (requestid: number, action: 'approve' | 'deny' | 'cancel', note?: string) => request<any>(`/join-requests/${requestid}/respond`, {
+		method: 'POST',
+		body: JSON.stringify({ action, note })
+	}, false),
+	invitePlayerToTeam: (userid: number) => request<any>(`/join-requests/invite/${userid}`, {
+		method: 'POST'
+	}, false),
+
+	// Notifications
+	listNotifications: () => request<any[]>(`/notifications`),
+	createNotification: (recipient_userid: number, type: string, message: string, metadata?: string) => request<any>(`/notifications`, {
+		method: 'POST',
+		body: JSON.stringify({ recipient_userid, type, message, metadata })
+	}, false),
+	markNotificationRead: (notificationid: number) => request<any>(`/notifications/${notificationid}/read`, {
+		method: 'POST'
 	}, false),
 };

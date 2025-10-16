@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './Teams.css';
 import { api } from '../api/client';
 import defaultTeamLogo from '../assets/default_team.png';
@@ -13,6 +14,7 @@ type Team = {
 };
 
 const Teams: React.FC = () => {
+	const { user, isAuthenticated } = useAuth();
 	const [query, setQuery] = useState('');
 	const [group, setGroup] = useState<string>('All');
 	const [openGroup, setOpenGroup] = useState(false);
@@ -116,15 +118,33 @@ const Teams: React.FC = () => {
 							<span style={{ marginLeft: '10px' }}>Loading...</span>
 						</div>
 					)}
-						{!loading && filtered.map(t => (
-							<Link key={t.id} to={`/teams/${t.id}`} className="team-card-link">
-								<div className="team-card">
-									<img className="team-logo" src={t.logoUrl || '/vite.svg'} alt={`${t.name} logo`} />
-									<div className="team-name">{t.name}</div>
-									{t.group ? <div className="team-meta">{t.group}</div> : null}
-								</div>
+				{!loading && filtered.map(t => (
+					<div key={t.id} className="team-card-link" style={{ textDecoration: 'none' }}>
+						<div className="team-card">
+							<Link to={`/teams/${t.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+								<img className="team-logo" src={t.logoUrl || '/vite.svg'} alt={`${t.name} logo`} />
+								<div className="team-name">{t.name}</div>
+								{t.group ? <div className="team-meta">{t.group}</div> : null}
 							</Link>
-						))}
+							{isAuthenticated && !user?.teamid ? (
+								<button
+									type="button"
+									className="join-team-btn"
+									onClick={async () => {
+										try {
+											await api.createJoinRequest(Number(t.id));
+											alert('Join request sent to the team captain.');
+										} catch (e: any) {
+											alert(e.message || 'Failed to send join request');
+										}
+									}}
+								>
+									Request to Join
+								</button>
+							) : null}
+						</div>
+					</div>
+				))}
 					{!loading && filtered.length === 0 && (
 						<div className="empty">{error || 'No teams found.'}</div>
 					)}

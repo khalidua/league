@@ -10,7 +10,12 @@ class RegisterRequest(BaseModel):
     password: str
     firstname: Optional[str] = None
     lastname: Optional[str] = None
-    role: Optional[str] = "Player"
+    # Player-only registration; optional onboarding fields
+    position: Optional[str] = None
+    jerseynumber: Optional[int] = None
+    preferredfoot: Optional[str] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
 
 class AuthResponse(BaseModel):
     access_token: str

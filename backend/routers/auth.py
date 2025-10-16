@@ -34,14 +34,14 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create new user
+    # Create new user (Player-only)
     hashed_password = get_password_hash(request.password)
     user = models.User(
         email=request.email,
         passwordhash=hashed_password,
         firstname=request.firstname,
         lastname=request.lastname,
-        role=request.role or "Player",
+        role="Player",
         status="active",
         profileimage="https://res.cloudinary.com/dns6zhmc2/image/upload/v1760475598/defaultPlayer_vnbpfb.png"  # Set default profile image from Cloudinary
     )
@@ -49,9 +49,44 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
-    
-    # Note: Player records are created during onboarding, not during registration
-    # This prevents duplicate player creation and allows for proper onboarding flow
+
+    # Create Player record immediately with optional onboarding fields (once)
+    existing_player = db.query(models.Player).filter(models.Player.userid == user.userid).first()
+    if not existing_player:
+        player = models.Player(
+            userid=user.userid,
+            teamid=None,
+        )
+        # Set provided optional fields on initial create
+        if request.position:
+            player.position = request.position
+        if request.jerseynumber is not None:
+            player.jerseynumber = request.jerseynumber
+        if request.preferredfoot:
+            player.preferredfoot = request.preferredfoot
+        if request.height is not None:
+            player.height = request.height
+        if request.weight is not None:
+            player.weight = request.weight
+        db.add(player)
+        db.commit()
+    else:
+        # If a player already exists, update fields only if provided in this registration
+        player = existing_player
+        updated = False
+        if request.position:
+            player.position = request.position; updated = True
+        if request.jerseynumber is not None:
+            player.jerseynumber = request.jerseynumber; updated = True
+        if request.preferredfoot:
+            player.preferredfoot = request.preferredfoot; updated = True
+        if request.height is not None:
+            player.height = request.height; updated = True
+        if request.weight is not None:
+            player.weight = request.weight; updated = True
+        if updated:
+            db.add(player)
+            db.commit()
     
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -142,6 +177,7 @@ def get_current_user_info(current_user: models.User = Depends(get_current_active
                 "profileimage": current_user.profileimage,
                 "teamid": team.teamid if team else None,
                 "teamname": team.teamname if team else None,
+                "teamlogo": team.logourl if team else None,
                 # Player-specific fields
                 "position": player.position,
                 "jerseynumber": player.jerseynumber,
@@ -197,6 +233,7 @@ def update_current_user_profile(
                 "profileimage": current_user.profileimage,
                 "teamid": team.teamid if team else None,
                 "teamname": team.teamname if team else None,
+                "teamlogo": team.logourl if team else None,
                 # Player-specific fields
                 "position": player.position,
                 "jerseynumber": player.jerseynumber,

@@ -73,8 +73,11 @@ const TeamManagement: React.FC = () => {
     if (isCaptain && user?.teamid) {
       loadTeamPlayers();
       loadTeamLogo();
+      // Requests are reviewed via the notification bell now
     }
   }, [isCaptain, user?.teamid]);
+  // Join requests are handled from the notification bell dropdown
+
 
   const loadTeamLogo = async () => {
     if (!user?.teamid) return;
@@ -137,22 +140,9 @@ const TeamManagement: React.FC = () => {
     setSuccess(null);
     
     try {
-      // First, find the user's player record
-      const allPlayers = await api.listPlayers();
-      const userPlayer = allPlayers.find((p: Player) => p.userid === userId);
-      
-      if (!userPlayer) {
-        setError('Player record not found. User needs to complete onboarding first.');
-        return;
-      }
-      
-      // Update the player's team
-      await api.updatePlayer(userPlayer.playerid, {
-        teamid: user?.teamid
-      });
-      
-      setSuccess('Player added to team successfully!');
-      loadTeamPlayers(); // Reload team players
+      // Send invite (pending until invitee accepts via notifications)
+      await api.invitePlayerToTeam(userId);
+      setSuccess('Invite sent. Pending player acceptance.');
     } catch (err: any) {
       setError(err.message || 'Failed to add player to team');
     } finally {

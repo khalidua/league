@@ -13,6 +13,8 @@ from backend.models.match import Match
 from backend.models.match_result import MatchResult
 from backend.models.goal import Goal
 from backend.models.event import Event
+from backend.models.join_request import JoinRequest
+from backend.models.notification import Notification
 
 __all__ = [
 	"User",
@@ -30,4 +32,6 @@ __all__ = [
 	"MatchResult",
 	"Goal",
 	"Event",
+	"JoinRequest",
+	"Notification",
 ]

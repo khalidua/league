@@ -5,6 +5,7 @@ from backend.deps import get_db
 from backend import models
 from backend.schemas import Player as PlayerSchema, PlayerCreate, PlayerUpdate, PlayerWithUser
 from backend.auth import require_authenticated_user
+from backend.schemas.notification import NotificationCreate
 
 router = APIRouter()
 
@@ -54,6 +55,11 @@ def list_players(
 
 @router.post("", response_model=PlayerSchema, status_code=201)
 def create_player(payload: PlayerCreate, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
+	# Prevent duplicate by userid
+	if payload.userid is not None:
+		existing = db.query(models.Player).filter(models.Player.userid == payload.userid).first()
+		if existing:
+			raise HTTPException(400, "Player already exists for this user")
 	player = models.Player(**payload.model_dump())
 	db.add(player)
 	db.commit()

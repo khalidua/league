@@ -4,6 +4,7 @@ import './Navbar.css';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import UserMenu from './UserMenu';
+import NotificationBell from './NotificationBell';
 
 const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -99,7 +100,10 @@ const Navbar: React.FC = () => {
           {/* Right - Auth or User Menu */}
           <div className="navbar-right">
             {isAuthenticated ? (
-              <UserMenu className="usermenu" />
+              <>
+                <NotificationBell className="notif-desktop" />
+                <UserMenu className="usermenu" />
+              </>
             ) : (
               <div className="auth-buttons">
                 <Link to="/login" className="auth-btn login-btn">Login</Link>
@@ -118,6 +122,8 @@ const Navbar: React.FC = () => {
             <span className="bar" />
             <span className="bar" />
           </button>
+
+          {/* Bell is rendered once inside navbar-right; CSS adapts layout per viewport */}
 
           {/* Mobile Menu */}
           <div id="mobile-menu" className="nav-links" role="menu">

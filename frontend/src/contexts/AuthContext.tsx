@@ -24,7 +24,13 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, firstname?: string, lastname?: string, role?: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    firstname?: string,
+    lastname?: string,
+    options?: { position?: string; jerseynumber?: number; preferredfoot?: string; height?: number; weight?: number }
+  ) => Promise<void>;
   logout: () => void;
   loading: boolean;
   isAuthenticated: boolean;
@@ -91,7 +97,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    // Also refresh user on window focus to reflect latest membership/team changes
+    const handleFocus = async () => {
+      const currentToken = localStorage.getItem('access_token') || localStorage.getItem('token');
+      if (currentToken) {
+        try {
+          const fresh = await api.getCurrentUser();
+          setUser(fresh);
+        } catch (e) {
+          // ignore focus refresh errors
+        }
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -101,7 +123,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       localStorage.setItem('access_token', access_token);
       setToken(access_token);
-      setUser(userData);
+      // Immediately refresh full user from /auth/me to include latest team info/logo
+      try {
+        const fullUser = await api.getCurrentUser();
+        setUser(fullUser);
+      } catch {
+        // Fallback to server-returned snapshot if /auth/me fails
+        setUser(userData);
+      }
       // Clear cached GETs as authenticated views may differ
       clearCache();
     } catch (error) {
@@ -109,14 +138,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (email: string, password: string, firstname?: string, lastname?: string, role?: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    firstname?: string,
+    lastname?: string,
+    options?: { position?: string; jerseynumber?: number; preferredfoot?: string; height?: number; weight?: number }
+  ) => {
     try {
-      const response = await api.register(email, password, firstname, lastname, role);
+      const response = await api.register(email, password, firstname, lastname, options);
       const { access_token, user: userData } = response;
       
       localStorage.setItem('access_token', access_token);
       setToken(access_token);
-      setUser(userData);
+      try {
+        const fullUser = await api.getCurrentUser();
+        setUser(fullUser);
+      } catch {
+        setUser(userData);
+      }
       clearCache();
     } catch (error) {
       throw error;
