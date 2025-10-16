@@ -167,6 +167,8 @@ def get_current_user_info(current_user: models.User = Depends(get_current_active
                 team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
             
             # Add team and player information to user data
+            # Determine captain flag and include playerid
+            is_captain = bool(team and team.teamcaptainid == player.playerid)
             user_data = {
                 "userid": current_user.userid,
                 "email": current_user.email,
@@ -179,11 +181,13 @@ def get_current_user_info(current_user: models.User = Depends(get_current_active
                 "teamname": team.teamname if team else None,
                 "teamlogo": team.logourl if team else None,
                 # Player-specific fields
+                "playerid": player.playerid,
                 "position": player.position,
                 "jerseynumber": player.jerseynumber,
                 "preferredfoot": player.preferredfoot,
                 "height": player.height,
-                "weight": player.weight
+                "weight": player.weight,
+                "isTeamCaptain": is_captain
             }
             return user_data
     
@@ -223,6 +227,7 @@ def update_current_user_profile(
                 team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
             
             # Add team and player information to user data
+            is_captain = bool(team and team.teamcaptainid == player.playerid)
             user_data = {
                 "userid": current_user.userid,
                 "email": current_user.email,
@@ -235,11 +240,13 @@ def update_current_user_profile(
                 "teamname": team.teamname if team else None,
                 "teamlogo": team.logourl if team else None,
                 # Player-specific fields
+                "playerid": player.playerid,
                 "position": player.position,
                 "jerseynumber": player.jerseynumber,
                 "preferredfoot": player.preferredfoot,
                 "height": player.height,
-                "weight": player.weight
+                "weight": player.weight,
+                "isTeamCaptain": is_captain
             }
             return user_data
     

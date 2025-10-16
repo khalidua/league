@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.get("", response_model=List[JoinRequestSchema])
 def list_join_requests(db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
-	# If user is captain (has team where teamcaptainid == player's playerid), show requests for that team
+	# Captains see team requests; invitees see their own invites; others see only their own created requests
 	player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
 	if not player:
 		return []
@@ -23,10 +23,13 @@ def list_join_requests(db: Session = Depends(get_db), current_user: models.User 
 
 	query = db.query(models.JoinRequest)
 	if team and team.teamcaptainid is not None and team.teamcaptainid == player.playerid:
+		# Captain: see all requests for the team
 		query = query.filter(models.JoinRequest.teamid == team.teamid)
 	else:
-		# Otherwise return only requests created by the current user
-		query = query.filter(models.JoinRequest.requester_userid == current_user.userid)
+		# Non-captain: only see items addressed to you (invites) or created by you
+		query = query.filter(
+			(models.JoinRequest.requester_userid == current_user.userid)
+		)
 	return query.order_by(models.JoinRequest.requestid.desc()).all()
 
 

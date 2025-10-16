@@ -5,6 +5,7 @@ import defaultTeamLogo from '../assets/default_team.png';
 import Spinner from '../components/Spinner';
 import PlayerCard from '../components/PlayerCard';
 import './TeamDetail.css';
+import { useAuth } from '../contexts/AuthContext';
 
 type Team = {
 	teamid: number;
@@ -34,6 +35,7 @@ type Player = {
 const TeamDetail: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
+	const { isAuthenticated, user } = useAuth();
 	const [team, setTeam] = useState<Team | null>(null);
 	const [players, setPlayers] = useState<Player[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -147,6 +149,24 @@ const TeamDetail: React.FC = () => {
 								</div>
 							)}
 						</div>
+						{isAuthenticated && !user?.teamid && (
+							<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+								<button
+									type="button"
+									className="join-team-btn"
+									onClick={async () => {
+										try {
+											await api.createJoinRequest(team.teamid);
+											alert('Join request sent to the team captain.');
+										} catch (e: any) {
+											alert(e.message || 'Failed to send join request');
+										}
+									}}
+								>
+									Request to Join
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 

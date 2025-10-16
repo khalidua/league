@@ -119,31 +119,13 @@ const Teams: React.FC = () => {
 						</div>
 					)}
 				{!loading && filtered.map(t => (
-					<div key={t.id} className="team-card-link" style={{ textDecoration: 'none' }}>
+					<Link key={t.id} to={`/teams/${t.id}`} className="team-card-link" style={{ textDecoration: 'none' }}>
 						<div className="team-card">
-							<Link to={`/teams/${t.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-								<img className="team-logo" src={t.logoUrl || '/vite.svg'} alt={`${t.name} logo`} />
-								<div className="team-name">{t.name}</div>
-								{t.group ? <div className="team-meta">{t.group}</div> : null}
-							</Link>
-							{isAuthenticated && !user?.teamid ? (
-								<button
-									type="button"
-									className="join-team-btn"
-									onClick={async () => {
-										try {
-											await api.createJoinRequest(Number(t.id));
-											alert('Join request sent to the team captain.');
-										} catch (e: any) {
-											alert(e.message || 'Failed to send join request');
-										}
-									}}
-								>
-									Request to Join
-								</button>
-							) : null}
+							<img className="team-logo" src={t.logoUrl || '/vite.svg'} alt={`${t.name} logo`} />
+							<div className="team-name">{t.name}</div>
+							{t.group ? <div className="team-meta">{t.group}</div> : null}
 						</div>
-					</div>
+					</Link>
 				))}
 					{!loading && filtered.length === 0 && (
 						<div className="empty">{error || 'No teams found.'}</div>

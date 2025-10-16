@@ -16,7 +16,7 @@ const Navbar: React.FC = () => {
   const toggle = () => setOpen(v => !v);
   
   // Team management is for players with a team, not for admins
-  const isTeamCaptain = !!user?.teamid && user?.role !== 'Admin';
+  const isTeamCaptain = !!user?.teamid && user?.isTeamCaptain === true;
   
   const handleMoreToggle = () => {
     if (!moreDropdownOpen && moreButtonRef.current) {

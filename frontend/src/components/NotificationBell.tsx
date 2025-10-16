@@ -18,7 +18,7 @@ interface NotificationBellProps {
 }
 
 const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) => {
-	const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
 	const [open, setOpen] = useState(false);
 	const [items, setItems] = useState<NotificationItem[]>([]);
 	const [unreadCount, setUnreadCount] = useState(0);
@@ -106,7 +106,14 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 							const linkTo = meta && meta.requester_playerid ? `/players/${meta.requester_playerid}` : undefined;
 
 							// Join request actions for captains
-							const isJoinRequest = (((n.type === 'join_request') || (n.type === 'team_invite') || (!n.type && meta && meta.requestid)) && meta && meta.requestid);
+                            const isJoinRequest = (((n.type === 'join_request') || (n.type === 'team_invite') || (!n.type && meta && meta.requestid)) && meta && meta.requestid);
+                            // Only captains see team join-requests for their team; only invitees see invites to them
+                            if (n.type === 'join_request') {
+                                if (!user?.isTeamCaptain) return null;
+                            }
+                            if (n.type === 'team_invite') {
+                                if (user?.userid !== (meta?.requester_userid)) return null;
+                            }
 							const onRespond = async (action: 'approve' | 'deny') => {
 								try {
 									await api.respondJoinRequest(meta.requestid, action);
@@ -125,25 +132,33 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 								} catch {}
 							};
 
-							return (
-								<div key={n.notificationid} className="menu-item" style={{ width: '100%' }}>
-									<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 8 }}>
-										{linkTo ? (
-											<Link to={linkTo} style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}>
-												{n.message}
-											</Link>
-										) : (
-											<span style={{ flex: 1 }}>{n.message}</span>
-										)}
-										{isJoinRequest && (
-											<span style={{ display: 'flex', gap: 6 }}>
-												<button type="button" onClick={() => onRespond('approve')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#9ef59e', padding: '4px 8px', borderRadius: 6, cursor: 'pointer' }}>Approve</button>
-												<button type="button" onClick={() => onRespond('deny')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#ff9e9e', padding: '4px 8px', borderRadius: 6, cursor: 'pointer' }}>Deny</button>
-											</span>
-										)}
-									</div>
-								</div>
-							);
+                            const result = (meta && meta.result) || undefined;
+                            return (
+                                <div key={n.notificationid} className="menu-item" style={{ width: '100%' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 8 }}>
+                                        {linkTo ? (
+                                            <Link to={linkTo} style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}>
+                                                {n.message}
+                                            </Link>
+                                        ) : (
+                                            <span style={{ flex: 1 }}>{n.message}</span>
+                                        )}
+                                        {/* Status icon when resolved */}
+                                        {result && (
+                                            <span aria-hidden style={{ fontSize: 14, color: result === 'approved' ? '#9ef59e' : '#ff9e9e' }}>
+                                                {result === 'approved' ? '✓' : '✕'}
+                                            </span>
+                                        )}
+                                        {/* Action buttons for pending */}
+                                        {!result && isJoinRequest && (
+                                            <span style={{ display: 'flex', gap: 6 }}>
+                                                <button type="button" onClick={() => onRespond('approve')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#9ef59e', padding: '4px 8px', borderRadius: 6, cursor: 'pointer' }}>Approve</button>
+                                                <button type="button" onClick={() => onRespond('deny')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#ff9e9e', padding: '4px 8px', borderRadius: 6, cursor: 'pointer' }}>Deny</button>
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
 						})}
 					</div>
 				</div>,
