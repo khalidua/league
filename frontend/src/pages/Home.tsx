@@ -29,6 +29,10 @@ const Home: React.FC = () => {
   const [teamPlayers, setTeamPlayers] = useState<any[]>([]);
   const [teamLoading, setTeamLoading] = useState(false);
   const [teamError, setTeamError] = useState<string | null>(null);
+  // Create team inline form state
+  const [showCreate, setShowCreate] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [creating, setCreating] = useState(false);
   
   // Fetch upcoming match data
   useEffect(() => {
@@ -315,9 +319,51 @@ const Home: React.FC = () => {
                 <div className="no-team-icon">⚽</div>
                 <h3>You're not in a team yet</h3>
                 <p>Join a team to start playing and see your teammates here</p>
-                <Link to="/teams" className="join-team-btn">
-                  Browse Teams
-                </Link>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <Link to="/teams" className="join-team-btn">
+                    Browse Teams
+                  </Link>
+                  <button
+                    className="join-team-btn"
+                    onClick={() => setShowCreate(v => !v)}
+                  >
+                    {showCreate ? 'Close' : 'Create Team'}
+                  </button>
+                </div>
+                {showCreate && (
+                  <div style={{ marginTop: '12px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      value={newTeamName}
+                      onChange={(e) => setNewTeamName(e.target.value)}
+                      placeholder="Enter new team name"
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        border: '1px solid rgba(243,242,236,0.2)',
+                        background: 'rgba(255,255,255,0.06)',
+                        color: '#F3F2EC',
+                        minWidth: 220
+                      }}
+                    />
+                    <button
+                      className="join-team-btn"
+                      disabled={creating || !newTeamName.trim()}
+                      onClick={async () => {
+                        setCreating(true);
+                        try {
+                          await api.createMyTeam({ teamname: newTeamName.trim() });
+                          window.location.reload();
+                        } catch {
+                        } finally {
+                          setCreating(false);
+                        }
+                      }}
+                    >
+                      {creating ? 'Creating...' : 'Create'}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : null)}

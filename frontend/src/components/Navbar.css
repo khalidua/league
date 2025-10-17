@@ -4,6 +4,12 @@ html, body, #root {
   background: linear-gradient(135deg, #1E93AB 0%, #2A5A6B 50%, #1A4A5A 100%);
   background-attachment: fixed;
 }
+/* Prevent background scroll when mobile menu is open */
+body.no-scroll {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
 .nav-item{
     color: #F3F2EC;
     display: flex;
@@ -399,76 +405,157 @@ html, body, #root {
   .Navbar .nav-links{
     display: none;
     position: fixed;
-    top: 60px;
-    right: 8px;
-    left: 8px;
-    background: linear-gradient(135deg, rgba(30, 147, 171, 0.95) 0%, rgba(26, 74, 90, 0.95) 100%);
+    top: 50px; /* start below navbar height */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(30, 147, 171, 0.97) 0%, rgba(26, 74, 90, 0.97) 100%);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    box-shadow: 
-      0 20px 60px rgba(0, 0, 0, 0.3),
-      0 8px 32px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     flex-direction: column;
-    gap: 4px;
-    width: auto;
-    padding: 12px;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0;
+    width: 100%;
+    height: calc(100vh - 50px); /* fill remaining viewport */
+    padding: 16px 16px 20px 16px;
     z-index: 9999;
     overflow: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
   }
-  .Navbar.open .nav-links{ display: flex; }
+  .Navbar.open .nav-links{ display: flex; transform: translateX(0); }
+  .nav-links-content{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    width: 100%;
+    flex: 1 1 auto;             /* take remaining space */
+    overflow-y: auto;           /* scroll if long */
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Footer with auth buttons fixed at bottom */
+  .mobile-auth-footer{
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 12px;           /* small spacing above footer */
+    margin-bottom: 0;           /* stick to bottom edge */
+  }
+  .mobile-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 46px;
+    border-radius: 24px;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+  }
+  .mobile-login{
+    color: #F3F2EC;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .mobile-register{
+    color: #F3F2EC;
+    background: linear-gradient(135deg, rgba(30, 147, 171, 0.97) 0%, rgba(26, 74, 90, 0.97) 100%);
+    border: 1px solid #1E93AB;
+  }
+  /* Menu items: left-align and increase size */
+  .nav-link{ 
+    display: block; 
+    color: #F3F2EC; 
+    padding: 18px; 
+    text-decoration: none; 
+    font-size: 1.25rem; 
+    transition: background 0.2s ease;
+    font-weight: 600;
+    text-align: left;
+  }
+  .nav-link:hover{ 
+    background: rgba(255,255,255,0.08);
+    color: #F3F2EC; 
+  }
+  .nav-item{ 
+    width: 100%; 
+    height: auto; 
+    padding: 18px; 
+    margin: 0;
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.96);
+    transition: background 0.2s ease, color 0.2s ease;
+    position: relative;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .nav-item:last-child { border-bottom: none; }
+  .nav-item:hover {
+    background: rgba(255,255,255,0.08);
+    color: #FFFFFF;
+  }
+  .nav-item:hover::before { display: none; }
   .nav-overlay{
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.35);
     z-index: 9998;
   }
-  .nav-link{ 
-    display: block; 
-    color: #F3F2EC; 
-    padding: 14px 16px; 
-    text-decoration: none; 
-    font-size: 17px; 
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    font-weight: 500;
+}
+
+/* Hide desktop auth on mobile; we show them inside menu footer */
+@media (min-width: 769px) {
+  .auth-buttons-desktop { display: flex; gap: 12px; align-items: center; }
+  .desktop-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    box-sizing: border-box;
   }
-  .nav-link:hover{ 
-    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
-    color: #F3F2EC; 
-    transform: translateX(4px);
+  .desktop-login{
+    color: #F3F2EC;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
   }
-  .nav-item{ 
-    width: auto; 
-    height: auto; 
-    padding: 10px 12px; 
-    margin: 2px 0;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    position: relative;
+  .desktop-login:hover{
+    background: rgba(243, 242, 236, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
   }
-  
-  .nav-item:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-    color: #FFFFFF;
-    transform: translateX(2px);
+  .desktop-register{
+    color: #F3F2EC;
+    background: linear-gradient(135deg, rgba(30, 147, 171, 0.97) 0%, rgba(26, 74, 90, 0.97) 100%);
+    border: 1px solid #1E93AB;
   }
-  
-  .nav-item:hover::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, #1E93AB 0%, #0f3460 100%);
-    border-radius: 0 2px 2px 0;
+  .desktop-register:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 147, 171, 0.3);
   }
-  .dropdown:hover .dropdown-content{ position: static; display: flex; box-shadow: none; }
+}
+@media (max-width: 768px) {
+  .auth-buttons-desktop { display: none; justify-content: center; align-items: center; }
 }
 
 /* Extra small screens */
@@ -499,9 +586,12 @@ html, body, #root {
   }
   
   .Navbar .nav-links {
-    right: 4px;
-    left: 4px;
-    top: 58px;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(100vh - 50px);
+    padding: 24px;
   }
   
   .auth-buttons {
@@ -553,10 +643,12 @@ html, body, #root {
   .Navbar .hamburger.is-open .bar:nth-child(3){ top: 12px; transform: translateX(-50%) rotate(-45deg); }
   
   .Navbar .nav-links {
-    right: 2px;
-    left: 2px;
-    top: 53px;
-    padding: 8px;
+    top: 45px; /* matches ultra small navbar height */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(100vh - 45px);
+    padding: 16px;
   }
   
   .nav-item {
@@ -613,10 +705,12 @@ html, body, #root {
   .Navbar .hamburger.is-open .bar:nth-child(3){ top: 10px; transform: translateX(-50%) rotate(-45deg); }
   
   .Navbar .nav-links {
-    right: 1px;
-    left: 1px;
-    top: 48px;
-    padding: 6px;
+    top: 40px; /* matches smallest navbar height */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(100vh - 40px);
+    padding: 12px;
   }
   
   .nav-item {
@@ -650,17 +744,31 @@ html, body, #root {
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;           /* center content horizontally/vertically */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .login-btn {
   color: #F3F2EC;
-  border: 1px solid rgba(243, 242, 236, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   background: transparent;
+  box-sizing: border-box;
 }
 
 .login-btn:hover {
   background: rgba(243, 242, 236, 0.1);
-  border-color: rgba(243, 242, 236, 0.5);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  /* Ensure mobile footer Login keeps a light border */
+  .mobile-auth-footer .login-btn{
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: transparent;
+    box-sizing: border-box;
+  }
 }
 
 .register-btn {
@@ -704,4 +812,9 @@ html, body, #root {
 .logout-btn:hover {
   background: rgba(220, 39, 39, 0.2);
   border-color: rgba(220, 39, 39, 0.5);
+}
+
+@media (max-width: 768px) {
+  /* Force-hide desktop auth buttons on mobile, overriding base `.auth-buttons` */
+  .auth-buttons.auth-buttons-desktop { display: none !important; }
 }

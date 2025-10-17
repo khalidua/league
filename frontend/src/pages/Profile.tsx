@@ -732,10 +732,15 @@ const Profile: React.FC = () => {
             </div>
             <button
               className="delete-account-btn"
-              onClick={() => {
-                if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                  // TODO: Implement account deletion
-                  alert('Account deletion feature coming soon!');
+              onClick={async () => {
+                if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+                try {
+                  await api.deleteAccount();
+                  localStorage.removeItem('access_token');
+                  localStorage.removeItem('token');
+                  window.location.href = '/';
+                } catch (e: any) {
+                  alert(e?.message || 'Failed to delete account');
                 }
               }}
               disabled={loading}

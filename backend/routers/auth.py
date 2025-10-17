@@ -256,3 +256,36 @@ def update_current_user_profile(
 def logout():
     """Logout user (client-side token removal)"""
     return {"message": "Successfully logged out"}
+
+@router.delete("/me", status_code=204)
+def delete_account(current_user: models.User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """Soft-delete the current account. Players must not be team captains. Removes team membership and marks account deleted."""
+    # If Player, ensure not a team captain
+    if current_user.role == "Player":
+        player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+        if player:
+            if player.teamid:
+                team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
+                if team and team.teamcaptainid == player.playerid:
+                    raise HTTPException(status_code=400, detail="Disband or transfer captaincy before deleting your account.")
+                # Remove team membership
+                player.teamid = None
+                db.add(player)
+
+    # Soft delete user to avoid FK issues and anonymize credentials
+    try:
+        current_user.status = "deleted"
+        # Anonymize email uniquely so the original can be reused
+        if current_user.email and "@" in current_user.email:
+            local, domain = current_user.email.split("@", 1)
+            current_user.email = f"{local}+deleted_{current_user.userid}@{domain}"
+        else:
+            current_user.email = f"deleted_{current_user.userid}@example.local"
+        # Invalidate password
+        current_user.passwordhash = get_password_hash("deleted_account_placeholder_password")
+        db.add(current_user)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to delete account")
+    return None

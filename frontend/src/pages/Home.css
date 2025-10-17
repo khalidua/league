@@ -498,7 +498,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.032);
   backdrop-filter: blur(2px);
   z-index: 10;
   border-radius: 16px;
@@ -648,6 +648,7 @@ html, body {
 /* No team section styles */
 .no-team-section {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 200px;
@@ -655,6 +656,10 @@ html, body {
 }
 
 .no-team-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     color: #F3F2EC;
     max-width: 400px;
@@ -683,7 +688,10 @@ html, body {
 }
 
 .join-team-btn {
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: fit-content;
     padding: 12px 24px;
     background: linear-gradient(135deg, #1E93AB 0%, #0F7A8E 100%);
     color: #F3F2EC;

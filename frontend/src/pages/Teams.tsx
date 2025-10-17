@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Teams.css';
 import { api } from '../api/client';
@@ -15,6 +15,7 @@ type Team = {
 
 const Teams: React.FC = () => {
 	const { user, isAuthenticated } = useAuth();
+	const location = useLocation();
 	const [query, setQuery] = useState('');
 	const [group, setGroup] = useState<string>('All');
 	const [openGroup, setOpenGroup] = useState(false);
@@ -22,6 +23,17 @@ const Teams: React.FC = () => {
 	const [teams, setTeams] = useState<Team[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [showCreate, setShowCreate] = useState(false);
+	const [newTeamName, setNewTeamName] = useState('');
+	const [creating, setCreating] = useState(false);
+
+	useEffect(() => {
+		// Auto-open create form if ?create=1
+		const params = new URLSearchParams(location.search);
+		if (params.get('create') === '1' && isAuthenticated && !user?.teamid) {
+			setShowCreate(true);
+		}
+	}, [location.search, isAuthenticated, user?.teamid]);
 
 	useEffect(() => {
 		let active = true;
@@ -107,9 +119,50 @@ const Teams: React.FC = () => {
 									</div>
 								) : null}
 							</div>
+                        </div>
+                    </div>
+                    {isAuthenticated && !user?.teamid && (
+							<div className="create-team-wrapper">
+								<button
+									className="create-team-btn"
+									onClick={() => setShowCreate(v => !v)}
+								>
+									{showCreate ? 'Close' : 'Create Team'}
+								</button>
+							</div>
+						)}
+				</div>
+
+				{isAuthenticated && !user?.teamid && showCreate && (
+					<div className="create-team-panel">
+						<div className="create-team-row">
+							<input
+								className="create-team-input"
+								type="text"
+								placeholder="Enter new team name"
+								value={newTeamName}
+								onChange={(e) => setNewTeamName(e.target.value)}
+							/>
+							<button
+								className="create-team-submit"
+								disabled={creating || !newTeamName.trim()}
+								onClick={async () => {
+									setCreating(true);
+									try {
+										await api.createMyTeam({ teamname: newTeamName.trim() });
+										window.location.reload();
+									} catch {
+										// surface error inline later if needed
+									} finally {
+										setCreating(false);
+									}
+								}}
+							>
+								{creating ? 'Creating...' : 'Create'}
+							</button>
 						</div>
 					</div>
-				</div>
+				)}
 
 				<div className="teams-grid">
 					{loading && (
@@ -118,15 +171,15 @@ const Teams: React.FC = () => {
 							<span style={{ marginLeft: '10px' }}>Loading...</span>
 						</div>
 					)}
-				{!loading && filtered.map(t => (
-					<Link key={t.id} to={`/teams/${t.id}`} className="team-card-link" style={{ textDecoration: 'none' }}>
-						<div className="team-card">
-							<img className="team-logo" src={t.logoUrl || '/vite.svg'} alt={`${t.name} logo`} />
-							<div className="team-name">{t.name}</div>
-							{t.group ? <div className="team-meta">{t.group}</div> : null}
-						</div>
-					</Link>
-				))}
+					{!loading && filtered.map(t => (
+						<Link key={t.id} to={`/teams/${t.id}`} className="team-card-link" style={{ textDecoration: 'none' }}>
+							<div className="team-card">
+								<img className="team-logo" src={t.logoUrl || '/vite.svg'} alt={`${t.name} logo`} />
+								<div className="team-name">{t.name}</div>
+								{t.group ? <div className="team-meta">{t.group}</div> : null}
+							</div>
+						</Link>
+					))}
 					{!loading && filtered.length === 0 && (
 						<div className="empty">{error || 'No teams found.'}</div>
 					)}

@@ -26,6 +26,8 @@ def list_players(
 	if teamid is not None:
 		query = query.filter(models.Player.teamid == teamid)
 	
+	# Exclude deleted accounts
+	query = query.filter((models.User.status.is_(None)) | (models.User.status != "deleted"))
 	results = query.offset(skip).limit(limit).all()
 	
 	# Convert joined results to PlayerWithUser objects
@@ -114,21 +116,45 @@ def get_player(playerid: int, db: Session = Depends(get_db)):
 
 @router.patch("/{playerid}", response_model=PlayerSchema)
 def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
-	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
-	if not player:
-		raise HTTPException(404, "Player not found")
-	for field, value in payload.model_dump(exclude_unset=True).items():
-		setattr(player, field, value)
-	db.add(player)
-	db.commit()
-	db.refresh(player)
-	return player
+    player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
+    if not player:
+        raise HTTPException(404, "Player not found")
+
+    # Authorization: Only Admin/Organizer OR the captain of this player's team can update
+    if current_user.role not in ["Admin", "Organizer"]:
+        current_player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+        if not current_player or not current_player.teamid:
+            raise HTTPException(403, "Only team captains can modify team players")
+        team = db.query(models.Team).filter(models.Team.teamid == current_player.teamid).first()
+        if not team or team.teamcaptainid != current_player.playerid:
+            raise HTTPException(403, "Only team captains can modify team players")
+        if player.teamid != current_player.teamid:
+            raise HTTPException(403, "You can only modify players from your own team")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(player, field, value)
+    db.add(player)
+    db.commit()
+    db.refresh(player)
+    return player
 
 @router.delete("/{playerid}", status_code=204)
 def delete_player(playerid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
-	player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
-	if not player:
-		raise HTTPException(404, "Player not found")
-	db.delete(player)
-	db.commit()
-	return None
+    player = db.query(models.Player).filter(models.Player.playerid == playerid).first()
+    if not player:
+        raise HTTPException(404, "Player not found")
+
+    # Authorization: Only Admin/Organizer OR the captain of this player's team can delete
+    if current_user.role not in ["Admin", "Organizer"]:
+        current_player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+        if not current_player or not current_player.teamid:
+            raise HTTPException(403, "Only team captains can remove team players")
+        team = db.query(models.Team).filter(models.Team.teamid == current_player.teamid).first()
+        if not team or team.teamcaptainid != current_player.playerid:
+            raise HTTPException(403, "Only team captains can remove team players")
+        if player.teamid != current_player.teamid:
+            raise HTTPException(403, "You can only remove players from your own team")
+
+    db.delete(player)
+    db.commit()
+    return None

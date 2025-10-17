@@ -16,7 +16,20 @@ const Navbar: React.FC = () => {
   const toggle = () => setOpen(v => !v);
   
   // Team management is for players with a team, not for admins
-  const isTeamCaptain = !!user?.teamid && user?.isTeamCaptain === true;
+  const isTeamCaptain = Boolean((user as any)?.teamid && (user as any)?.isTeamCaptain === true);
+  
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    const body = document.body;
+    if (open) {
+      body.classList.add('no-scroll');
+    } else {
+      body.classList.remove('no-scroll');
+    }
+    return () => {
+      body.classList.remove('no-scroll');
+    };
+  }, [open]);
   
   const handleMoreToggle = () => {
     if (!moreDropdownOpen && moreButtonRef.current) {
@@ -97,7 +110,7 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Right - Auth or User Menu */}
+          {/* Right - Auth or User Menu (hidden on mobile for guests) */}
           <div className="navbar-right">
             {isAuthenticated ? (
               <>
@@ -105,9 +118,9 @@ const Navbar: React.FC = () => {
                 <UserMenu className="usermenu" />
               </>
             ) : (
-              <div className="auth-buttons">
-                <Link to="/login" className="auth-btn login-btn">Login</Link>
-                <Link to="/register" className="auth-btn register-btn">Register</Link>
+              <div className="auth-buttons auth-buttons-desktop">
+                <Link to="/login" className="desktop-btn desktop-login">Login</Link>
+                <Link to="/register" className="desktop-btn desktop-register">Register</Link>
               </div>
             )}
           </div>
@@ -127,14 +140,22 @@ const Navbar: React.FC = () => {
 
           {/* Mobile Menu */}
           <div id="mobile-menu" className="nav-links" role="menu">
-            <Link className="nav-item" to="/" onClick={toggle}>{(user?.role || '').toLowerCase() === 'admin' ? 'Dashboard' : 'Home'}</Link>
-            <Link className="nav-item" to="/teams" onClick={toggle}>Teams</Link>
-            <Link className="nav-item" to="/matches" onClick={toggle}>Matches</Link>
-            <Link className="nav-item" to="/standings" onClick={toggle}>Standings</Link>
-            <Link className="nav-item" to="/players" onClick={toggle}>Players</Link>
-            <Link className="nav-item" to="/rules" onClick={toggle}>Rules</Link>
-            {isTeamCaptain && (
-              <Link className="nav-item" to="/team-management" onClick={toggle}>Team Management</Link>
+            <div className="nav-links-content">
+              <Link className="nav-item" to="/" onClick={toggle}>{(user?.role || '').toLowerCase() === 'admin' ? 'Dashboard' : 'Home'}</Link>
+              <Link className="nav-item" to="/teams" onClick={toggle}>Teams</Link>
+              <Link className="nav-item" to="/matches" onClick={toggle}>Matches</Link>
+              <Link className="nav-item" to="/standings" onClick={toggle}>Standings</Link>
+              <Link className="nav-item" to="/players" onClick={toggle}>Players</Link>
+              <Link className="nav-item" to="/rules" onClick={toggle}>Rules</Link>
+              {isTeamCaptain && (
+                <Link className="nav-item" to="/team-management" onClick={toggle}>Team Management</Link>
+              )}
+            </div>
+            {!isAuthenticated && (
+              <div className="mobile-auth-footer">
+                <Link to="/login" className="mobile-btn mobile-login" onClick={toggle}>Login</Link>
+                <Link to="/register" className="mobile-btn mobile-register" onClick={toggle}>Register</Link>
+              </div>
             )}
           </div>
 

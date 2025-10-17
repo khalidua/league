@@ -197,6 +197,7 @@ export const api = {
 			body: JSON.stringify(data),
 		}, false),
 	logout: () => request<any>(`/auth/logout`, { method: 'POST' }, false),
+	deleteAccount: () => request<void>(`/auth/me`, { method: 'DELETE' }, false),
 	
 	// Other APIs
 	listStadiums: () => request<any[]>(`/stadiums`),
@@ -206,12 +207,19 @@ export const api = {
 		method: 'POST',
 		body: JSON.stringify(data)
 	}, false),
+	createMyTeam: (data: any) => request<any>('/teams/my', {
+		method: 'POST',
+		body: JSON.stringify(data)
+	}, false),
 	updateTeam: (teamid: number, data: any) => request<any>(`/teams/${teamid}`, {
 		method: 'PATCH',
 		body: JSON.stringify(data)
 	}, false),
 	deleteTeam: (teamid: number) => request<any>(`/teams/${teamid}`, {
 		method: 'DELETE'
+	}, false),
+	disbandTeam: (teamid: number) => request<any>(`/teams/${teamid}/disband`, {
+		method: 'POST'
 	}, false),
 	listPlayers: (params?: { teamid?: number; skip?: number; limit?: number }) => {
 		const qs = new URLSearchParams();

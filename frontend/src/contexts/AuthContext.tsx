@@ -12,7 +12,7 @@ interface User {
   status: string;
   teamid?: number;
   teamname?: string;
-  // Player-specific fields
+  teamlogo?: string;
   position?: string;
   jerseynumber?: number;
   preferredfoot?: string;

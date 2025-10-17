@@ -182,15 +182,8 @@ const TeamManagement: React.FC = () => {
     setSuccess(null);
     
     try {
-      // First, remove all players from the team
-      for (const player of teamPlayers) {
-        await api.updatePlayer(player.playerid, {
-          teamid: null
-        });
-      }
-      
-      // Then delete the team
-      await api.deleteTeam(user.teamid);
+      // Captains: use disband endpoint (backend clears players and deletes team)
+      await api.disbandTeam(user.teamid);
       
       setSuccess('Team deleted successfully!');
       setShowDeleteConfirm(false);

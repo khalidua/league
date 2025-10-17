@@ -125,6 +125,7 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(243, 242, 236, 0.2);
   transition: transform 0.3s ease;
+  user-select: none;
 }
 
 .stat-card:hover {
@@ -473,6 +474,7 @@ tr:hover {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(243, 242, 236, 0.2);
   transition: transform 0.3s ease;
+  user-select: none;
 }
 
 .tournament-card:hover,

@@ -1,5 +1,6 @@
 from typing import List
 import json
+import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.deps import get_db
@@ -207,6 +208,26 @@ def respond_join_request(requestid: int, payload: JoinRequestRespond, db: Sessio
 	if payload.note:
 		jr.note = payload.note
 
+	# Identify captain user for notifications
+	captain_userid = None
+	if team.teamcaptainid is not None:
+		captain_player = db.query(models.Player).filter(models.Player.playerid == team.teamcaptainid).first()
+		if captain_player:
+			captain_userid = captain_player.userid
+
+	# Delete actionable notifications related to this request (invite/request prompts)
+	try:
+		all_notifs = db.query(models.Notification).all()
+		for n in all_notifs:
+			try:
+				m = json.loads(n.meta) if n.meta else None
+				if m and m.get("requestid") == jr.requestid and n.type in ("team_invite", "join_request"):
+					db.delete(n)
+			except Exception:
+				continue
+	except Exception:
+		pass
+
 	# Notify requester about the decision, tailor message for invite vs request
 	requester_user = db.query(models.User).filter(models.User.userid == jr.requester_userid).first()
 	if requester_user:
@@ -229,6 +250,30 @@ def respond_join_request(requestid: int, payload: JoinRequestRespond, db: Sessio
 			meta=json.dumps(meta),
 		)
 		db.add(n)
+
+	# Additionally, notify captain when invitee responds to an invite (source='captain')
+	if jr.source == "captain" and captain_userid is not None:
+		# current_user is the invitee in this flow
+		actor_user = db.query(models.User).filter(models.User.userid == current_user.userid).first()
+		actor_name = (actor_user.firstname or "").strip() if actor_user else "Player"
+		if actor_user and actor_user.lastname:
+			actor_name = (actor_name + " " + actor_user.lastname).strip()
+		actor_name = actor_name or (actor_user.email if actor_user else "Player")
+		status_text = "approved" if jr.status == "approved" else ("denied" if jr.status == "denied" else jr.status)
+		captain_meta = {
+			"requestid": jr.requestid,
+			"teamid": team.teamid,
+			"teamname": team.teamname,
+			"result": jr.status,
+		}
+		captain_message = f"{actor_name} {status_text} your invite to join {team.teamname}"
+		cn = models.Notification(
+			recipient_userid=captain_userid,
+			type="join_request_result",
+			message=captain_message,
+			meta=json.dumps(captain_meta),
+		)
+		db.add(cn)
 
 	db.add(jr)
 	db.commit()

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../api/client';
 import settingsIco from '../assets/icons8-settings-24.png'
 import ProfileIco from '../assets/icons8-profile-24.png'
 import logoutIco from '../assets/icons8-logout-24.png'
@@ -53,6 +54,17 @@ const UserMenu: React.FC<UserMenuProps> = ({ className = '' }) => {
   const handleLogout = async () => {
     await logout();
     setIsOpen(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('Delete your account? This cannot be undone.')) return;
+    try {
+      await api.deleteAccount();
+      await logout();
+      window.location.href = '/';
+    } catch (e: any) {
+      alert(e?.message || 'Failed to delete account');
+    }
   };
 
 

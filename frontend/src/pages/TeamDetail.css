@@ -210,6 +210,39 @@
 	flex: 1;
 }
 
+/* Join team button states */
+.join-team-btn {
+  min-width: 160px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1E93AB 0%, #0F7A8E 100%);
+  color: #F3F2EC;
+  border: 1px solid rgba(30, 147, 171, 0.6);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.join-team-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.join-team-btn:active { transform: translateY(0); }
+.join-team-btn:disabled { opacity: 0.7; cursor: default; transform: none; }
+
+.join-team-btn.is-pending,
+.join-team-btn.is-pending:disabled {
+  background: #777;
+  border-color: #888;
+  color: #eee;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
+}
+.join-team-btn.is-pending:disabled:hover {
+	box-shadow: none;
+	transform: none;
+}
+
 .team-name-large {
 	font-size: 2.5rem;
 	font-weight: 700;

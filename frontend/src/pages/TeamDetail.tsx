@@ -40,25 +40,22 @@ const TeamDetail: React.FC = () => {
 	const [players, setPlayers] = useState<Player[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-
+	const [joinLoading, setJoinLoading] = useState(false);
+	const [joinPending, setJoinPending] = useState(false);
 
 	useEffect(() => {
 		const loadTeamData = async () => {
 			if (!id) return;
-			
 			setLoading(true);
 			setError(null);
-			
 			try {
-				// Fetch team details and players in parallel using efficient API
 				const [teamData, playersData] = await Promise.all([
 					fetch(getApiUrl(`/teams/${id}`)).then(res => {
 						if (!res.ok) throw new Error('Team not found');
 						return res.json();
 					}),
-					api.listPlayers({ teamid: parseInt(id) }) // Efficient: filter on backend
+					api.listPlayers({ teamid: parseInt(id) })
 				]);
-				
 				setTeam(teamData);
 				setPlayers(playersData);
 			} catch (e: any) {
@@ -67,10 +64,31 @@ const TeamDetail: React.FC = () => {
 				setLoading(false);
 			}
 		};
-
 		loadTeamData();
 	}, [id]);
 
+	// Poll notifications to update pending/denied state
+	useEffect(() => {
+		if (!isAuthenticated || !user || !id) return;
+		let cancelled = false;
+		const check = async () => {
+			try {
+				const list = await api.listNotifications();
+				if (cancelled) return;
+				// If there is a join_request_result for this team and user was denied, clear pending
+				const denied = (list || []).some((n: any) => {
+					try {
+						const m = n.metadata ? JSON.parse(n.metadata) : undefined;
+						return n.type === 'join_request_result' && m && m.teamid === Number(id) && m.result === 'denied';
+					} catch { return false; }
+				});
+				if (denied) setJoinPending(false);
+			} catch {}
+		};
+		const interval = setInterval(check, 15000);
+		check();
+		return () => { cancelled = true; clearInterval(interval); };
+	}, [isAuthenticated, user, id]);
 
 	if (loading) {
 		return (
@@ -153,17 +171,21 @@ const TeamDetail: React.FC = () => {
 							<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
 								<button
 									type="button"
-									className="join-team-btn"
+									className={`join-team-btn${joinPending ? ' is-pending' : ''}`}
+									disabled={joinLoading || joinPending}
 									onClick={async () => {
+										setJoinLoading(true);
 										try {
 											await api.createJoinRequest(team.teamid);
-											alert('Join request sent to the team captain.');
+											setJoinPending(true);
 										} catch (e: any) {
-											alert(e.message || 'Failed to send join request');
+											setError(e.message || 'Failed to send join request');
+										} finally {
+											setJoinLoading(false);
 										}
 									}}
 								>
-									Request to Join
+									{joinLoading ? 'Sending...' : joinPending ? 'Pending' : 'Request to Join'}
 								</button>
 							</div>
 						)}

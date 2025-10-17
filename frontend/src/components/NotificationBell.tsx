@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
-import bellUrl from '../assets/notification-bell-svgrepo-com.svg';
+// Replaced raster bell with inline SVG per user request
 import { useAuth } from '../contexts/AuthContext';
 
 interface NotificationItem {
@@ -32,11 +32,12 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 			try {
 				const list = await api.listNotifications();
 				setItems(list || []);
-				setUnreadCount((list || []).filter((n: any) => !n.isread).length);
-				// Mark all as read once opened
 				const unread = (list || []).filter((n: any) => !n.isread);
+				setUnreadCount(unread.length);
+				// Mark all as read once opened so badge clears after viewing
 				if (unread.length > 0) {
 					await Promise.all(unread.map((n: any) => api.markNotificationRead(n.notificationid)));
+					setItems((list || []).map((n: any) => ({ ...n, isread: true })) as any);
 					setUnreadCount(0);
 				}
 			} catch {}
@@ -46,6 +47,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 	// Prefetch count without opening so badge shows proactively
 	useEffect(() => {
 		let cancelled = false;
+		let intervalId: any;
 		const loadCount = async () => {
 			try {
 				const list = await api.listNotifications();
@@ -56,7 +58,9 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 		loadCount();
 		const onFocus = () => loadCount();
 		window.addEventListener('focus', onFocus);
-		return () => { cancelled = true; window.removeEventListener('focus', onFocus); };
+		// periodic polling to keep badge fresh
+		intervalId = setInterval(loadCount, 30000);
+		return () => { cancelled = true; window.removeEventListener('focus', onFocus); clearInterval(intervalId); };
 	}, []);
 
 	useEffect(() => {
@@ -71,6 +75,17 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 		return () => document.removeEventListener('mousedown', onClickOutside);
 	}, [open]);
 
+	const markAllRead = async () => {
+		try {
+			const unread = (items || []).filter((n: any) => !n.isread);
+			if (unread.length > 0) {
+				await Promise.all(unread.map((n: any) => api.markNotificationRead(n.notificationid)));
+				setItems(prev => prev.map(n => ({ ...n, isread: true })) as any);
+				setUnreadCount(0);
+			}
+		} catch {}
+	};
+
 	const toggle = () => {
 		if (!isAuthenticated) return;
 		if (!open && btnRef.current) {
@@ -80,6 +95,10 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 			const top = rect.bottom + 6;
 			setPanelPos({ top, right });
 		}
+		// if closing, mark items as read after viewing
+		if (open) {
+			markAllRead();
+		}
 		setOpen(!open);
 	};
 
@@ -88,7 +107,9 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 	return (
 		<>
 			<button ref={btnRef} className={`notif-bell ${className}`} aria-label="Notifications" onClick={toggle}>
-				<img src={bellUrl} className="bell-icon" alt="" aria-hidden />
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 1024 1024" aria-hidden className="bell-icon">
+					<path fill="currentColor" d="M960 960H622q-17 29-46 46.5t-64 17.5t-64-17.5t-46-46.5H64q-27 0-45.5-19T0 896v-64q53 0 90.5-75T128 576V448q0-142 91.5-248.5T448 70v-6q0-27 19-45.5T512 0t45 18.5T576 64v6q137 23 228.5 129.5T896 448v128q0 106 37.5 181t90.5 75v64q0 26-18.5 45T960 960z"/>
+				</svg>
 				{unreadCount > 0 && <span className="badge">{unreadCount}</span>}
 			</button>
 			{open && createPortal(
@@ -105,30 +126,29 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 							try { meta = n.metadata ? JSON.parse(n.metadata) : undefined; } catch {}
 							const linkTo = meta && meta.requester_playerid ? `/players/${meta.requester_playerid}` : undefined;
 
-							// Join request actions for captains
-                            const isJoinRequest = (((n.type === 'join_request') || (n.type === 'team_invite') || (!n.type && meta && meta.requestid)) && meta && meta.requestid);
-                            // Only captains see team join-requests for their team; only invitees see invites to them
-                            if (n.type === 'join_request') {
-                                if (!user?.isTeamCaptain) return null;
-                            }
-                            if (n.type === 'team_invite') {
-                                if (user?.userid !== (meta?.requester_userid)) return null;
-                            }
+							// Join request actions when metadata includes a request id
+							const isJoinRequest = Boolean(meta && meta.requestid);
 							const onRespond = async (action: 'approve' | 'deny') => {
 								try {
 									await api.respondJoinRequest(meta.requestid, action);
-									// Refresh notifications and hide the original invite/request
-									const fresh = await api.listNotifications();
-									const filtered = (fresh || []).filter((it: any) => {
-										try {
-											const m = it.metadata ? JSON.parse(it.metadata) : undefined;
-											const sameReq = m && m.requestid && meta && meta.requestid && m.requestid === meta.requestid;
-											const isActionable = (it.type === 'team_invite' || it.type === 'join_request');
-											return !(sameReq && isActionable);
-										} catch { return true; }
+									// Replace actionable notification with a resolved version (no buttons)
+									setItems(prev => {
+										const next = (prev || []).map((it: any) => {
+											try {
+												const m = it.metadata ? JSON.parse(it.metadata) : undefined;
+												const sameReq = m && m.requestid && meta && meta.requestid && m.requestid === meta.requestid;
+												if (sameReq) {
+													const updatedMeta = JSON.stringify({ ...(m || {}), result: action });
+													return { ...it, metadata: updatedMeta, isread: true };
+												}
+												return it;
+											} catch { return it; }
+										});
+										// Recalculate unread count
+										const newUnread = next.filter((x: any) => !x.isread).length;
+										setUnreadCount(newUnread);
+										return next as any;
 									});
-									setItems(filtered);
-									setUnreadCount(filtered.filter((x: any) => !x.isread).length);
 								} catch {}
 							};
 
@@ -165,8 +185,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 				document.body
 			)}
 			<style>{`
-			.notif-bell { position: relative; background: transparent; border: none; color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; width: 20px; height: 20px; }
-			.notif-bell .bell-icon { width: 20px; height: 20px; display: block; filter: brightness(0) invert(1); }
+			.notif-bell { position: relative; background: transparent; border: none; color: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; width: 20px; height: 20px; outline: none; -webkit-tap-highlight-color: transparent; }
+			.notif-bell:hover { background: transparent; }
+			.notif-bell:active { background: transparent; }
+			.notif-bell:focus, .notif-bell:focus-visible { outline: none; box-shadow: none; }
+			.notif-bell .bell-icon { width: 20px; height: 20px; display: block; color: #fff; }
 			.notif-bell .badge { position: absolute; top: -4px; right: -6px; background: #e74c3c; color: #fff; border-radius: 10px; padding: 0 6px; font-size: 11px; line-height: 16px; }
 			/* Panel visuals are inherited from .user-dropdown & friends */
 			`}</style>
