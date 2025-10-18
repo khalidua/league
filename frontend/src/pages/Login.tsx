@@ -22,7 +22,13 @@ const Login: React.FC = () => {
       await login(email, password);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      const errorMessage = err.message || 'Login failed';
+      setError(errorMessage);
+      
+      // If the error is about email verification, show additional help
+      if (errorMessage.includes('verify your email')) {
+        setError(errorMessage + ' You can resend the verification email if needed.');
+      }
     } finally {
       setLoading(false);
     }
@@ -83,6 +89,12 @@ const Login: React.FC = () => {
             Don't have an account?{' '}
             <Link to="/register" className="auth-link">
               Sign up here
+            </Link>
+          </p>
+          <p>
+            Need to verify your email?{' '}
+            <Link to="/resend-verification" className="auth-link">
+              Resend verification
             </Link>
           </p>
         </div>

@@ -147,17 +147,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ) => {
     try {
       const response = await api.register(email, password, firstname, lastname, options);
-      const { access_token, user: userData } = response;
-      
-      localStorage.setItem('access_token', access_token);
-      setToken(access_token);
-      try {
-        const fullUser = await api.getCurrentUser();
-        setUser(fullUser);
-      } catch {
-        setUser(userData);
-      }
-      clearCache();
+      // Registration now returns a message and user data without access token
+      // User needs to verify email before getting access token
+      return response;
     } catch (error) {
       throw error;
     }

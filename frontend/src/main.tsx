@@ -14,6 +14,9 @@ import Rules from './pages/Rules.tsx'
 import Profile from './pages/Profile.tsx'
 import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
+import VerifyEmail from './pages/VerifyEmail.tsx'
+import VerifyEmailSuccess from './pages/VerifyEmailSuccess.tsx'
+import ResendVerification from './pages/ResendVerification.tsx'
 import TeamManagement from './pages/TeamManagement.tsx'
 import Tournaments from './pages/Tournaments.tsx'
 import AdminDashboard from './pages/AdminDashboard.tsx'
@@ -63,6 +66,33 @@ createRoot(document.getElementById('root')!).render(
               </ProtectedRoute>
             } 
           />
+          
+          {/* Email verification routes */}
+          <Route 
+            path="/verify-email" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <VerifyEmail />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/verify-email-success" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <VerifyEmailSuccess />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/resend-verification" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <ResendVerification />
+              </ProtectedRoute>
+            } 
+          />
+          
           {/* Onboarding removed: registration now includes optional player fields */}
           <Route 
             path="/team-management" 

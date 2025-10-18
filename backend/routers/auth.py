@@ -1,9 +1,9 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.deps import get_db
 from backend import models
-from backend.schemas.auth import LoginRequest, RegisterRequest, AuthResponse
+from backend.schemas.auth import LoginRequest, RegisterRequest, AuthResponse, RegisterResponse
 from backend.schemas.user import User as UserSchema, UserUpdate, UserResponse
 from backend.auth import (
     verify_password, 
@@ -12,12 +12,20 @@ from backend.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     get_current_active_user
 )
+from backend.services.email_service import email_service
 
 router = APIRouter()
 
-@router.post("/register", response_model=AuthResponse)
+@router.post("/register", response_model=RegisterResponse)
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     """Register a new user"""
+    # Validate email domain
+    if not request.email.endswith('@zewailcity.edu.eg'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only @zewailcity.edu.eg email addresses are allowed for registration"
+        )
+    
     # Validate password length to prevent bcrypt errors
     password_bytes = request.password.encode('utf-8')
     if len(password_bytes) > 72:
@@ -34,7 +42,11 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
-    # Create new user (Player-only)
+    # Generate verification token and expiration
+    verification_token = email_service.generate_verification_token()
+    verification_expires = datetime.utcnow() + timedelta(hours=24)
+    
+    # Create new user (Player-only) with pending verification
     hashed_password = get_password_hash(request.password)
     user = models.User(
         email=request.email,
@@ -42,8 +54,11 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         firstname=request.firstname,
         lastname=request.lastname,
         role="Player",
-        status="active",
-        profileimage="https://res.cloudinary.com/dns6zhmc2/image/upload/v1760475598/defaultPlayer_vnbpfb.png"  # Set default profile image from Cloudinary
+        status="pending",  # Changed to pending until email verification
+        profileimage="https://res.cloudinary.com/dns6zhmc2/image/upload/v1760475598/defaultPlayer_vnbpfb.png",  # Set default profile image from Cloudinary
+        is_email_verified=False,
+        email_verification_token=verification_token,
+        email_verification_expires=verification_expires
     )
     
     db.add(user)
@@ -88,25 +103,37 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             db.add(player)
             db.commit()
     
-    # Create access token
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str(user.userid), "email": user.email},
-        expires_delta=access_token_expires
+    # Send verification email
+    email_sent = email_service.send_verification_email(
+        recipient_email=user.email,
+        verification_token=verification_token,
+        firstname=user.firstname
     )
     
-    return AuthResponse(
-        access_token=access_token,
-        user={
+    # Update timestamp for initial verification email
+    if email_sent:
+        user.last_verification_email_sent = datetime.utcnow()
+        db.commit()
+    
+    if not email_sent:
+        # If email fails, we should still create the user but log the error
+        print(f"Warning: Failed to send verification email to {user.email}")
+    
+    # Return response without access token (user needs to verify email first)
+    return {
+        "message": "Registration successful! Please check your email to verify your account.",
+        "email_sent": email_sent,
+        "user": {
             "userid": user.userid,
             "email": user.email,
             "firstname": user.firstname,
             "lastname": user.lastname,
             "role": user.role,
             "status": user.status,
-            "profileimage": user.profileimage
+            "profileimage": user.profileimage,
+            "is_email_verified": user.is_email_verified
         }
-    )
+    }
 
 @router.post("/login", response_model=AuthResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
@@ -127,6 +154,12 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if user.status == "pending":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please verify your email address before logging in. Check your inbox for a verification email."
         )
     
     if user.status != "active":
@@ -252,6 +285,109 @@ def update_current_user_profile(
             return user_data
     
     return current_user
+
+@router.post("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    """Verify user email with token"""
+    # Find user by verification token
+    user = db.query(models.User).filter(
+        models.User.email_verification_token == token
+    ).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid verification token"
+        )
+    
+    # Check if token is expired
+    if user.email_verification_expires and user.email_verification_expires < datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Verification token has expired. Please request a new verification email."
+        )
+    
+    # Check if already verified
+    if user.is_email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address is already verified"
+        )
+    
+    # Update user status
+    user.is_email_verified = True
+    user.status = "active"
+    user.email_verification_token = None  # Clear the token
+    user.email_verification_expires = None  # Clear the expiration
+    
+    db.commit()
+    db.refresh(user)
+    
+    # Note: Welcome email removed to reduce email volume
+    
+    return {
+        "message": "Email verified successfully! You can now log in to your account.",
+        "user": {
+            "userid": user.userid,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "role": user.role,
+            "status": user.status,
+            "is_email_verified": user.is_email_verified
+        }
+    }
+
+@router.post("/resend-verification")
+def resend_verification_email(email: str, db: Session = Depends(get_db)):
+    """Resend verification email with 1-minute cooldown"""
+    # Find user by email
+    user = db.query(models.User).filter(models.User.email == email).first()
+    
+    if not user:
+        # Don't reveal if email exists or not for security
+        return {"message": "If the email exists and is not verified, a verification email has been sent."}
+    
+    # Check if already verified
+    if user.is_email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address is already verified"
+        )
+    
+    # Check cooldown period (1 minute)
+    current_time = datetime.utcnow()
+    if user.last_verification_email_sent:
+        time_since_last_email = current_time - user.last_verification_email_sent
+        if time_since_last_email.total_seconds() < 60:  # 1 minute cooldown
+            remaining_seconds = 60 - int(time_since_last_email.total_seconds())
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Please wait {remaining_seconds} seconds before requesting another verification email."
+            )
+    
+    # Generate new verification token and expiration
+    verification_token = email_service.generate_verification_token()
+    verification_expires = current_time + timedelta(hours=24)
+    
+    # Update user with new token and timestamp
+    user.email_verification_token = verification_token
+    user.email_verification_expires = verification_expires
+    user.last_verification_email_sent = current_time
+    
+    db.commit()
+    
+    # Send verification email
+    email_sent = email_service.send_verification_email(
+        recipient_email=user.email,
+        verification_token=verification_token,
+        firstname=user.firstname
+    )
+    
+    if not email_sent:
+        print(f"Warning: Failed to resend verification email to {user.email}")
+    
+    return {"message": "If the email exists and is not verified, a verification email has been sent."}
 
 @router.post("/logout")
 def logout():

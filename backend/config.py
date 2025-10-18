@@ -22,6 +22,10 @@ class Settings(BaseModel):
 	cloudinary_cloud_name: str = os.getenv("CLOUDINARY_CLOUD_NAME", "")
 	cloudinary_api_key: str = os.getenv("CLOUDINARY_API_KEY", "")
 	cloudinary_api_secret: str = os.getenv("CLOUDINARY_API_SECRET", "")
+	# Email settings
+	gmail_user: str = os.getenv("GMAIL_USER", "")
+	gmail_app_password: str = os.getenv("GMAIL_APP_PASSWORD", "")
+	secret_key: str = os.getenv("SECRET_KEY", "super-secret-key")
 
 settings = Settings()
 

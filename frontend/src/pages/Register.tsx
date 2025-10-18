@@ -36,6 +36,10 @@ const Register: React.FC = () => {
         setError('Password must be at least 6 characters long');
         return;
       }
+      if (!email.endsWith('@zewailcity.edu.eg')) {
+        setError('Only @zewailcity.edu.eg email addresses are allowed');
+        return;
+      }
       setStep(2);
       return;
     }
@@ -43,14 +47,26 @@ const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      await register(email, password, firstname, lastname, {
+      const response = await register(email, password, firstname, lastname, {
         position: position || undefined,
         jerseynumber: jerseynumber ? Number(jerseynumber) : undefined,
         preferredfoot: preferredfoot || undefined,
         height: height ? Number(height) : undefined,
         weight: weight ? Number(weight) : undefined,
       });
-      navigate('/');
+      
+      // Registration successful - show success message and redirect to verification page
+      if (response.email_sent) {
+        navigate('/verify-email-success', { 
+          state: { 
+            email: email, 
+            message: response.message 
+          } 
+        });
+      } else {
+        // Email sending failed but user was created
+        setError('Account created but verification email could not be sent. Please try logging in or contact support.');
+      }
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -86,7 +102,10 @@ const Register: React.FC = () => {
               </div>
               <div className="form-group">
                 <label htmlFor="email">Email</label>
-                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Enter your email" />
+                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Enter your @zewailcity.edu.eg email" />
+                <small style={{ color: '#7f8c8d', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>
+                  Only @zewailcity.edu.eg email addresses are allowed
+                </small>
               </div>
               <div className="form-group">
                 <label htmlFor="password">Password</label>

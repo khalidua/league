@@ -172,6 +172,12 @@ export const api = {
 			body: JSON.stringify({ email, password, firstname, lastname, ...(options || {}) }),
 		}, false),
 	getCurrentUser: () => request<any>(`/auth/me`),
+	verifyEmail: (token: string) => request<any>(`/auth/verify-email?token=${token}`, {
+		method: 'POST'
+	}, false),
+	resendVerification: (email: string) => request<any>(`/auth/resend-verification?email=${email}`, {
+		method: 'POST'
+	}, false),
 	
 	// Users
 	listUsers: () => request<any[]>('/users'),

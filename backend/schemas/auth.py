@@ -22,6 +22,17 @@ class AuthResponse(BaseModel):
     token_type: str = "bearer"
     user: dict
 
+class RegisterResponse(BaseModel):
+    message: str
+    email_sent: bool
+    user: dict
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+class ResendVerificationRequest(BaseModel):
+    email: str
+
 class TokenData(BaseModel):
     userid: Optional[int] = None
     email: Optional[str] = None
