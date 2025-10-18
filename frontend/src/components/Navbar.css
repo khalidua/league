@@ -417,10 +417,11 @@ body.no-scroll {
     box-shadow: none;
     flex-direction: column;
     align-items: stretch;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 0;
     width: 100%;
-    height: calc(100vh - 50px); /* fill remaining viewport */
+    max-height: calc(100vh - 50px); /* ensure it doesn't exceed viewport */
+    height: calc(100vh - 50px);
     padding: 16px 16px 20px 16px;
     z-index: 9999;
     overflow: hidden;
@@ -437,6 +438,8 @@ body.no-scroll {
     flex: 1 1 auto;             /* take remaining space */
     overflow-y: auto;           /* scroll if long */
     -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 50px - 120px); /* account for navbar and footer */
+    min-height: 0;              /* allow flex shrinking */
   }
   /* Footer with auth buttons fixed at bottom */
   .mobile-auth-footer{
@@ -606,6 +609,7 @@ body.no-scroll {
     left: 0;
     right: 0;
     bottom: 0;
+    max-height: calc(100vh - 50px);
     height: calc(100vh - 50px);
     padding: 24px;
   }
@@ -663,6 +667,7 @@ body.no-scroll {
     left: 0;
     right: 0;
     bottom: 0;
+    max-height: calc(100vh - 45px);
     height: calc(100vh - 45px);
     padding: 16px;
   }
@@ -725,6 +730,7 @@ body.no-scroll {
     left: 0;
     right: 0;
     bottom: 0;
+    max-height: calc(100vh - 40px);
     height: calc(100vh - 40px);
     padding: 12px;
   }
