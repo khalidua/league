@@ -41,9 +41,12 @@ class UserResponse(UserBase):
 	userid: int
 	teamid: Optional[int] = None
 	teamname: Optional[str] = None
+	teamcaptainid: Optional[int] = None
 	# Player-specific fields
+	playerid: Optional[int] = None
 	position: Optional[str] = None
 	jerseynumber: Optional[int] = None
 	preferredfoot: Optional[str] = None
 	height: Optional[int] = None
 	weight: Optional[int] = None
+	isTeamCaptain: Optional[bool] = None

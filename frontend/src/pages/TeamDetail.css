@@ -317,10 +317,6 @@
 	margin-top: 24px;
 	justify-content: center;
 	align-items: start;
-}
-
-/* Ensure consistent PlayerCard dimensions */
-.players-cards-grid {
 	--card-height: 240px;
 	--card-width: 160px;
 }
@@ -354,9 +350,6 @@
 	.players-cards-grid {
 		grid-template-columns: repeat(auto-fit, 140px);
 		gap: 16px;
-	}
-	
-	.players-cards-grid {
 		--card-height: 210px;
 		--card-width: 140px;
 	}
@@ -371,9 +364,6 @@
 	.players-cards-grid {
 		grid-template-columns: repeat(auto-fit, 120px);
 		gap: 12px;
-	}
-	
-	.players-cards-grid {
 		--card-height: 180px;
 		--card-width: 120px;
 	}

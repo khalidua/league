@@ -18,11 +18,12 @@ html, body {
     width: 100%;
     height: 100%;
     background-image: 
-      radial-gradient(circle at 25% 25%, rgba(230, 39, 39, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(230, 39, 39, 0.03) 0%, transparent 50%);
+      radial-gradient(circle at 25% 25%, rgba(196, 13, 60, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(196, 13, 60, 0.03) 0%, transparent 50%);
     pointer-events: none;
     z-index: -1;
   }
+
 .Home {
     display: flex;
     flex-direction: column;
@@ -36,35 +37,34 @@ html, body {
     position: relative;
     overflow-x: hidden;
     scroll-behavior: smooth;
+    animation: fadeInUp 0.8s ease-out;
 }
 
 
 .team {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     color: #F3F2EC;
-    margin: 0 0 2rem 0;
-    padding: 0 1rem;
+    margin: 10vh;
 }
 .team h2{
-    margin: 0;
     color: #F3F2EC;
-    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
-    box-shadow: 0 8px 32px rgba(230, 39, 39, 0.3), 0 0 0 1px rgba(230, 39, 39, 0.1);
+    background: linear-gradient(135deg, rgb(196, 13, 60) 0%, rgb(196, 13, 60) 100%);
+    box-shadow: 0 8px 32px rgba(196, 13, 60, 0.3), 0 0 0 1px rgba(196, 13, 60, 0.1);
     padding: 16px 32px;
-    border-radius: 10px; /* strap style, not pill */
-    width: 100%;
+    border-radius: 10px;
     font-weight: 700;
     font-size: 1.5rem;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    margin: 0 0 15px 0;
 }
 
 .team h2::before {
     content: '';
-    position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
@@ -79,7 +79,7 @@ html, body {
 
 .team h2:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(230, 39, 39, 0.4), 0 0 0 1px rgba(230, 39, 39, 0.2);
+    box-shadow: 0 12px 40px rgba(196, 13, 60, 0.4), 0 0 0 1px rgba(196, 13, 60, 0.2);
 }
 .players{
     display: flex;
@@ -151,6 +151,7 @@ html, body {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(243, 242, 236, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(243, 242, 236, 0.1);
+    animation: float 6s ease-in-out infinite;
 }
 
 .Hero::before {
@@ -160,7 +161,7 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 30% 20%, rgba(230, 39, 39, 0.1) 0%, transparent 50%),
+    background: radial-gradient(circle at 30% 20%, rgba(196, 13, 60, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 70% 80%, rgba(30, 147, 171, 0.05) 0%, transparent 50%);
     pointer-events: none;
 }
@@ -179,6 +180,7 @@ html, body {
   height: auto;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  animation: pulse 4s ease-in-out infinite;
 }
 
 .logos img:hover {
@@ -208,7 +210,7 @@ html, body {
 .match-details h1{
     font-size: 3.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #F3F2EC 0%, #E62727 100%);
+    background: linear-gradient(135deg, #F3F2EC 0%, rgb(196, 13, 60) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -230,7 +232,7 @@ html, body {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 .match-details button {
-    background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
+    background: linear-gradient(135deg, rgb(196, 13, 60) 0%, rgb(196, 13, 60) 100%);
     color: #F3F2EC;
     border: none;
     padding: 16px 32px;
@@ -239,7 +241,7 @@ html, body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 32px rgba(230, 39, 39, 0.3), 0 0 0 1px rgba(230, 39, 39, 0.1);
+    box-shadow: 0 8px 32px rgba(196, 13, 60, 0.3), 0 0 0 1px rgba(196, 13, 60, 0.1);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     position: relative;
@@ -263,13 +265,10 @@ html, body {
 
 .match-details button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(230, 39, 39, 0.4), 0 0 0 1px rgba(230, 39, 39, 0.2);
+    box-shadow: 0 12px 40px rgba(196, 13, 60, 0.4), 0 0 0 1px rgba(196, 13, 60, 0.2);
 }
 
 /* Add smooth animations for page load */
-.Home {
-    animation: fadeInUp 0.8s ease-out;
-}
 
 @keyframes fadeInUp {
     from {
@@ -283,9 +282,6 @@ html, body {
 }
 
 /* Add subtle floating animation to hero elements */
-.Hero {
-    animation: float 6s ease-in-out infinite;
-}
 
 @keyframes float {
     0%, 100% {
@@ -297,9 +293,6 @@ html, body {
 }
 
 /* Add pulse animation to team logos */
-.logos img {
-    animation: pulse 4s ease-in-out infinite;
-}
 
 @keyframes pulse {
     0%, 100% {
@@ -329,10 +322,10 @@ html, body {
     position: relative;
     z-index: 2;
     margin-right: -200px;
-    }
-.logos img.team2 {
+  }
+  .logos img.team2 {
     margin-left: -50px;
-    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -357,7 +350,13 @@ html, body {
     padding: 2rem 1rem;
     min-height: 300px;
   }
-  .team h2{font-size: 1.2rem;}
+  .team{
+    
+    margin-top: 10vh !important;
+  }
+  .team h2{
+    font-size: 1.2rem;
+  }
   .logos { opacity: 0.25; position: absolute; z-index: 0;}
   .logos img { width: 300px; }
   .match-details { margin: 0 20px; text-align: center; }
@@ -367,9 +366,32 @@ html, body {
     padding: 14px 28px;
     font-size: 1rem;
   }
-      .logos img.team1 {margin-right: -20px;}
-    .logos img.team2 {margin-left: -50px;}
-
+  .logos img.team1 {margin-right: -20px;}
+  .logos img.team2 {margin-left: -50px;}
+  
+  /* Login overlay responsive */
+  .login-prompt {
+    padding: 1.5rem;
+    margin: 0 0.5rem;
+  }
+  
+  .login-prompt h3 {
+    font-size: 1.3rem;
+  }
+  
+  .login-prompt p {
+    font-size: 0.9rem;
+  }
+  
+  .login-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .login-btn {
+    width: 100%;
+    max-width: 200px;
+  }
 }
 
 .standing{
@@ -425,8 +447,8 @@ html, body {
 
 .standings-cta:hover{
     color: #F3F2EC;
-    border-color: #E62727;
-    background-color: rgba(230, 39, 39, 0.1);
+    border-color: rgb(196, 13, 60);
+    background-color: rgba(196, 13, 60, 0.1);
     transform: translateY(-2px);
 }
 .standings-cta.prev{ left: 6px; }
@@ -454,7 +476,25 @@ html, body {
     border-radius: 12px;
   }
   .Home .standings-title{font-size: 1rem;}
-  .team h2{font-size: 1rem;}
+  .team{
+    margin-bottom: 5vh !important;
+  }
+  .team h2{
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+  .carousel-team-logo {
+    padding: 5px 10px;
+    gap: 6px;
+  }
+  .small-team-logo {
+    width: 20px;
+    height: 20px;
+  }
+  .carousel-team-name {
+    font-size: 0.75rem;
+    letter-spacing: 0.2px;
+  }
   .logos img { width: 200px; }
   .match-details h1 { font-size: 1.8rem; }
   .match-details h2 { font-size: 1.3rem; }
@@ -481,6 +521,10 @@ html, body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .blurred-section {
@@ -561,15 +605,15 @@ html, body {
 }
 
 .login-btn.primary {
-  background: linear-gradient(135deg, #E62727 0%, #C41E3A 100%);
-  color: #FFFFFF;
-  box-shadow: 0 4px 15px rgba(230, 39, 39, 0.3);
+  background: linear-gradient(135deg, rgb(196, 13, 60) 0%, rgb(196, 13, 60) 100%);
+  color: #F3F2EC;
+  box-shadow: 0 4px 15px rgba(196, 13, 60, 0.3);
 }
 
 .login-btn.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(230, 39, 39, 0.4);
-  color: #FFFFFF;
+  box-shadow: 0 6px 20px rgba(196, 13, 60, 0.4);
+  color: #F3F2EC;
 }
 
 .login-btn.secondary {
@@ -586,60 +630,39 @@ html, body {
 }
 
 /* Mobile responsive for login overlay */
-@media (max-width: 768px) {
-  .login-prompt {
-    padding: 1.5rem;
-    margin: 0 0.5rem;
-  }
-  
-  .login-prompt h3 {
-    font-size: 1.3rem;
-  }
-  
-  .login-prompt p {
-    font-size: 0.9rem;
-  }
-  
-  .login-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .login-btn {
-    width: 100%;
-    max-width: 200px;
-  }
-}
 
 /* Team info styles */
-.team h2 {
-    margin: 0 0 15px 0;
+
+/* Carousel with team logo */
+.carousel-with-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
 }
 
-.team-info {
+.carousel-team-logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 15px;
-    padding: 12px 20px;
+    gap: 10px;
+    padding: 8px 16px;
     background: rgba(243, 242, 236, 0.08);
-    border-radius: 12px;
+    border-radius: 20px;
     border: 1px solid rgba(220, 220, 220, 0.15);
     backdrop-filter: blur(10px);
 }
 
-.team-logo {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+.small-team-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     object-fit: cover;
-    border: 2px solid rgba(243, 242, 236, 0.3);
+    border: 1px solid rgba(243, 242, 236, 0.3);
 }
 
-.team-name {
+.carousel-team-name {
     color: #F3F2EC;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -714,18 +737,19 @@ html, body {
 
 /* Responsive design for team info */
 @media (max-width: 768px) {
-    .team-info {
-        flex-direction: column;
+    .carousel-team-logo {
+        padding: 6px 12px;
         gap: 8px;
     }
     
-    .team-logo {
-        width: 35px;
-        height: 35px;
+    .small-team-logo {
+        width: 24px;
+        height: 24px;
     }
     
-    .team-name {
-        font-size: 1rem;
+    .carousel-team-name {
+        font-size: 0.8rem;
+        letter-spacing: 0.3px;
     }
     
     .no-team-content h3 {

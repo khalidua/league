@@ -5,7 +5,6 @@ import Spinner from '../components/Spinner';
 import './AdminDashboard.css';
 
 interface DashboardStats {
-  totalUsers: number;
   totalPlayers: number;
   totalTeams: number;
   totalMatches: number;
@@ -15,7 +14,7 @@ interface DashboardStats {
 
 interface RecentActivity {
   id: string;
-  type: 'user_registered' | 'match_completed' | 'team_created' | 'tournament_created';
+  type: 'user_registered' | 'player_registered' | 'player_joined_team' | 'match_completed' | 'team_created' | 'tournament_created';
   description: string;
   timestamp: string;
 }
@@ -49,7 +48,6 @@ const AdminDashboard: React.FC = () => {
       const completedMatches = matches.filter((match: any) => match.status === 'Finished').length;
 
       setStats({
-        totalUsers: users.length,
         totalPlayers: players.length,
         totalTeams: teams.length,
         totalMatches: matches.length,
@@ -103,6 +101,36 @@ const AdminDashboard: React.FC = () => {
         });
       });
 
+      // Add recent player registrations
+      const recentPlayerRegistrations = players
+        .filter((player: any) => player.registered_at)
+        .sort((a: any, b: any) => new Date(b.registered_at).getTime() - new Date(a.registered_at).getTime())
+        .slice(0, 3);
+      
+      recentPlayerRegistrations.forEach((player: any) => {
+        activities.push({
+          id: `player_reg_${player.playerid}`,
+          type: 'player_registered',
+          description: `Player ${player.firstname} ${player.lastname} registered`,
+          timestamp: player.registered_at
+        });
+      });
+
+      // Add recent team joins
+      const recentTeamJoins = players
+        .filter((player: any) => player.joined_team_at && player.teamname)
+        .sort((a: any, b: any) => new Date(b.joined_team_at).getTime() - new Date(a.joined_team_at).getTime())
+        .slice(0, 3);
+      
+      recentTeamJoins.forEach((player: any) => {
+        activities.push({
+          id: `player_join_${player.playerid}`,
+          type: 'player_joined_team',
+          description: `${player.firstname} ${player.lastname} joined ${player.teamname}`,
+          timestamp: player.joined_team_at
+        });
+      });
+
       // Sort activities by timestamp (most recent first)
       activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setRecentActivity(activities.slice(0, 5)); // Show only 5 most recent
@@ -122,8 +150,12 @@ const AdminDashboard: React.FC = () => {
     switch (type) {
       case 'user_registered':
         return '👤';
-      case 'match_completed':
+      case 'player_registered':
         return '⚽';
+      case 'player_joined_team':
+        return '🤝';
+      case 'match_completed':
+        return '🏁';
       case 'team_created':
         return '🏆';
       case 'tournament_created':
@@ -214,17 +246,6 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'overview' && (
           <div className="overview-tab">
             <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 448 512" aria-hidden>
-                    <path fill="currentColor" d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0S96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"/>
-                  </svg>
-                </div>
-                <div className="stat-info">
-                  <h3>{stats?.totalUsers || 0}</h3>
-                  <p>Total Users</p>
-                </div>
-              </div>
               <div className="stat-card">
                 <div className="stat-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 11 11" aria-hidden>
@@ -1760,7 +1781,6 @@ const GroupManagement: React.FC = () => {
             <div className="groups-header">
               <div className="groups-title">
                 <h3>Groups</h3>
-                <p className="groups-subtitle">Live standings update automatically when match results are entered</p>
               </div>
               <div className="groups-actions">
                 <button 
@@ -1773,6 +1793,7 @@ const GroupManagement: React.FC = () => {
                 <button 
                   className="primary-btn"
                   onClick={() => setShowCreateGroupForm(true)}
+                  disabled={tournamentTeams.length === 0}
                 >
                   Create Group
                 </button>
@@ -1790,26 +1811,37 @@ const GroupManagement: React.FC = () => {
                 <p>{tournamentTeams.length} teams are registered and ready for group assignment.</p>
               </div>
             ) : (
-              <div className="groups-grid">
+              <div className="simple-groups-grid">
                 {groups.map((group) => {
-                  const groupStats = getGroupStats(group.groupid);
-                  const groupStandings = getGroupStandings(group.groupid);
                   const groupTeams = getTeamsInGroup(group.groupid);
                   
                   return (
-                    <div key={group.groupid} className="group-card">
-                      <div className="group-header">
-                        <div className="group-title">
-                          <h4>{group.groupname}</h4>
-                          <div className="group-stats-summary">
-                            <span className="stat-badge">{groupStats.teamsCount} teams</span>
-                            <span className="stat-badge">{groupStats.totalMatches} matches</span>
-                            <span className="stat-badge completed">{groupStats.completedMatches} finished</span>
-                            <span className="stat-badge upcoming">{groupStats.upcomingMatches} upcoming</span>
+                    <div key={group.groupid} className="simple-group-card">
+                      <div className="simple-group-header">
+                        <h4>{group.groupname}</h4>
+                        <span className="team-count">{groupTeams.length} teams</span>
+                      </div>
+                      
+                      <div className="simple-group-teams">
+                        {groupTeams.length === 0 ? (
+                          <p className="no-teams">No teams assigned to this group</p>
+                        ) : (
+                          <div className="simple-teams-list">
+                            {groupTeams.map((team: any) => (
+                              <div key={team.teamid} className="simple-team-item">
+                                {team.logourl && (
+                                  <img src={team.logourl} alt={team.teamname} className="simple-team-logo" />
+                                )}
+                                <span className="simple-team-name">{team.teamname}</span>
+                              </div>
+                            ))}
                           </div>
-                        </div>
+                        )}
+                      </div>
+                      
+                      <div className="simple-group-actions">
                         <button 
-                          className="action-btn"
+                          className="manage-teams-btn"
                           onClick={() => {
                             setSelectedGroup(group);
                             setShowAssignTeamForm(true);
@@ -1817,105 +1849,6 @@ const GroupManagement: React.FC = () => {
                         >
                           Manage Teams
                         </button>
-                      </div>
-                      
-                      <div className="group-content">
-                        <div className="group-teams">
-                          <h5>Teams ({groupTeams.length})</h5>
-                          {groupTeams.length === 0 ? (
-                            <p className="no-teams">No teams assigned</p>
-                          ) : (
-                            <div className="teams-list">
-                              {groupTeams.map((team: any) => (
-                                <div key={team.teamid} className="team-item">
-                                  <span className="team-name">{team.teamname}</span>
-                                  {team.logourl && (
-                                    <img src={team.logourl} alt={team.teamname} className="team-logo-small" />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="group-standings">
-                          <div className="standings-header">
-                            <h5>Live Standings</h5>
-                            <div className="standings-legend">
-                              <span>P: Played</span>
-                              <span>W: Wins</span>
-                              <span>D: Draws</span>
-                              <span>L: Losses</span>
-                              <span>GF: Goals For</span>
-                              <span>GA: Goals Against</span>
-                              <span>GD: Goal Difference</span>
-                              <span>Pts: Points</span>
-                            </div>
-                          </div>
-                          
-                          {groupStandings.length === 0 ? (
-                            <div className="no-standings">
-                              <p>No standings data available</p>
-                              <small>Standings will appear automatically when match results are entered</small>
-                            </div>
-                          ) : (
-                            <div className="standings-table-container">
-                              <table className="standings-table">
-                                <thead>
-                                  <tr>
-                                    <th className="position-col">#</th>
-                                    <th className="team-col">Team</th>
-                                    <th className="stat-col">P</th>
-                                    <th className="stat-col">W</th>
-                                    <th className="stat-col">D</th>
-                                    <th className="stat-col">L</th>
-                                    <th className="stat-col">GF</th>
-                                    <th className="stat-col">GA</th>
-                                    <th className="stat-col">GD</th>
-                                    <th className="points-col">Pts</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {groupStandings.map((standing: any, index: number) => {
-                                    const team = teams.find((t: any) => t.teamid === standing.teamid);
-                                    const goalDifference = standing.goalsfor - standing.goalsagainst;
-                                    const isTopThree = index < 3;
-                                    
-                                    return (
-                                      <tr key={standing.teamid} className={isTopThree ? 'top-three' : ''}>
-                                        <td className="position-col">
-                                          <span className={`position ${index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : ''}`}>
-                                            {index + 1}
-                                          </span>
-                                        </td>
-                                        <td className="team-col">
-                                          <div className="team-info">
-                                            {team?.logourl && (
-                                              <img src={team.logourl} alt={team.teamname} className="team-logo" />
-                                            )}
-                                            <span className="team-name">{team?.teamname || 'Unknown'}</span>
-                                          </div>
-                                        </td>
-                                        <td className="stat-col">{standing.matchesplayed}</td>
-                                        <td className="stat-col wins">{standing.wins}</td>
-                                        <td className="stat-col draws">{standing.draws}</td>
-                                        <td className="stat-col losses">{standing.losses}</td>
-                                        <td className="stat-col">{standing.goalsfor}</td>
-                                        <td className="stat-col">{standing.goalsagainst}</td>
-                                        <td className={`stat-col ${goalDifference > 0 ? 'positive' : goalDifference < 0 ? 'negative' : ''}`}>
-                                          {goalDifference > 0 ? '+' : ''}{goalDifference}
-                                        </td>
-                                        <td className="points-col">
-                                          <span className="points">{standing.points}</span>
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
-                        </div>
                       </div>
                     </div>
                   );
@@ -2034,7 +1967,7 @@ const CreateGroupForm: React.FC<{
   );
 };
 
-// Assign Team Form Component
+// New Team Management Modal Component
 const AssignTeamForm: React.FC<{
   group: any;
   availableTeams: any[];
@@ -2049,19 +1982,10 @@ const AssignTeamForm: React.FC<{
     try {
       setLoading(true);
       setError(null);
-      // Prevent assigning teams that do not match tournament's maxPlayers
-      const maxPlayers = Number((group as any).tournament?.maxPlayers ?? 8);
-      const roster = await api.listPlayers({ teamid });
-      const rosterCount = (roster || []).length;
-      if (rosterCount > maxPlayers) {
-        throw new Error(`Team must have at most ${maxPlayers} players (current: ${rosterCount}).`);
-      }
-
       await api.createGroupTeam({
         groupid: group.groupid,
         teamid: teamid
       });
-
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Failed to assign team');
@@ -2074,7 +1998,6 @@ const AssignTeamForm: React.FC<{
     try {
       setLoading(true);
       setError(null);
-
       await api.deleteGroupTeam(group.groupid, teamid);
       onSuccess();
     } catch (err: any) {
@@ -2090,23 +2013,23 @@ const AssignTeamForm: React.FC<{
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content large-modal">
+      <div className="simple-modal">
         <div className="modal-header">
           <h3>Manage Teams - {group.groupname}</h3>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
         
-        <div className="team-assignment">
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
 
-          <div className="assigned-teams">
+        <div className="modal-content">
+          <div className="team-section">
             <h4>Assigned Teams ({assignedTeams.length})</h4>
             {assignedTeams.length === 0 ? (
-              <p>No teams assigned to this group</p>
+              <p>No teams assigned</p>
             ) : (
               <div className="team-list">
                 {assignedTeams.map((team: any) => (
@@ -2125,10 +2048,10 @@ const AssignTeamForm: React.FC<{
             )}
           </div>
 
-          <div className="available-teams">
+          <div className="team-section">
             <h4>Available Teams ({unassignedTeams.length})</h4>
             {unassignedTeams.length === 0 ? (
-              <p>All teams are already assigned to groups</p>
+              <p>All teams assigned</p>
             ) : (
               <div className="team-list">
                 {unassignedTeams.map((team: any) => (
@@ -2146,12 +2069,6 @@ const AssignTeamForm: React.FC<{
               </div>
             )}
           </div>
-        </div>
-
-        <div className="form-actions">
-          <button onClick={onClose} className="secondary-btn">
-            Close
-          </button>
         </div>
       </div>
     </div>

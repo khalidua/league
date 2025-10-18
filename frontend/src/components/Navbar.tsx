@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [moreDropdownPosition, setMoreDropdownPosition] = useState({ top: 0, left: 0 });
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const moreDropdownRef = useRef<HTMLDivElement>(null);
   const toggle = () => setOpen(v => !v);
@@ -77,8 +77,9 @@ const Navbar: React.FC = () => {
           <div className="nav-center">
             <div className="nav-links-desktop">
               <Link className="nav-item" to="/">{(user?.role || '').toLowerCase() === 'admin' ? 'Dashboard' : 'Home'}</Link>
-              <Link className="nav-item" to="/teams">Teams</Link>
+              <Link className="nav-item" to="/standings">Standings</Link>
               <Link className="nav-item" to="/matches">Matches</Link>
+              <Link className="nav-item" to="/tournaments">Tournaments</Link>
 
               {/* Dropdown */}
               <div className="dropdown">
@@ -94,14 +95,11 @@ const Navbar: React.FC = () => {
                       zIndex: 10000
                     }}
                   >
-                    <Link to="/standings" onClick={() => setMoreDropdownOpen(false)}>Standings</Link>
+                    <Link to="/teams" onClick={() => setMoreDropdownOpen(false)}>Teams</Link>
                     <Link to="/players" onClick={() => setMoreDropdownOpen(false)}>Players</Link>
                     <Link to="/rules" onClick={() => setMoreDropdownOpen(false)}>Rules</Link>
                     {isTeamCaptain && (
                       <Link to="/team-management" onClick={() => setMoreDropdownOpen(false)}>Team Management</Link>
-                    )}
-                    {(user?.role || '').toLowerCase() === 'admin' && (
-                      <Link to="/admin" onClick={() => setMoreDropdownOpen(false)}>Dashboard</Link>
                     )}
                   </div>,
                   document.body
@@ -142,19 +140,24 @@ const Navbar: React.FC = () => {
           <div id="mobile-menu" className="nav-links" role="menu">
             <div className="nav-links-content">
               <Link className="nav-item" to="/" onClick={toggle}>{(user?.role || '').toLowerCase() === 'admin' ? 'Dashboard' : 'Home'}</Link>
-              <Link className="nav-item" to="/teams" onClick={toggle}>Teams</Link>
-              <Link className="nav-item" to="/matches" onClick={toggle}>Matches</Link>
               <Link className="nav-item" to="/standings" onClick={toggle}>Standings</Link>
+              <Link className="nav-item" to="/matches" onClick={toggle}>Matches</Link>
+              <Link className="nav-item" to="/tournaments" onClick={toggle}>Tournaments</Link>
+              <Link className="nav-item" to="/teams" onClick={toggle}>Teams</Link>
               <Link className="nav-item" to="/players" onClick={toggle}>Players</Link>
               <Link className="nav-item" to="/rules" onClick={toggle}>Rules</Link>
               {isTeamCaptain && (
                 <Link className="nav-item" to="/team-management" onClick={toggle}>Team Management</Link>
               )}
             </div>
-            {!isAuthenticated && (
+            {!isAuthenticated ? (
               <div className="mobile-auth-footer">
                 <Link to="/login" className="mobile-btn mobile-login" onClick={toggle}>Login</Link>
                 <Link to="/register" className="mobile-btn mobile-register" onClick={toggle}>Register</Link>
+              </div>
+            ) : (
+              <div className="mobile-auth-footer">
+                <button className="mobile-btn mobile-logout" onClick={() => { logout(); toggle(); }}>Logout</button>
               </div>
             )}
           </div>

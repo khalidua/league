@@ -8,12 +8,7 @@ import AdminDashboard from './AdminDashboard';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
 import Spinner from '../components/Spinner';
-import crisLogo from '../assets/cris.png';
-import realLogo from '../assets/realLogo.png';
-import manLogo from '../assets/manLogo.png';
-import reactLogo from '../assets/react.svg';
 import lockIcon from '../assets/icons8-lock-24.png';
-import defaultTeamLogo from '../assets/default_team.png';
 import { capitalizeFirstLetter } from '../utils/nameUtils';
 import { getPlayerImage, getTeamLogo } from '../utils/defaultImages';
 const Home: React.FC = () => {
@@ -136,14 +131,21 @@ const Home: React.FC = () => {
               })
               .slice(0, 5);
 
-            const formStr = teamResults.map((r: any) => {
-              if (r.winnerteamid == null) return 'D';
-              return Number(r.winnerteamid) === Number(s.teamid) ? 'W' : 'L';
-            }).join('-');
+            const formStr = teamResults.length > 0 
+              ? teamResults.map((r: any) => {
+                  if (r.winnerteamid == null) return 'D';
+                  return Number(r.winnerteamid) === Number(s.teamid) ? 'W' : 'L';
+                }).join('-')
+              : 'W-W-D-L'; // Test form for debugging
+            
+            console.log(`Team ${s.teamid} form:`, formStr);
+            console.log(`Team ${s.teamid} teamResults:`, teamResults);
+            console.log(`Team ${s.teamid} teamResults.length:`, teamResults.length);
+            console.log(`Team ${s.teamid} form string length:`, formStr.length);
             return {
               id: s.teamid,
               name: team.teamname || `Team ${s.teamid}`,
-              logoUrl: team.logourl || defaultTeamLogo,
+              logoUrl: team.logourl || '/src/assets/default_team.png',
               played,
               wins: s.wins || 0,
               draws: s.draws || 0,
@@ -240,17 +242,6 @@ const Home: React.FC = () => {
         {!isAdmin && (
           <div className='team'>
             <h2>MY TEAM</h2>
-            {isAuthenticated && user?.teamid && user?.teamname ? (
-              <div className="team-info">
-                <img src={getTeamLogo(user.teamlogo)} alt={user.teamname} className="team-logo" />
-                <span className="team-name">{user.teamname}</span>
-              </div>
-            ) : isAuthenticated && user?.teamid ? (
-              <div className="team-info">
-                <img src={getTeamLogo()} alt="Your Team" className="team-logo" />
-                <span className="team-name">Your Team</span>
-              </div>
-            ) : null}
           </div>
         )}
         <div className="team-section-container">

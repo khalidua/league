@@ -10,7 +10,7 @@ type PlayerRow = {
 	id: number;
 	name: string;
 	team: string;
-	position: 'GK' | 'DEF' | 'MID' | 'FWD' | string;
+	position: 'Goalkeeper' | 'Defender' | 'MID' | 'FWD' | string;
 	number: number;
 	age?: number;
 	avatarUrl?: string;
@@ -37,7 +37,7 @@ const Players: React.FC = () => {
 	const [players, setPlayers] = useState<PlayerRow[]>([]);
 	const [total, setTotal] = useState(0);
 	const [teams, setTeams] = useState<string[]>(['All']);
-	const positions = useMemo(() => ['All', 'GK', 'DEF', 'MID', 'FWD'], []);
+	const [positions, setPositions] = useState<string[]>(['All']);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -89,9 +89,11 @@ const Players: React.FC = () => {
 				const start = (page - 1) * pageSize;
 				const data = list.slice(start, start + pageSize);
 				const teams = Array.from(new Set(mapped.map((p) => p.team))).filter(Boolean);
+				const positions = Array.from(new Set(mapped.map((p) => p.position))).filter(Boolean);
 				setPlayers(data);
 				setTotal(total);
 				if (teams && teams.length > 0) setTeams(['All', ...teams]);
+				if (positions && positions.length > 0) setPositions(['All', ...positions]);
 			} catch (e: any) {
 				if (e.name === 'AbortError') return;
 				setError('Failed to load players');

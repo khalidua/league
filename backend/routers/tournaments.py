@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.deps import get_db
 from backend import models
-from backend.schemas import Tournament as TournamentSchema, TournamentCreate, TournamentUpdate
+from backend.schemas import Tournament as TournamentSchema, TournamentCreate, TournamentUpdate, TournamentJoinRequest
 from backend.auth import require_organizer_or_admin, require_authenticated_user
 
 router = APIRouter()
@@ -47,3 +47,63 @@ def delete_tournament(tournamentid: int, db: Session = Depends(get_db), current_
 	db.delete(tournament)
 	db.commit()
 	return None
+
+@router.post("/join", status_code=201)
+def join_tournament(payload: TournamentJoinRequest, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
+	"""Team captain joins a tournament"""
+	# Verify tournament exists
+	tournament = db.query(models.Tournament).filter(models.Tournament.tournamentid == payload.tournamentid).first()
+	if not tournament:
+		raise HTTPException(404, "Tournament not found")
+	
+	# Verify current user is a team captain
+	player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+	if not player or not player.teamid:
+		raise HTTPException(403, "Only team captains can join tournaments")
+	
+	team = db.query(models.Team).filter(models.Team.teamid == player.teamid).first()
+	if not team or team.teamcaptainid != player.playerid:
+		raise HTTPException(403, "Only team captains can join tournaments")
+	
+	# Check if team is already registered for this tournament
+	existing_entry = db.query(models.TournamentTeam).filter(
+		models.TournamentTeam.tournamentid == payload.tournamentid,
+		models.TournamentTeam.teamid == team.teamid
+	).first()
+	
+	if existing_entry:
+		raise HTTPException(400, "Your team is already registered for this tournament")
+	
+	# Register team for tournament
+	tournament_team = models.TournamentTeam(
+		tournamentid=payload.tournamentid,
+		teamid=team.teamid
+	)
+	db.add(tournament_team)
+	db.commit()
+	db.refresh(tournament_team)
+	
+	return {"message": f"Team {team.teamname} successfully joined tournament {tournament.name}"}
+
+@router.get("/{tournamentid}/teams")
+def get_tournament_teams(tournamentid: int, db: Session = Depends(get_db)):
+	"""Get all teams registered for a specific tournament"""
+	# Verify tournament exists
+	tournament = db.query(models.Tournament).filter(models.Tournament.tournamentid == tournamentid).first()
+	if not tournament:
+		raise HTTPException(404, "Tournament not found")
+	
+	# Get all teams registered for this tournament
+	tournament_teams = db.query(models.TournamentTeam).filter(
+		models.TournamentTeam.tournamentid == tournamentid
+	).all()
+	
+	# Get team details
+	team_ids = [tt.teamid for tt in tournament_teams]
+	teams = db.query(models.Team).filter(models.Team.teamid.in_(team_ids)).all()
+	
+	return {
+		"tournament": tournament,
+		"teams": teams,
+		"registered_team_ids": team_ids
+	}

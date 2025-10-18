@@ -1,166 +1,159 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import './Standings.css';
 import StandingsTable, { type StandingsTeam } from '../components/StandingsTable';
 import { api } from '../api/client';
 import Spinner from '../components/Spinner';
-import defaultTeamLogo from '../assets/default_team.png';
-
-type StandingsData = {
-  standingid: number;
-  groupid?: number;
-  teamid?: number;
-  matchesplayed: number;
-  wins: number;
-  draws: number;
-  losses: number;
-  goalsfor: number;
-  goalsagainst: number;
-  goaldifference?: number;
-  points: number;
-  teamname?: string;
-  teamlogo?: string;
-  groupname?: string;
-};
 
 const StandingsPage: React.FC = () => {
   const [params, setParams] = useSearchParams();
-  const initialGroup = params.get('group') ?? 'Group A';
-  const [active, setActive] = useState<string>(initialGroup);
-  const [standingsData, setStandingsData] = useState<StandingsData[]>([]);
-  const [loading, setLoading] = useState(false);
+  const initialGroup = params.get('group') ?? '';
+  const [groups, setGroups] = useState<{ title: string; teams: StandingsTeam[] }[]>([]);
+  const [activeGroup, setActiveGroup] = useState<string>(initialGroup);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch standings data
   useEffect(() => {
-    const fetchStandings = async () => {
-      setLoading(true);
-      setError(null);
+    const loadStandings = async () => {
       try {
-        const [standings, results, matches, teams, groupTeams] = await Promise.all([
+        setLoading(true);
+        setError(null);
+        const [groupsData, standingsData, teamsData, resultsData, matchesData] = await Promise.all([
+          api.listTournamentGroups(),
           api.listStandings(),
+          api.listTeams(),
           api.listMatchResults(),
           api.listMatches(),
-          api.listTeams(),
-          api.listGroupTeams(),
         ]);
-        // Attach auxiliary data for form calculation
-        const matchById: Record<number, any> = {};
-        (matches || []).forEach((m: any) => { matchById[Number(m.matchid)] = m; });
+
         const teamById: Record<number, any> = {};
-        (teams || []).forEach((t: any) => { teamById[Number(t.teamid)] = t; });
-        // Build group -> teamId set
-        const groupIdToTeamIds: Record<number, Set<number>> = {};
-        (groupTeams || []).forEach((gt: any) => {
-          const gid = Number(gt.groupid);
-          const tid = Number(gt.teamid);
-          if (!groupIdToTeamIds[gid]) groupIdToTeamIds[gid] = new Set<number>();
-          groupIdToTeamIds[gid].add(tid);
+        (teamsData || []).forEach((t: any) => { teamById[Number(t.teamid)] = t; });
+
+        // index matches by id for quick lookup (date and teams)
+        const matchById: Record<number, any> = {};
+        (matchesData || []).forEach((m: any) => { matchById[Number(m.matchid)] = m; });
+
+        console.log('Raw groupsData:', groupsData);
+        
+        const groupsTop: { title: string; teams: StandingsTeam[] }[] = (groupsData || [])
+          .filter((g: any, index: number, self: any[]) => 
+            self.findIndex(group => group.groupid === g.groupid) === index
+          )
+          .map((g: any) => {
+          const groupStandings = (standingsData || []).filter((s: any) => s.groupid === g.groupid);
+          const sorted = groupStandings.sort((a: any, b: any) => {
+            if (b.points !== a.points) return b.points - a.points;
+            const gdA = (a.goalsfor || 0) - (a.goalsagainst || 0);
+            const gdB = (b.goalsfor || 0) - (b.goalsagainst || 0);
+            if (gdB !== gdA) return gdB - gdA;
+            return (b.goalsfor || 0) - (a.goalsfor || 0);
+          });
+
+          const teams: StandingsTeam[] = sorted.map((s: any) => {
+            const team = teamById[Number(s.teamid)] || {};
+            const played = (s.wins || 0) + (s.draws || 0) + (s.losses || 0);
+            // compute recent form from latest 5 results involving this team
+            const teamResults = (resultsData || [])
+              .filter((r: any) => {
+                const m = matchById[Number(r.matchid)];
+                if (!m) return false;
+                return Number(m.hometeamid) === Number(s.teamid) || Number(m.awayteamid) === Number(s.teamid);
+              })
+              .sort((ra: any, rb: any) => {
+                const ma = matchById[Number(ra.matchid)];
+                const mb = matchById[Number(rb.matchid)];
+                const da = ma ? new Date(ma.matchdate).getTime() : 0;
+                const db = mb ? new Date(mb.matchdate).getTime() : 0;
+                return db - da; // newest first
+              })
+              .slice(0, 5);
+
+            const formStr = teamResults.length > 0 
+              ? teamResults.map((r: any) => {
+                  if (r.winnerteamid == null) return 'D';
+                  return Number(r.winnerteamid) === Number(s.teamid) ? 'W' : 'L';
+                }).join('-')
+              : 'W-W-D-L'; // Test form for debugging
+            
+            console.log(`Team ${s.teamid} form:`, formStr);
+            console.log(`Team ${s.teamid} teamResults:`, teamResults);
+            console.log(`Team ${s.teamid} teamResults.length:`, teamResults.length);
+            console.log(`Team ${s.teamid} form string length:`, formStr.length);
+            
+            return {
+              id: s.teamid,
+              name: team.teamname || `Team ${s.teamid}`,
+              logoUrl: team.logourl || '/src/assets/default_team.png',
+              played,
+              wins: s.wins || 0,
+              draws: s.draws || 0,
+              losses: s.losses || 0,
+              goalsFor: s.goalsfor || 0,
+              goalsAgainst: s.goalsagainst || 0,
+              goalDifference: (s.goalsfor || 0) - (s.goalsagainst || 0),
+              points: s.points || 0,
+              form: formStr,
+            } as StandingsTeam;
+          });
+
+          return { title: g.groupname || `Group ${g.groupid}`, teams };
         });
 
-        // Map into enriched records keeping original properties
-        const enriched = (standings || []).map((s: any) => ({ ...s, _results: results, _matchById: matchById, _teamById: teamById, _groupTeamIds: groupIdToTeamIds[Number(s.groupid)] }));
-        setStandingsData(enriched);
+        console.log('Processed groupsTop:', groupsTop);
+        
+        // Additional deduplication by title to ensure no duplicates
+        const uniqueGroups = groupsTop.filter((group, index, self) => 
+          self.findIndex(g => g.title === group.title) === index
+        );
+        
+        console.log('Unique groups:', uniqueGroups);
+        setGroups(uniqueGroups);
+        
+        // Set initial active group if not set
+        if (!activeGroup && uniqueGroups.length > 0) {
+          const firstGroup = uniqueGroups[0].title;
+          setActiveGroup(firstGroup);
+          // Update URL with first group
+          const next = new URLSearchParams(params);
+          next.set('group', firstGroup);
+          setParams(next, { replace: true });
+        }
       } catch (e) {
+        console.error('Error loading standings:', e);
         setError('Failed to load standings');
-        console.error('Error fetching standings:', e);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStandings();
+    loadStandings();
   }, []);
 
-  // Group standings by group name
-  const groups = useMemo(() => {
-    const groupedData = standingsData.reduce((acc, standing) => {
-      const groupName = standing.groupname || 'Unassigned';
-      if (!acc[groupName]) {
-        acc[groupName] = [];
-      }
-      
-      // Convert to StandingsTeam format
-      const matchesById = (standing as any)._matchById as Record<number, any>;
-      const allResults = (standing as any)._results as any[];
-      const groupTeamIds = (standing as any)._groupTeamIds as Set<number> | undefined;
-      const teamIdNum = Number(standing.teamid);
-      const teamResults = (allResults || [])
-        .filter((r: any) => {
-          const m = matchesById[Number(r.matchid)];
-          if (!m) return false;
-          // require finished matches only and within same group (both teams in group)
-          if (m.status !== 'Finished') return false;
-          if (groupTeamIds) {
-            const inSameGroup = groupTeamIds.has(Number(m.hometeamid)) && groupTeamIds.has(Number(m.awayteamid));
-            if (!inSameGroup) return false;
-          }
-          return Number(m.hometeamid) === teamIdNum || Number(m.awayteamid) === teamIdNum;
-        })
-        .sort((ra: any, rb: any) => {
-          const ma = matchesById[Number(ra.matchid)];
-          const mb = matchesById[Number(rb.matchid)];
-          const da = ma ? new Date(ma.matchdate).getTime() : 0;
-          const db = mb ? new Date(mb.matchdate).getTime() : 0;
-          return db - da; // newest first
-        })
-        .slice(0, Math.min(5, standing.matchesplayed || 5));
-      const formStr = teamResults.map((r: any) => {
-        if (r.winnerteamid == null) return 'D';
-        return Number(r.winnerteamid) === teamIdNum ? 'W' : 'L';
-      }).join('-');
-
-      const teamData: StandingsTeam = {
-        id: standing.standingid,
-        name: standing.teamname || `Team ${standing.teamid}`,
-        logoUrl: standing.teamlogo || defaultTeamLogo,
-        played: standing.matchesplayed,
-        wins: standing.wins,
-        draws: standing.draws,
-        losses: standing.losses,
-        goalsFor: standing.goalsfor,
-        goalsAgainst: standing.goalsagainst,
-        goalDifference: standing.goaldifference || 0,
-        points: standing.points,
-        form: formStr
-      };
-      
-      acc[groupName].push(teamData);
-      return acc;
-    }, {} as Record<string, StandingsTeam[]>);
-
-    // Convert to array format and sort teams within each group
-    return Object.entries(groupedData).map(([key, teams]) => ({
-      key,
-      teams: teams.sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
-        return b.goalsFor - a.goalsFor;
-      })
-    }));
-  }, [standingsData]);
-
-  const current = groups.find(g => g.key === active) ?? groups[0];
-
-  const setGroup = (g: string) => {
-    setActive(g);
+  const setGroup = (groupTitle: string) => {
+    setActiveGroup(groupTitle);
     const next = new URLSearchParams(params);
-    next.set('group', g);
+    next.set('group', groupTitle);
     setParams(next, { replace: true });
   };
 
-  return (
-    <div className="StandingsPage">
-      <div className="standings-strap">LEAGUE STANDINGS</div>
+  const currentGroup = groups.find(g => g.title === activeGroup) ?? groups[0];
 
-      {loading && (
+  if (loading) {
+    return (
+      <div className="StandingsPage">
+        <div className="standings-strap">LEAGUE STANDINGS</div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', color: 'white' }}>
           <Spinner color="white" size="md" />
           <span style={{ marginLeft: '15px' }}>Loading standings...</span>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {!loading && error && (
+  if (error) {
+    return (
+      <div className="StandingsPage">
+        <div className="standings-strap">LEAGUE STANDINGS</div>
         <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
           <p>{error}</p>
           <button 
@@ -178,33 +171,39 @@ const StandingsPage: React.FC = () => {
             Retry
           </button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {!loading && !error && groups.length > 0 && (
+  return (
+    <div className="StandingsPage">
+      <div className="standings-strap">LEAGUE STANDINGS</div>
+      
+      {groups.length > 0 && (
         <>
           <div className="standings-tabs">
             {groups.map(g => (
               <button
-                key={g.key}
-                className={`tab-btn${g.key === active ? ' is-active' : ''}`}
-                onClick={() => setGroup(g.key)}
+                key={g.title}
+                className={`tab-btn${g.title === activeGroup ? ' is-active' : ''}`}
+                onClick={() => setGroup(g.title)}
                 type="button"
               >
-                {g.key}
+                {g.title}
               </button>
             ))}
           </div>
 
           <div className="standings-section">
-            <StandingsTable title={current.key} teams={current.teams} showForm />
+            {currentGroup && (
+              <StandingsTable 
+                title={currentGroup.title} 
+                teams={currentGroup.teams} 
+                showForm 
+              />
+            )}
           </div>
         </>
-      )}
-
-      {!loading && !error && groups.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
-          <p>No standings data available</p>
-        </div>
       )}
 
       <div className="standings-footer">
@@ -215,5 +214,3 @@ const StandingsPage: React.FC = () => {
 };
 
 export default StandingsPage;
-
-

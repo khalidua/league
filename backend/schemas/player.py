@@ -1,4 +1,5 @@
 from typing import Optional, Literal
+from datetime import datetime
 from pydantic import BaseModel
 
 PreferredFoot = Literal["Left", "Right", "Both"]
@@ -12,6 +13,8 @@ class PlayerBase(BaseModel):
 	preferredfoot: Optional[PreferredFoot] = None
 	height: Optional[float] = None
 	weight: Optional[float] = None
+	registered_at: Optional[datetime] = None
+	joined_team_at: Optional[datetime] = None
 
 	class Config:
 		from_attributes = True

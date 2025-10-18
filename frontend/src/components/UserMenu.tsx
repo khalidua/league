@@ -126,8 +126,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ className = '' }) => {
               <span className="menu-icon"><img src={ProfileIco}/></span>
               <span>Profile</span>
             </Link>
-            {/* Show team management only for players with a team (not Admins) */}
-            {user?.role !== 'Admin' && user?.teamid && (
+            {/* Show team management only for team captains (not Admins) */}
+            {user?.role !== 'Admin' && user?.teamid && user?.isTeamCaptain && (
               <Link to="/team-management" className="menu-item" onClick={() => setIsOpen(false)}>
                 <span className="menu-icon">⚽</span>
                 <span>Manage Team</span>

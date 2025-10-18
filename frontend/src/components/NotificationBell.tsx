@@ -138,7 +138,8 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ className = '' }) =
 												const m = it.metadata ? JSON.parse(it.metadata) : undefined;
 												const sameReq = m && m.requestid && meta && meta.requestid && m.requestid === meta.requestid;
 												if (sameReq) {
-													const updatedMeta = JSON.stringify({ ...(m || {}), result: action });
+													const resultValue = action === 'approve' ? 'approved' : 'denied';
+													const updatedMeta = JSON.stringify({ ...(m || {}), result: resultValue });
 													return { ...it, metadata: updatedMeta, isread: true };
 												}
 												return it;

@@ -5,7 +5,7 @@ from backend.schemas.team import Team, TeamCreate, TeamUpdate
 from backend.schemas.playerstats import PlayerStats, PlayerStatsCreate, PlayerStatsUpdate
 from backend.schemas.player import Player, PlayerCreate, PlayerUpdate, PlayerWithUser
 from backend.schemas.stadium import Stadium, StadiumCreate, StadiumUpdate
-from backend.schemas.tournament import Tournament, TournamentCreate, TournamentUpdate
+from backend.schemas.tournament import Tournament, TournamentCreate, TournamentUpdate, TournamentJoinRequest
 from backend.schemas.tournament_team import TournamentTeam, TournamentTeamCreate
 from backend.schemas.tournament_group import TournamentGroup, TournamentGroupCreate, TournamentGroupUpdate
 from backend.schemas.group_teams import GroupTeams, GroupTeamsCreate
@@ -23,7 +23,7 @@ __all__ = [
 	"PlayerStats", "PlayerStatsCreate", "PlayerStatsUpdate",
 	"Player", "PlayerCreate", "PlayerUpdate", "PlayerWithUser",
 	"Stadium", "StadiumCreate", "StadiumUpdate",
-	"Tournament", "TournamentCreate", "TournamentUpdate",
+	"Tournament", "TournamentCreate", "TournamentUpdate", "TournamentJoinRequest",
 	"TournamentTeam", "TournamentTeamCreate",
 	"TournamentGroup", "TournamentGroupCreate", "TournamentGroupUpdate",
 	"GroupTeams", "GroupTeamsCreate",

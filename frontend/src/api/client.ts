@@ -252,6 +252,11 @@ export const api = {
 	deleteTournament: (tournamentid: number) => request<any>(`/tournaments/${tournamentid}`, {
 		method: 'DELETE'
 	}, false),
+	joinTournament: (data: { tournamentid: number; note?: string }) => request<any>('/tournaments/join', {
+		method: 'POST',
+		body: JSON.stringify(data)
+	}, false),
+	getTournamentTeams: (tournamentid: number) => request<any>(`/tournaments/${tournamentid}/teams`),
 	
 	// Matches
 	listMatches: (params?: { status?: string; round?: string }) => {

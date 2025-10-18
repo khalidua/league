@@ -26,3 +26,7 @@ class TournamentUpdate(TournamentBase):
 
 class Tournament(TournamentBase):
 	tournamentid: int
+
+class TournamentJoinRequest(BaseModel):
+	tournamentid: int
+	note: Optional[str] = None

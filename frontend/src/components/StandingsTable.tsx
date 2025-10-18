@@ -34,6 +34,12 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, showForm = true,
 		return b.goalsFor - a.goalsFor;
 	});
 
+	// Debug form data
+	console.log('StandingsTable teams:', teams);
+	teams.forEach(team => {
+		console.log(`Team ${team.name} form:`, team.form);
+	});
+
 	return (
 		<div className="standings-wrapper">
 			{title ? <h2 className="standings-title">{title}</h2> : null}

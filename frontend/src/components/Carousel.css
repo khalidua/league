@@ -68,8 +68,8 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(230, 39, 39, 0.4);
 }
-.carousel-btn.prev{ left: 6px; }
-.carousel-btn.next{ right: 6px; }
+.carousel-btn.prev{ left: 0px; }
+.carousel-btn.next{ right: 0px; }
 
 .myTeam{
   margin-bottom: 80px;

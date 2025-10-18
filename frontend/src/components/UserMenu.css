@@ -272,4 +272,9 @@
     padding: 6px 10px;
     font-size: 0.75rem;
   }
+  
+  /* Hide logout button in user menu on mobile */
+  .menu-item.logout-item {
+    display: none;
+  }
 }

@@ -58,7 +58,7 @@
   z-index:20;
 }
 .filter-item{ width:100%; text-align:left; padding:10px 12px; border-radius:10px; background:transparent; border:none; color:#F3F2EC; cursor:pointer; }
-.filter-item:hover{ background:linear-gradient(135deg,#E62727 0%,#C41E3A 100%); }
+.filter-item:hover{ background:linear-gradient(135deg,rgb(196, 13, 60) 0%,rgb(196, 13, 60) 100%); }
 .filter-item.is-active{ outline:1px solid rgba(243,242,236,.3); }
 
 .table-wrapper{ width:100%; overflow:auto; border-radius:12px; border:1px solid rgba(220,220,220,.1); }

@@ -10,9 +10,10 @@
   position: relative;
   width: 100%;
   height: 470px;
-  background-color: brown;
+  background: linear-gradient(135deg, #1C2A39 0%, #2E8B57 100%);
   border-radius: 24px;
   z-index: 1;
+  box-shadow: 0 8px 32px rgba(28, 42, 57, 0.4);
 }
 
 .info-card {
@@ -22,13 +23,15 @@
   left: 0;
   width: 100%;
   height: 130px;
-  background-color: white;
+  background: linear-gradient(135deg, #FAF9F6 0%, #C0C7C5 100%);
   border-radius: 24px;
   z-index: 50;
-  color: #000;
+  color: #1C2A39;
   justify-content: space-between;
   align-items: center;
   padding: 0px 70px;
+  box-shadow: 0 4px 20px rgba(28, 42, 57, 0.2);
+  border: 1px solid rgba(192, 199, 197, 0.3);
 }
 .stat-item{
     display: flex;
@@ -48,28 +51,34 @@
 h1{
     margin: 0;
     margin-top: 30px;
+    color: #FAF9F6;
+    font-weight: 700;
 }
 
 .stat-value{
   font-size: 24px;
   font-weight: bold;
+  color: #2E8B57;
 }
 
 
 .stat-label{
   font-size: 14px;
   font-weight: bold;
+  color: #1C2A39;
 }
 
 
 .rating{
-  background-color: #000;
-  color: #fff;
+  background: linear-gradient(135deg, #2E8B57 0%, #1C2A39 100%);
+  color: #FAF9F6;
+  box-shadow: 0 4px 12px rgba(46, 139, 87, 0.4);
 }
 
 
 .rating .stat-value{
-  color: #fff;
+  color: #FAF9F6;
+  font-weight: 800;
 }
 
 
@@ -77,6 +86,8 @@ h1{
 .main-data h3{
     margin: 0;
     letter-spacing: 15px;
+    color: #FAF9F6;
+    font-weight: 600;
 }
 
 .ovals{
@@ -89,28 +100,31 @@ h1{
 
 .oval-one{
     width: 48%;
-    background-color: yellow;
+    background: linear-gradient(135deg, #2E8B57 0%, #1C2A39 100%);
     border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 14px;
-    color: #333;
+    color: #FAF9F6;
     text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(46, 139, 87, 0.4);
 }
 
 .oval-two{
     width: 48%;
     border-radius: 24px;
-    background-color: aqua;
+    background: linear-gradient(135deg, #C0C7C5 0%, #FAF9F6 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 14px;
-    color: #333;
+    color: #1C2A39;
     text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(192, 199, 197, 0.3);
+    border: 1px solid rgba(28, 42, 57, 0.2);
 }
 
 .team{
@@ -138,6 +152,7 @@ h1{
     justify-content: center;
     font-weight: bold;
     font-size: 16px;
+    color: #2E8B57;
 }
 .personal-info{
     display: flex;
@@ -147,6 +162,9 @@ h1{
     margin-top: 20px;
     margin-left: 60px;
     backdrop-filter: blur(10px);
+    background: rgba(250, 249, 246, 0.15);
+    border: 1px solid rgba(192, 199, 197, 0.3);
+    box-shadow: 0 4px 16px rgba(28, 42, 57, 0.1);
 }
 
 .personal-info-grid {
@@ -164,8 +182,8 @@ h1{
 
 .info-label {
     font-size: 0.75rem;
-    color: #F3F2EC;
-    opacity: 0.8;
+    color: #C0C7C5;
+    opacity: 0.9;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
@@ -173,7 +191,7 @@ h1{
 
 .info-value {
     font-size: 1rem;
-    color: #F3F2EC;
+    color: #81d3a5;
     font-weight: 500;
 }
 

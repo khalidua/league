@@ -15,6 +15,7 @@ import Profile from './pages/Profile.tsx'
 import Login from './pages/Login.tsx'
 import Register from './pages/Register.tsx'
 import TeamManagement from './pages/TeamManagement.tsx'
+import Tournaments from './pages/Tournaments.tsx'
 import AdminDashboard from './pages/AdminDashboard.tsx'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -32,6 +33,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:id" element={<TeamDetail />} />
           <Route path="/matches" element={<Matches />} />
+          <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/rules" element={<Rules />} />
           
           {/* Protected routes */}

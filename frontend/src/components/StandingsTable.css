@@ -29,6 +29,7 @@
 	width: 100%;
 	box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 	overflow-x: auto;
+	overflow-y: visible;
 }
 
 .standings-table {
@@ -40,16 +41,25 @@
 }
 
 .standings-table thead th {
-	text-align: left;
+	text-align: center;
 	font-weight: 600;
 	color: #F3F2EC;
 	padding: 10px 8px;
 	border-bottom: 1px solid rgba(220, 220, 220, 0.2);
 }
 
+.standings-table thead th.col-team {
+	text-align: left;
+}
+
 .standings-table tbody td {
 	padding: 10px 8px;
 	border-bottom: 1px dashed rgba(220, 220, 220, 0.1);
+	text-align: center;
+}
+
+.standings-table tbody td.col-team {
+	text-align: left;
 }
 
 .standings-row:hover {
@@ -60,6 +70,9 @@
 .col-pts,
 .col-form {
 	white-space: nowrap;
+	font-size: 0.9rem;
+	letter-spacing: 0.5px;
+	font-weight: 600;
 }
 
 .col-pos,
@@ -68,19 +81,28 @@
 	color: #F3F2EC;
 }
 
+.col-form {
+	min-width: 80px;
+	text-align: center;
+	overflow: visible;
+	white-space: nowrap;
+}
+
 .team-cell {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
 	gap: 10px;
+	justify-content: flex-start;
 }
 
 .team-logo {
 	width: 24px;
 	height: 24px;
-	border-radius: 4px;
-	object-fit: cover;
-	background: #2A5A6B;
-	border: 1px solid rgba(220, 220, 220, 0.1);
+	object-fit: contain;
+	background: none !important;
+	border: none !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
 }
 
 .team-name {

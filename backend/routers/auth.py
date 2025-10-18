@@ -180,6 +180,7 @@ def get_current_user_info(current_user: models.User = Depends(get_current_active
                 "teamid": team.teamid if team else None,
                 "teamname": team.teamname if team else None,
                 "teamlogo": team.logourl if team else None,
+                "teamcaptainid": team.teamcaptainid if team else None,
                 # Player-specific fields
                 "playerid": player.playerid,
                 "position": player.position,
