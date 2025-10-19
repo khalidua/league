@@ -1,4 +1,159 @@
 /* Admin Dashboard Styles */
+
+/* Match Management Panel Styles */
+.match-management-panel {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.filters-section {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #F3F2EC;
+  white-space: nowrap;
+}
+
+.filter-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #F3F2EC;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #1E93AB;
+  box-shadow: 0 0 0 2px rgba(30, 147, 171, 0.2);
+}
+
+.matches-table-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.matches-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.matches-table th {
+  background: rgba(30, 147, 171, 0.2);
+  color: #F3F2EC;
+  padding: 15px 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.matches-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #F3F2EC;
+}
+
+.matches-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-badge.upcoming {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-badge.live {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.finished {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.match-management-panel .edit-btn,
+.match-management-panel .delete-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.match-management-panel .edit-btn:hover,
+.match-management-panel .delete-btn:hover {
+  opacity: 0.7;
+}
+
+.no-matches {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(243, 242, 236, 0.6);
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filters-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .filter-group {
+    justify-content: space-between;
+  }
+  
+  .matches-table-container {
+    overflow-x: auto;
+  }
+  
+  .matches-table {
+    min-width: 800px;
+  }
+}
 .admin-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #1E93AB 0%, #2A5A6B 50%, #1A4A5A 100%);

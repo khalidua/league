@@ -12,18 +12,22 @@ router = APIRouter()
 
 @router.get("")
 def list_matches(status: Optional[str] = None, round: Optional[str] = None, db: Session = Depends(get_db)):
-	"""List matches with team names"""
-	query = db.query(models.Match)
+	"""List matches with team names and scores"""
+	# Use LEFT JOIN to get matches with their results
+	query = db.query(models.Match, models.MatchResult).outerjoin(
+		models.MatchResult, models.Match.matchid == models.MatchResult.matchid
+	)
+	
 	if status:
 		query = query.filter(models.Match.status == status)
 	if round:
 		query = query.filter(models.Match.round == round)
 	
-	matches = query.all()
+	results = query.all()
 	
-	# Enhance matches with team names
+	# Enhance matches with team names and scores
 	enhanced_matches = []
-	for match in matches:
+	for match, match_result in results:
 		hometeam = None
 		awayteam = None
 		
@@ -42,7 +46,9 @@ def list_matches(status: Optional[str] = None, round: Optional[str] = None, db: 
 			"round": match.round,
 			"status": match.status,
 			"hometeamname": hometeam.teamname if hometeam else "TBD",
-			"awayteamname": awayteam.teamname if awayteam else "TBD"
+			"awayteamname": awayteam.teamname if awayteam else "TBD",
+			"homescore": match_result.homescore if match_result else None,
+			"awayscore": match_result.awayscore if match_result else None
 		}
 		enhanced_matches.append(match_data)
 	

@@ -174,7 +174,7 @@ const Teams: React.FC = () => {
 					{!loading && filtered.map(t => (
 						<Link key={t.id} to={`/teams/${t.id}`} className="team-card-link" style={{ textDecoration: 'none' }}>
 							<div className="team-card">
-								<img className="team-logo" src={t.logoUrl || '/vite.svg'} alt={`${t.name} logo`} />
+								<img className="team-logo" src={t.logoUrl} alt={`${t.name} logo`} />
 								<div className="team-name">{t.name}</div>
 								{t.group ? <div className="team-meta">{t.group}</div> : null}
 							</div>

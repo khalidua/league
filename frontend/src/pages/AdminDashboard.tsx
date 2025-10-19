@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
 import Spinner from '../components/Spinner';
+import defaultTeamLogo from '../assets/default_team.png';
 import './AdminDashboard.css';
 
 interface DashboardStats {
@@ -149,19 +150,66 @@ const AdminDashboard: React.FC = () => {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'user_registered':
-        return '👤';
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
+            <g fill="none" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
+              <circle cx="12" cy="8" r="5" fill="#ffffff"/>
+              <path d="M20 21a8 8 0 1 0-16 0"/>
+              <path fill="#ffffff" d="M12 13a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/>
+            </g>
+          </svg>
+        );
       case 'player_registered':
-        return '⚽';
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48" fill="#ffffff">
+            <mask id="ipSSport0">
+              <g fill="none" stroke="#ffffff" strokeWidth="4">
+                <path fill="#ffffff" d="M36 15a5 5 0 1 0 0-10a5 5 0 0 0 0 10Z"/>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m12 16.77l8.003-2.772L31 19.247l-10.997 8.197L31 34.684l-6.992 9.314M35.32 21.643l2.682 1.459L44 17.466M16.849 31.545l-2.97 3.912l-9.875 5.54"/>
+              </g>
+            </mask>
+            <path fill="#ffffff" d="M0 0h48v48H0z" mask="url(#ipSSport0)"/>
+          </svg>
+        );
       case 'player_joined_team':
-        return '🤝';
+        return (
+          <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+            <path fill="currentColor" d="M268.9 85.2L152.3 214.8c-4.6 5.1-4.4 13 .5 17.9c30.5 30.5 80 30.5 110.5 0l31.8-31.8c4.2-4.2 9.5-6.5 14.9-6.9c6.8-.6 13.8 1.7 19 6.9L505.6 376l70.4-56V32L464 96l-23.8-15.9A96.2 96.2 0 0 0 386.9 64h-70.4c-1.1 0-2.3 0-3.4.1c-16.9.9-32.8 8.5-44.2 21.1m-152.3 97.5L223.4 64h-39.6c-25.5 0-49.9 10.1-67.9 28.1L112 96L0 32v288l156.4 130.3c23 19.2 52 29.7 81.9 29.7H254l-7-7c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l41 41h9c19.1 0 37.8-4.3 54.8-12.3L359 441c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l32 32l17.5-17.5c8.9-8.9 11.5-21.8 7.6-33.1L312.1 251.7l-14.9 14.9c-49.3 49.3-129.1 49.3-178.4 0c-23-23-23.9-59.9-2.2-84z"/>
+          </svg>
+        );
       case 'match_completed':
-        return '🏁';
+        return (
+          <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">
+            <path fill="#ffffff" d="M5 4c2 3-4 4-4 0M0 4V3h1l1-1h2v1h1V2h3v1L5 4"/>
+          </svg>
+        );
       case 'team_created':
-        return '🏆';
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+            <path fill="#ffffff" d="m6 13.5l4 2.5l4-2.5V5H6v8.5zM4.5 10a2 2 0 1 0-4 0a2 2 0 0 0 4 0zm13-2a2 2 0 1 0 0 4a2 2 0 0 0 0-4zM4.485 6.199A6.71 6.71 0 0 1 10 3.3a6.715 6.715 0 0 1 5.456 2.823a1.4 1.4 0 0 0 2.281-1.624A9.518 9.518 0 0 0 10 .5a9.506 9.506 0 0 0-7.817 4.107a1.402 1.402 0 0 0 .355 1.948a1.401 1.401 0 0 0 1.947-.356zm10.971 7.678A6.713 6.713 0 0 1 10 16.7a6.71 6.71 0 0 1-5.515-2.899a1.4 1.4 0 0 0-2.302 1.592A9.506 9.506 0 0 0 10 19.5a9.518 9.518 0 0 0 7.737-3.999a1.401 1.401 0 0 0-2.281-1.624z"/>
+          </svg>
+        );
       case 'tournament_created':
-        return '🎯';
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
+            <g fill="#ffffff">
+              <path d="M22 8.162v.073c0 .86 0 1.291-.207 1.643c-.207.352-.584.561-1.336.98l-.793.44c.546-1.848.729-3.834.796-5.532l.01-.221l.002-.052c.651.226 1.017.395 1.245.711c.283.393.283.915.283 1.958Zm-20 0v.073c0 .86 0 1.291.207 1.643c.207.352.584.561 1.336.98l.794.44c-.547-1.848-.73-3.834-.797-5.532l-.01-.221l-.001-.052c-.652.226-1.018.395-1.246.711C2 6.597 2 7.12 2 8.162Z"/>
+              <path fillRule="evenodd" d="M16.377 2.347A26.373 26.373 0 0 0 12 2c-1.783 0-3.253.157-4.377.347c-1.139.192-1.708.288-2.184.874c-.475.586-.45 1.219-.4 2.485c.173 4.348 1.111 9.78 6.211 10.26V19.5H9.82a1 1 0 0 0-.98.804l-.19.946H6a.75.75 0 0 0 0 1.5h12a.75.75 0 0 0 0-1.5h-2.65l-.19-.946a1 1 0 0 0-.98-.804h-1.43v-3.534c5.1-.48 6.039-5.911 6.211-10.26c.05-1.266.076-1.9-.4-2.485c-.476-.586-1.045-.682-2.184-.874Zm-3.59 3.46a.75.75 0 0 1 .463.693v4a.75.75 0 0 1-1.5 0V8.31l-.22.22a.75.75 0 1 1-1.06-1.06l1.5-1.5a.75.75 0 0 1 .817-.163Z" clipRule="evenodd"/>
+            </g>
+          </svg>
+        );
       default:
-        return '📝';
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+            <mask id="ipSNotes0">
+              <g fill="none" strokeLinejoin="round" strokeWidth="4">
+                <path fill="#ffffff" stroke="#ffffff" d="M8 6a2 2 0 0 1 2-2h20l10 10v28a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V6Z"/>
+                <path stroke="#ffffff" strokeLinecap="round" d="M16 20h16m-16 8h16"/>
+              </g>
+            </mask>
+            <path fill="#ffffff" d="M0 0h48v48H0z" mask="url(#ipSNotes0)"/>
+          </svg>
+        );
     }
   };
 
@@ -209,6 +257,12 @@ const AdminDashboard: React.FC = () => {
           onClick={() => setActiveTab('matches')}
         >
           Live Match Dashboard
+        </button>
+        <button 
+          className={`tab ${activeTab === 'match-management' ? 'active' : ''}`}
+          onClick={() => setActiveTab('match-management')}
+        >
+          Match Management
         </button>
         <button 
           className={`tab ${activeTab === 'tournaments' ? 'active' : ''}`}
@@ -327,6 +381,12 @@ const AdminDashboard: React.FC = () => {
         {activeTab === 'matches' && (
           <div className="matches-tab">
             <MatchManagement onMatchResultEntered={loadDashboardData} />
+          </div>
+        )}
+
+        {activeTab === 'match-management' && (
+          <div className="match-management-tab">
+            <MatchManagementPanel />
           </div>
         )}
 
@@ -1199,7 +1259,7 @@ const TeamManagement: React.FC = () => {
   return (
     <div className="team-management">
       <div className="section-header">
-        <h2>Live Match Dashboard</h2>
+        <h2>Team Management</h2>
         <button className="primary-btn" onClick={() => setShowCreateForm(true)}>
           Create Team
         </button>
@@ -1215,11 +1275,7 @@ const TeamManagement: React.FC = () => {
         {teams.map((team) => (
           <div key={team.teamid} className="team-card">
             <div className="team-logo">
-              {team.logourl ? (
-                <img src={team.logourl} alt={team.teamname} />
-              ) : (
-                <div className="default-logo">🏆</div>
-              )}
+              <img src={team.logourl || defaultTeamLogo} alt={team.teamname} />
             </div>
             <h3>{team.teamname}</h3>
             {team.description && (
@@ -1501,11 +1557,7 @@ const TournamentTeamManagement: React.FC = () => {
                   {getRegisteredTeams().map((team: any) => (
                     <div key={team.teamid} className="team-card">
                       <div className="team-logo">
-                        {team.logourl ? (
-                          <img src={team.logourl} alt={team.teamname} />
-                        ) : (
-                          <div className="default-logo">🏆</div>
-                        )}
+                        <img src={team.logourl || defaultTeamLogo} alt={team.teamname} />
                       </div>
                       <h5>{team.teamname}</h5>
                       {team.description && (
@@ -1539,11 +1591,7 @@ const TournamentTeamManagement: React.FC = () => {
                   {getAvailableTeams().map((team: any) => (
                     <div key={team.teamid} className="team-card">
                       <div className="team-logo">
-                        {team.logourl ? (
-                          <img src={team.logourl} alt={team.teamname} />
-                        ) : (
-                          <div className="default-logo">🏆</div>
-                        )}
+                        <img src={team.logourl || defaultTeamLogo} alt={team.teamname} />
                       </div>
                       <h5>{team.teamname}</h5>
                       {team.description && (
@@ -2145,6 +2193,243 @@ const UserManagement: React.FC = () => {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+};
+
+// Match Management Panel Component
+const MatchManagementPanel: React.FC = () => {
+  const [matches, setMatches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingMatch, setEditingMatch] = useState<any | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>('All');
+  const [filterTournament, setFilterTournament] = useState<string>('All');
+
+  useEffect(() => {
+    loadMatches();
+  }, []);
+
+  const loadMatches = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [matchesData, tournamentsData, teamsData] = await Promise.all([
+        api.listMatches(),
+        api.listTournaments(),
+        api.listTeams()
+      ]);
+      
+      // Create a map of tournament IDs to names
+      const tournamentMap = new Map();
+      (tournamentsData || []).forEach((tournament: any) => {
+        tournamentMap.set(tournament.tournamentid, tournament.name);
+      });
+      
+      // Create a map of team IDs to names
+      const teamMap = new Map();
+      (teamsData || []).forEach((team: any) => {
+        teamMap.set(team.teamid, team.teamname);
+      });
+      
+      // Enhance matches with tournament names, team names, and results
+      const enhancedMatches = (matchesData || []).map((match: any) => {
+        const tournamentName = match.tournamentid ? tournamentMap.get(match.tournamentid) || `Tournament ${match.tournamentid}` : null;
+        const homeTeamName = match.hometeamid ? teamMap.get(match.hometeamid) || 'TBD' : 'TBD';
+        const awayTeamName = match.awayteamid ? teamMap.get(match.awayteamid) || 'TBD' : 'TBD';
+        
+        const result = match.status === 'Finished' && match.homescore !== null && match.homescore !== undefined && match.awayscore !== null && match.awayscore !== undefined 
+          ? `${match.homescore} - ${match.awayscore}` 
+          : null;
+        
+        return {
+          ...match,
+          tournamentName,
+          hometeamname: homeTeamName,
+          awayteamname: awayTeamName,
+          result
+        };
+      });
+      
+      setMatches(enhancedMatches);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load matches');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteMatch = async (matchId: number) => {
+    if (!confirm('Are you sure you want to delete this match? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.deleteMatch(matchId);
+      await loadMatches();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete match');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFilteredMatches = () => {
+    return matches.filter(match => {
+      const statusMatch = filterStatus === 'All' || match.status === filterStatus;
+      const tournamentMatch = filterTournament === 'All' || 
+        (filterTournament === 'No Tournament' && !match.tournamentid) ||
+        match.tournamentName === filterTournament;
+      return statusMatch && tournamentMatch;
+    });
+  };
+
+  const getTournaments = () => {
+    const tournamentNames = [...new Set(matches.map(m => m.tournamentName).filter(Boolean))];
+    return tournamentNames;
+  };
+
+  if (loading && matches.length === 0) {
+    return <Spinner color="white" size="lg" />;
+  }
+
+  return (
+    <div className="match-management-panel">
+      <div className="section-header">
+        <h2>Match Management</h2>
+        <button className="primary-btn" onClick={() => setShowCreateForm(true)}>
+          Create New Match
+        </button>
+      </div>
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="filters-section">
+        <div className="filter-group">
+          <label>Status:</label>
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="filter-select"
+          >
+            <option value="All">All</option>
+            <option value="Upcoming">Upcoming</option>
+            <option value="Live">Live</option>
+            <option value="Finished">Finished</option>
+          </select>
+        </div>
+        
+        <div className="filter-group">
+          <label>Tournament:</label>
+          <select 
+            value={filterTournament} 
+            onChange={(e) => setFilterTournament(e.target.value)}
+            className="filter-select"
+          >
+            <option value="All">All</option>
+            <option value="No Tournament">No Tournament</option>
+            {getTournaments().map(tournamentName => (
+              <option key={tournamentName} value={tournamentName}>
+                {tournamentName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button className="secondary-btn" onClick={loadMatches} disabled={loading}>
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+
+      {/* Matches Table */}
+      <div className="matches-table-container">
+        <table className="matches-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Home Team</th>
+              <th>Score</th>
+              <th>Away Team</th>
+              <th>Status</th>
+              <th>Round</th>
+              <th>Tournament</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {getFilteredMatches().map((match) => (
+              <tr key={match.matchid}>
+                <td>
+                  {new Date(match.matchdate).toLocaleString()}
+                </td>
+                <td>{match.hometeamname || 'TBD'}</td>
+                <td>
+                  {match.result || '-'}
+                </td>
+                <td>{match.awayteamname || 'TBD'}</td>
+                <td>
+                  <span className={`status-badge ${match.status.toLowerCase()}`}>
+                    {match.status}
+                  </span>
+                </td>
+                <td>{match.round || 'Group'}</td>
+                <td>{match.tournamentName || 'None'}</td>
+                <td>
+                  <div className="action-buttons">
+                    <button 
+                      className="edit-btn"
+                      onClick={() => setEditingMatch(match)}
+                      title="Edit Match"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20">
+                        <path fill="#1E93AB" d="m16.77 8l1.94-2a1 1 0 0 0 0-1.41l-3.34-3.3a1 1 0 0 0-1.41 0L12 3.23zM1 14.25V19h4.75l9.96-9.96l-4.75-4.75z"/>
+                      </svg>
+                    </button>
+                    <button 
+                      className="delete-btn"
+                      onClick={() => handleDeleteMatch(match.matchid)}
+                      title="Delete Match"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 304 384">
+                        <path fill="rgb(196, 13, 60)" d="M21 341V85h256v256q0 18-12.5 30.5T235 384H64q-18 0-30.5-12.5T21 341zM299 21v43H0V21h75L96 0h107l21 21h75z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {getFilteredMatches().length === 0 && (
+          <div className="no-matches">
+            <p>No matches found matching the current filters.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Create/Edit Match Form */}
+      {(showCreateForm || editingMatch) && (
+        <MatchForm 
+          match={editingMatch}
+          onClose={() => {
+            setShowCreateForm(false);
+            setEditingMatch(null);
+          }}
+          onSuccess={() => {
+            setShowCreateForm(false);
+            setEditingMatch(null);
+            loadMatches();
+          }}
+        />
+      )}
     </div>
   );
 };

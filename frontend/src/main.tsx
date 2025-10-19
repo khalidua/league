@@ -29,7 +29,14 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <App />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <Home />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/players" element={<Players />} />
           <Route path="/players/:id" element={<PlayerDetail />} />
           <Route path="/standings" element={<Standings />} />

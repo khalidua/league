@@ -42,12 +42,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return <Navigate to="/" replace />;
     }
   }
-
-  if (!requireAuth && isAuthenticated) {
-    // User is authenticated but trying to access auth pages
-    return <Navigate to="/" replace />;
-  }
-
   return <>{children}</>;
 };
 
