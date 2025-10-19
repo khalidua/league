@@ -42,6 +42,7 @@ const TeamDetail: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [joinLoading, setJoinLoading] = useState(false);
 	const [joinPending, setJoinPending] = useState(false);
+	const [leaveLoading, setLeaveLoading] = useState(false);
 
 	useEffect(() => {
 		const loadTeamData = async () => {
@@ -186,6 +187,30 @@ const TeamDetail: React.FC = () => {
 									}}
 								>
 									{joinLoading ? 'Sending...' : joinPending ? 'Pending' : 'Request to Join'}
+								</button>
+							</div>
+						)}
+						{isAuthenticated && user?.teamid === team.teamid && user?.playerid !== team.teamcaptainid && (
+							<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+								<button
+									type="button"
+									className="leave-team-btn"
+									disabled={leaveLoading}
+									onClick={async () => {
+										if (!confirm('Are you sure you want to leave this team?')) return;
+										setLeaveLoading(true);
+										try {
+											await api.leaveTeam();
+											// Refresh the page to update the UI
+											window.location.reload();
+										} catch (e: any) {
+											setError(e.message || 'Failed to leave team');
+										} finally {
+											setLeaveLoading(false);
+										}
+									}}
+								>
+									{leaveLoading ? 'Leaving...' : 'Leave Team'}
 								</button>
 							</div>
 						)}

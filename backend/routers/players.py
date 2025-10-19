@@ -142,6 +142,29 @@ def update_player(playerid: int, payload: PlayerUpdate, db: Session = Depends(ge
     db.refresh(player)
     return player
 
+@router.post("/leave-team", status_code=200)
+def leave_team(db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
+    """Allow a player to leave their current team (cannot be captain)"""
+    current_player = db.query(models.Player).filter(models.Player.userid == current_user.userid).first()
+    if not current_player:
+        raise HTTPException(404, "Player profile not found")
+    
+    if not current_player.teamid:
+        raise HTTPException(400, "You are not currently on any team")
+    
+    # Check if player is the team captain
+    team = db.query(models.Team).filter(models.Team.teamid == current_player.teamid).first()
+    if team and team.teamcaptainid == current_player.playerid:
+        raise HTTPException(403, "Team captains cannot leave their team. Transfer captaincy first or delete the team.")
+    
+    # Remove player from team
+    current_player.teamid = None
+    current_player.joined_team_at = None
+    db.add(current_player)
+    db.commit()
+    
+    return {"message": "Successfully left the team"}
+
 @router.delete("/{playerid}", status_code=204)
 def delete_player(playerid: int, db: Session = Depends(get_db), current_user: models.User = Depends(require_authenticated_user)):
     player = db.query(models.Player).filter(models.Player.playerid == playerid).first()

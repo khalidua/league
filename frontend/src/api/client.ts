@@ -244,6 +244,9 @@ export const api = {
 		method: 'PATCH',
 		body: JSON.stringify(data)
 	}, false),
+	leaveTeam: () => request<any>('/players/leave-team', {
+		method: 'POST'
+	}, false),
 	
 	// Tournaments
 	listTournaments: () => request<any[]>(`/tournaments`),

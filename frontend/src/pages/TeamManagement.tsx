@@ -212,8 +212,17 @@ const TeamManagement: React.FC = () => {
 
       console.log('Uploading team logo:', file.name, file.type, file.size);
 
+      // Get auth token for upload request
+      const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(getApiUrl('/upload'), {
         method: 'POST',
+        headers,
         body: formData,
       });
 

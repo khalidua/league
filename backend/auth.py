@@ -75,6 +75,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 def verify_token(token: str) -> TokenData:
     """Verify and decode a JWT token"""
+    print(f"=== VERIFY_TOKEN CALLED ===")
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -82,22 +83,28 @@ def verify_token(token: str) -> TokenData:
     )
     
     try:
+        print(f"Decoding token with SECRET_KEY: {SECRET_KEY[:10]}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"Token payload: {payload}")
         userid_str: str = payload.get("sub")
         email: str = payload.get("email")
         
         if userid_str is None or email is None:
+            print(f"Missing userid or email in token: userid={userid_str}, email={email}")
             raise credentials_exception
             
         # Convert string userid back to integer
         try:
             userid = int(userid_str)
         except (ValueError, TypeError):
+            print(f"Invalid userid format: {userid_str}")
             raise credentials_exception
             
         token_data = TokenData(userid=userid, email=email)
+        print(f"Token data created: {token_data}")
         return token_data
-    except JWTError:
+    except JWTError as e:
+        print(f"JWT Error: {str(e)}")
         raise credentials_exception
 
 def get_current_user(
@@ -105,26 +112,38 @@ def get_current_user(
     db: Session = Depends(get_db)
 ) -> models.User:
     """Get the current authenticated user"""
-    token = credentials.credentials
-    token_data = verify_token(token)
-    
-    user = db.query(models.User).filter(models.User.userid == token_data.userid).first()
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    return user
+    print(f"=== GET_CURRENT_USER CALLED ===")
+    try:
+        token = credentials.credentials
+        print(f"Token received: {token[:20]}...")
+        token_data = verify_token(token)
+        print(f"Token verified for user: {token_data.userid}")
+        
+        user = db.query(models.User).filter(models.User.userid == token_data.userid).first()
+        if user is None:
+            print(f"User {token_data.userid} not found in database")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        print(f"User found: {user.userid}, status: {user.status}")
+        return user
+    except Exception as e:
+        print(f"Error in get_current_user: {str(e)}")
+        raise
 
 def get_current_active_user(current_user: models.User = Depends(get_current_user)) -> models.User:
     """Get the current active user"""
+    print(f"Checking user status: user_id={current_user.userid}, status='{current_user.status}'")
     if current_user.status != "active":
+        print(f"User {current_user.userid} is not active (status: '{current_user.status}')")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
+    print(f"User {current_user.userid} is active, proceeding...")
     return current_user
 
 def require_role(allowed_roles: list[str]):

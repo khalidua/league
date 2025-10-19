@@ -209,8 +209,17 @@ const Profile: React.FC = () => {
 
       console.log('Uploading profile image:', file.name, file.type, file.size);
 
+      // Get auth token for upload request
+      const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(getApiUrl('/upload'), {
         method: 'POST',
+        headers,
         body: formData,
       });
 
@@ -230,7 +239,18 @@ const Profile: React.FC = () => {
       // Update the user data in context
       updateUser(updatedUser);
 
+      // Force refresh the form data to reflect the new profile image
+      setFormData(prev => ({
+        ...prev,
+        profileimage: result.image_url
+      }));
+
       setSuccess('Profile picture updated successfully!');
+      
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error) {
       console.error('Upload error:', error);
       setError(`Failed to upload profile picture: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -246,18 +266,22 @@ const Profile: React.FC = () => {
     setError(null);
 
     try {
-      // Delete profile image and restore to default
-      console.log('Deleting profile picture and restoring default...');
-      await api.deleteProfileImage();
+      console.log('Deleting profile picture...');
+      const result = await api.deleteProfileImage();
+      console.log('Delete result:', result);
 
-      // Get updated user data
+      // Update user context
       const updatedUser = await api.getCurrentUser();
-      console.log('Updated user after deletion:', updatedUser);
-
-      // Update the user data in context
       updateUser(updatedUser);
 
-      setSuccess('Profile picture removed and restored to default!');
+      // Force refresh the form data to reflect the default profile image
+      const defaultImageUrl = "https://res.cloudinary.com/dns6zhmc2/image/upload/v1760475598/defaultPlayer_vnbpfb.png";
+      setFormData(prev => ({
+        ...prev,
+        profileimage: defaultImageUrl
+      }));
+
+      setSuccess('Profile picture removed successfully!');
     } catch (error) {
       console.error('Delete error:', error);
       setError(`Failed to remove profile picture: ${error instanceof Error ? error.message : 'Unknown error'}`);
