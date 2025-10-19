@@ -28,6 +28,7 @@ class Settings(BaseModel):
 	secret_key: str = os.getenv("SECRET_KEY", "super-secret-key")
 	# URL settings
 	frontend_base_url: str = os.getenv("FRONTEND_BASE_URL", os.getenv("PUBLIC_BASE_URL", "http://localhost:5173"))
+	backend_base_url: str = os.getenv("BACKEND_BASE_URL", "http://localhost:8000/api")
 
 settings = Settings()
 
