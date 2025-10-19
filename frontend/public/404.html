@@ -4,7 +4,29 @@
     <meta charset="utf-8" />
     <script>
       // SPA fallback: redirect to index.html for all routes
-      window.location.replace('./index.html' + window.location.pathname.substring(window.location.pathname.indexOf('/league/') + 7) + window.location.search + window.location.hash);
+      // Prevent infinite loops by checking if we're already at index.html
+      const currentPath = window.location.pathname;
+      const basePath = '/league/';
+      
+      // If we're already at index.html or in an infinite loop, go to root
+      if (currentPath.includes('index.html') || currentPath.split('/').length > 10) {
+        window.location.replace(basePath);
+        return;
+      }
+      
+      // Extract the route after /league/
+      const routeStart = currentPath.indexOf(basePath);
+      if (routeStart !== -1) {
+        const route = currentPath.substring(routeStart + basePath.length);
+        // Only redirect if we have a valid route and it's not index.html
+        if (route && !route.includes('index.html')) {
+          window.location.replace(basePath + 'index.html#' + route + window.location.search + window.location.hash);
+        } else {
+          window.location.replace(basePath);
+        }
+      } else {
+        window.location.replace(basePath);
+      }
     </script>
     <title>Redirecting...</title>
   </head>
