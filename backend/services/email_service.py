@@ -26,8 +26,9 @@ class EmailService:
         message["From"] = self.sender_email
         message["To"] = recipient_email
         
-        # Create verification link (you'll need to update this with your frontend URL)
-        verification_link = f"http://localhost:5173/verify-email?token={verification_token}"
+        # Build verification link using configured frontend base URL
+        base = getattr(settings, "frontend_base_url", "http://localhost:5173").rstrip("/")
+        verification_link = f"{base}/verify-email?token={verification_token}"
         
         # Create HTML email content
         html_content = f"""

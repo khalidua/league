@@ -26,6 +26,8 @@ class Settings(BaseModel):
 	gmail_user: str = os.getenv("GMAIL_USER", "")
 	gmail_app_password: str = os.getenv("GMAIL_APP_PASSWORD", "")
 	secret_key: str = os.getenv("SECRET_KEY", "super-secret-key")
+	# URL settings
+	frontend_base_url: str = os.getenv("FRONTEND_BASE_URL", os.getenv("PUBLIC_BASE_URL", "http://localhost:5173"))
 
 settings = Settings()
 
