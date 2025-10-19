@@ -11,7 +11,13 @@ const VerifyEmail: React.FC = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const token = searchParams.get('token');
+  // Prefer standard query param; fallback to token in URL hash for hosts without SPA rewrites
+  let token = searchParams.get('token');
+  if (!token && window.location.hash) {
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+    const hashParams = new URLSearchParams(hash.split('?')[1] || '');
+    token = hashParams.get('token');
+  }
 
   useEffect(() => {
     const verifyEmail = async () => {
