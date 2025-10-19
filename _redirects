@@ -1,0 +1,2 @@
+# SPA fallback for all routes under /league/
+/league/*  /league/index.html  200
