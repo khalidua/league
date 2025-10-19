@@ -37,14 +37,70 @@ createRoot(document.getElementById('root')!).render(
               </ProtectedRoute>
             } 
           />
-          <Route path="/players" element={<Players />} />
-          <Route path="/players/:id" element={<PlayerDetail />} />
-          <Route path="/standings" element={<Standings />} />
-          <Route path="/teams" element={<Teams />} />
-          <Route path="/teams/:id" element={<TeamDetail />} />
-          <Route path="/matches" element={<Matches />} />
-          <Route path="/tournaments" element={<Tournaments />} />
-          <Route path="/rules" element={<Rules />} />
+          <Route 
+            path="/players" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <Players />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/players/:id" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <PlayerDetail />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/standings" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <Standings />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/teams" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <Teams />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/teams/:id" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <TeamDetail />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/matches" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <Matches />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/tournaments" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <Tournaments />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/rules" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <Rules />
+              </ProtectedRoute>
+            } 
+          />
           
           {/* Protected routes */}
           <Route 

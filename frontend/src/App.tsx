@@ -35,7 +35,7 @@ function App() {
     if (token && atRoot) {
       navigate(`/verify-email?token=${encodeURIComponent(token)}`, { replace: true });
     }
-  }, [location.pathname, navigate]);
+  }, []); // Remove dependencies to prevent infinite loop
 
   return (
     <>
