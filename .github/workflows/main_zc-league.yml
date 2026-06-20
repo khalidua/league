@@ -1,4 +1,8 @@
-name: Build and deploy Python app to Azure Web App - ZC-League
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+# More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
+
+name: Build and deploy Python app to Azure Web App - ZC-league
 
 on:
   push:
@@ -11,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -55,12 +59,13 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_239F5EF23FAD47868A1B4226CC5C610F }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F59B4291D84A41969BF090BD7CC3BAF4 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F14010A83EE146888EE0793E1F4F662E }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_5ED776E1CD1C4A47AB965FF957C8D01B }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F768ABB64ED143CEB2BF49B6283A3C67 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C68C01C9080B48BEA59B710B159F9FDD }}
 
       - name: Deploy
         uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
         with:
           app-name: ZC-league
           package: .
