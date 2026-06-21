@@ -34,11 +34,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="ZC League API", version="1.0.0", lifespan=lifespan)
 
-# CORS: allow local dev and any configured origins
+# CORS: allow all origins (Bearer-token auth, no cookies → credentials=False is correct)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[
+        "https://khalidua.github.io",  # GitHub Pages frontend
+        "http://localhost:5173",        # Local Vite dev server
+        "http://localhost:3000",        # Alternative local port
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
