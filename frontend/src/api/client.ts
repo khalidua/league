@@ -1,7 +1,7 @@
 import { getCachedData, setCachedData, invalidateCache } from '../utils/cache';
 
 const LOCAL_API_BASE = import.meta.env.VITE_API_BASE?.replace(/\/$/, "") || "";
-const PRODUCTION_API_BASE = "https://zc-league-axckdddkdkbpeuc3.israelcentral-01.azurewebsites.net";
+const PRODUCTION_API_BASE = "zc-league-axckdddkdkbpeuc3.italynorth-01.azurewebsites.net";
 
 // In production (deployed), use production API directly
 // In development, use local API with fallback
