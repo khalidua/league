@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import secrets
 import string
-from backend.config import settings
+from config import settings
 
 class EmailService:
     def __init__(self):

@@ -4,10 +4,10 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from backend.schemas.auth import TokenData
-from backend.deps import get_db
+from schemas.auth import TokenData
+from deps import get_db
 from sqlalchemy.orm import Session
-from backend import models
+import models
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)

@@ -1,9 +1,9 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas import Standings as StandingsSchema, StandingsCreate, StandingsUpdate
+from deps import get_db
+import models
+from schemas import Standings as StandingsSchema, StandingsCreate, StandingsUpdate
 from pydantic import BaseModel
 
 router = APIRouter()

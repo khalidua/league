@@ -8,9 +8,9 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
-from backend import models
-from backend.auth import get_password_hash
+import SessionLocal
+import models
+from auth import get_password_hash
 
 def create_admin_users():
     """Create admin and organizer users for testing"""

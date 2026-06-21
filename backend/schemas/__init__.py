@@ -1,19 +1,19 @@
-from backend.schemas.user import User, UserCreate, UserUpdate, UserResponse
-from backend.schemas.admin import Admin, AdminCreate, AdminUpdate, AdminWithUser
-from backend.schemas.auth import LoginRequest, RegisterRequest, AuthResponse, TokenData
-from backend.schemas.team import Team, TeamCreate, TeamUpdate
-from backend.schemas.playerstats import PlayerStats, PlayerStatsCreate, PlayerStatsUpdate
-from backend.schemas.player import Player, PlayerCreate, PlayerUpdate, PlayerWithUser
-from backend.schemas.stadium import Stadium, StadiumCreate, StadiumUpdate
-from backend.schemas.tournament import Tournament, TournamentCreate, TournamentUpdate, TournamentJoinRequest
-from backend.schemas.tournament_team import TournamentTeam, TournamentTeamCreate
-from backend.schemas.tournament_group import TournamentGroup, TournamentGroupCreate, TournamentGroupUpdate
-from backend.schemas.group_teams import GroupTeams, GroupTeamsCreate
-from backend.schemas.standings import Standings, StandingsCreate, StandingsUpdate
-from backend.schemas.match import Match, MatchCreate, MatchUpdate
-from backend.schemas.match_result import MatchResult, MatchResultCreate, MatchResultUpdate
-from backend.schemas.goal import Goal, GoalCreate, GoalUpdate, GoalWithPlayer
-from backend.schemas.event import Event, EventCreate, EventUpdate
+from schemas.user import User, UserCreate, UserUpdate, UserResponse
+from schemas.admin import Admin, AdminCreate, AdminUpdate, AdminWithUser
+from schemas.auth import LoginRequest, RegisterRequest, AuthResponse, TokenData
+from schemas.team import Team, TeamCreate, TeamUpdate
+from schemas.playerstats import PlayerStats, PlayerStatsCreate, PlayerStatsUpdate
+from schemas.player import Player, PlayerCreate, PlayerUpdate, PlayerWithUser
+from schemas.stadium import Stadium, StadiumCreate, StadiumUpdate
+from schemas.tournament import Tournament, TournamentCreate, TournamentUpdate, TournamentJoinRequest
+from schemas.tournament_team import TournamentTeam, TournamentTeamCreate
+from schemas.tournament_group import TournamentGroup, TournamentGroupCreate, TournamentGroupUpdate
+from schemas.group_teams import GroupTeams, GroupTeamsCreate
+from schemas.standings import Standings, StandingsCreate, StandingsUpdate
+from schemas.match import Match, MatchCreate, MatchUpdate
+from schemas.match_result import MatchResult, MatchResultCreate, MatchResultUpdate
+from schemas.goal import Goal, GoalCreate, GoalUpdate, GoalWithPlayer
+from schemas.event import Event, EventCreate, EventUpdate
 
 __all__ = [
 	"User", "UserCreate", "UserUpdate", "UserResponse",

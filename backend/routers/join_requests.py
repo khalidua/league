@@ -3,10 +3,10 @@ import json
 import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas.join_request import JoinRequest as JoinRequestSchema, JoinRequestCreate, JoinRequestRespond
-from backend.auth import require_authenticated_user
+from deps import get_db
+import models
+from schemas.join_request import JoinRequest as JoinRequestSchema, JoinRequestCreate, JoinRequestRespond
+from auth import require_authenticated_user
 
 
 router = APIRouter()

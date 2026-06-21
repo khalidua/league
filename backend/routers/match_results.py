@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas import MatchResult as MatchResultSchema, MatchResultCreate, MatchResultUpdate
-from backend.auth import require_organizer_or_admin, require_authenticated_user
+from deps import get_db
+import models
+from schemas import MatchResult as MatchResultSchema, MatchResultCreate, MatchResultUpdate
+from auth import require_organizer_or_admin, require_authenticated_user
 
 router = APIRouter()
 

@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas.notification import Notification as NotificationSchema, NotificationCreate
-from backend.auth import require_authenticated_user
+from deps import get_db
+import models
+from schemas.notification import Notification as NotificationSchema, NotificationCreate
+from auth import require_authenticated_user
 
 
 router = APIRouter()

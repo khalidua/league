@@ -1,11 +1,11 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
-from backend.deps import get_db
-from backend import models
-from backend.schemas import Player as PlayerSchema, PlayerCreate, PlayerUpdate, PlayerWithUser
-from backend.auth import require_authenticated_user
-from backend.schemas.notification import NotificationCreate
+from deps import get_db
+import models
+from schemas import Player as PlayerSchema, PlayerCreate, PlayerUpdate, PlayerWithUser
+from auth import require_authenticated_user
+from schemas.notification import NotificationCreate
 
 router = APIRouter()
 

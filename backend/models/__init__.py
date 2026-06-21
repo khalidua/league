@@ -1,20 +1,20 @@
-from backend.models.user import User
-from backend.models.admin import Admin
-from backend.models.team import Team
-from backend.models.playerstats import PlayerStats
-from backend.models.player import Player
-from backend.models.stadium import Stadium
-from backend.models.tournament import Tournament
-from backend.models.tournament_team import TournamentTeam
-from backend.models.tournament_group import TournamentGroup
-from backend.models.group_teams import GroupTeams
-from backend.models.standings import Standings
-from backend.models.match import Match
-from backend.models.match_result import MatchResult
-from backend.models.goal import Goal
-from backend.models.event import Event
-from backend.models.join_request import JoinRequest
-from backend.models.notification import Notification
+from models.user import User
+from models.admin import Admin
+from models.team import Team
+from models.playerstats import PlayerStats
+from models.player import Player
+from models.stadium import Stadium
+from models.tournament import Tournament
+from models.tournament_team import TournamentTeam
+from models.tournament_group import TournamentGroup
+from models.group_teams import GroupTeams
+from models.standings import Standings
+from models.match import Match
+from models.match_result import MatchResult
+from models.goal import Goal
+from models.event import Event
+from models.join_request import JoinRequest
+from models.notification import Notification
 
 __all__ = [
 	"User",

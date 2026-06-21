@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas import Admin as AdminSchema, AdminCreate, AdminUpdate, AdminWithUser
-from backend.auth import require_admin
+from deps import get_db
+import models
+from schemas import Admin as AdminSchema, AdminCreate, AdminUpdate, AdminWithUser
+from auth import require_admin
 
 router = APIRouter()
 

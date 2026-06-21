@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from .config import settings
+from config import settings
 
 engine = create_engine(
 	settings.database_url,
@@ -16,5 +16,5 @@ Base = declarative_base()
 
 def init_db() -> None:
 	# Import models so metadata is populated
-	from backend import models  # noqa: F401
+	import models  # noqa: F401
 	Base.metadata.create_all(bind=engine)

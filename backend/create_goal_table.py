@@ -9,9 +9,9 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy import create_engine, text
-from backend.config import settings
-from backend.database import Base
-from backend.models.goal import Goal
+from config import settings
+import Base
+from models.goal import Goal
 
 def create_goal_table():
     """Create the Goal table in the database"""

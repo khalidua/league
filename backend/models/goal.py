@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 from sqlalchemy.sql import func
-from backend.database import Base
+from database import Base
 
 class Goal(Base):
     __tablename__ = "goal"

@@ -3,10 +3,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import cloudinary
 import cloudinary.uploader
-from backend.config import settings
-from backend.auth import require_authenticated_user, get_current_user
-from backend.deps import get_db
-from backend import models
+from config import settings
+from auth import require_authenticated_user, get_current_user
+from deps import get_db
+import models
 
 router = APIRouter()
 

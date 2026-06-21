@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime
 from sqlalchemy.sql import func
-from backend.database import Base
+from database import Base
 
 class Player(Base):
 	__tablename__ = "player"

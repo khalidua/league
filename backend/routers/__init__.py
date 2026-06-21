@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.routers import users, admins, teams, playerstats, players, stadiums, tournaments, tournament_teams, tournament_groups, group_teams, standings, matches, match_results, goals, events, upload, auth, join_requests, notifications
+from routers import users, admins, teams, playerstats, players, stadiums, tournaments, tournament_teams, tournament_groups, group_teams, standings, matches, match_results, goals, events, upload, auth, join_requests, notifications
 
 api_router = APIRouter()
 

@@ -1,18 +1,18 @@
 from datetime import timedelta, datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas.auth import LoginRequest, RegisterRequest, AuthResponse, RegisterResponse
-from backend.schemas.user import User as UserSchema, UserUpdate, UserResponse
-from backend.auth import (
+from deps import get_db
+import models
+from schemas.auth import LoginRequest, RegisterRequest, AuthResponse, RegisterResponse
+from schemas.user import User as UserSchema, UserUpdate, UserResponse
+from auth import (
     verify_password, 
     get_password_hash, 
     create_access_token, 
     ACCESS_TOKEN_EXPIRE_MINUTES,
     get_current_active_user
 )
-from backend.services.email_service import email_service
+from services.email_service import email_service
 
 router = APIRouter()
 

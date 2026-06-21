@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey
-from backend.database import Base
+from database import Base
 
 class MatchResult(Base):
 	__tablename__ = "matchresult"

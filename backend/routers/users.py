@@ -1,9 +1,9 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas import User as UserSchema, UserUpdate
+from deps import get_db
+import models
+from schemas import User as UserSchema, UserUpdate
 from pydantic import BaseModel
 
 router = APIRouter()

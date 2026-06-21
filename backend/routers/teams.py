@@ -2,10 +2,10 @@ from typing import List
 from sqlalchemy import text
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.deps import get_db
-from backend import models
-from backend.schemas import Team as TeamSchema, TeamCreate, TeamUpdate
-from backend.auth import require_organizer_or_admin, require_authenticated_user
+from deps import get_db
+import models
+from schemas import Team as TeamSchema, TeamCreate, TeamUpdate
+from auth import require_organizer_or_admin, require_authenticated_user
 
 router = APIRouter()
 

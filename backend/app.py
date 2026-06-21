@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.config import settings
-from backend.database import init_db
-from backend.routers import api_router
+from config import settings
+from database import init_db
+from routers import api_router
 
 app = FastAPI(title="ZC League API", version="1.0.0")
 

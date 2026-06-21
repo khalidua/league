@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from backend.database import Base
+from database import Base
 
 class TournamentGroup(Base):
 	__tablename__ = "tournamentgroup"
