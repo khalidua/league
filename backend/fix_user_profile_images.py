@@ -9,7 +9,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
-import SessionLocal, engine
+from database import SessionLocal, engine
 from backend import models
 
 def fix_user_profile_images():

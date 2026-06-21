@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy import create_engine, text
 from config import settings
-import Base
+from database import Base
 from models.goal import Goal
 
 def create_goal_table():
